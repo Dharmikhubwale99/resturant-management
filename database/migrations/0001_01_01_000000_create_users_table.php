@@ -14,11 +14,20 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('mobile');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->unsignedBigInteger('pincode_id')->nullable();
+            $table->unsignedBigInteger('otp')->nullable();
+            $table->dateTime('otp_expires_at')->nullable();
+            $table->dateTime('email_verified_at')->nullable();
+            $table->boolean('is_active')->default(0);
+            $table->foreignId('pin_code_id');
+            $table->string('refer_code', 100)->nullable();
+            $table->unsignedBigInteger('referred_by')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

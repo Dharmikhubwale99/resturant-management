@@ -1,0 +1,106 @@
+created:
+    - database/factories/CountryFactory.php
+    - database/factories/StateFactory.php
+    - database/factories/CityFactory.php
+    - database/factories/DistrictFactory.php
+    - database/factories/PinCodeFactory.php
+    - database/factories/UserFactory.php
+    - database/factories/PlanFactory.php
+    - database/factories/PlanFeatureFactory.php
+    - database/factories/TaxSettingFactory.php
+    - database/factories/RestaurantFactory.php
+    - database/factories/CategoryFactory.php
+    - database/factories/ItemFactory.php
+    - database/factories/VariantFactory.php
+    - database/factories/DiscountFactory.php
+    - database/factories/CustomerFactory.php
+    - database/factories/AreaFactory.php
+    - database/factories/TableFactory.php
+    - database/factories/TableBookingFactory.php
+    - database/factories/OrderFactory.php
+    - database/factories/OrderItemFactory.php
+    - database/factories/PaymentFactory.php
+    - database/factories/VisitFactory.php
+    - database/factories/KotFactory.php
+    - database/factories/KOTItemFactory.php
+    - database/factories/ExpenseFactory.php
+    - database/factories/PolicyFactory.php
+    - database/migrations/2025_06_23_111300_create_countries_table.php
+    - database/migrations/2025_06_23_111301_create_states_table.php
+    - database/migrations/2025_06_23_111302_create_cities_table.php
+    - database/migrations/2025_06_23_111303_create_districts_table.php
+    - database/migrations/2025_06_23_111304_create_pin_codes_table.php
+    - database/migrations/2025_06_23_111305_create_users_table.php
+    - database/migrations/2025_06_23_111306_create_plans_table.php
+    - database/migrations/2025_06_23_111307_create_plan_features_table.php
+    - database/migrations/2025_06_23_111308_create_tax_settings_table.php
+    - database/migrations/2025_06_23_111309_create_restaurants_table.php
+    - database/migrations/2025_06_23_111310_create_categories_table.php
+    - database/migrations/2025_06_23_111311_create_items_table.php
+    - database/migrations/2025_06_23_111312_create_variants_table.php
+    - database/migrations/2025_06_23_111313_create_discounts_table.php
+    - database/migrations/2025_06_23_111314_create_customers_table.php
+    - database/migrations/2025_06_23_111315_create_areas_table.php
+    - database/migrations/2025_06_23_111316_create_tables_table.php
+    - database/migrations/2025_06_23_111317_create_table_bookings_table.php
+    - database/migrations/2025_06_23_111318_create_orders_table.php
+    - database/migrations/2025_06_23_111319_create_order_items_table.php
+    - database/migrations/2025_06_23_111320_create_payments_table.php
+    - database/migrations/2025_06_23_111321_create_visits_table.php
+    - database/migrations/2025_06_23_111322_create_kots_table.php
+    - database/migrations/2025_06_23_111323_create_k_o_t_items_table.php
+    - database/migrations/2025_06_23_111324_create_expenses_table.php
+    - database/migrations/2025_06_23_111325_create_policies_table.php
+    - app/Models/Country.php
+    - app/Models/State.php
+    - app/Models/City.php
+    - app/Models/District.php
+    - app/Models/PinCode.php
+    - app/Models/User.php
+    - app/Models/Plan.php
+    - app/Models/PlanFeature.php
+    - app/Models/TaxSetting.php
+    - app/Models/Restaurant.php
+    - app/Models/Category.php
+    - app/Models/Item.php
+    - app/Models/Variant.php
+    - app/Models/Discount.php
+    - app/Models/Customer.php
+    - app/Models/Area.php
+    - app/Models/Table.php
+    - app/Models/TableBooking.php
+    - app/Models/Order.php
+    - app/Models/OrderItem.php
+    - app/Models/Payment.php
+    - app/Models/Visit.php
+    - app/Models/Kot.php
+    - app/Models/KOTItem.php
+    - app/Models/Expense.php
+    - app/Models/Policy.php
+models:
+    Country: { name: 'string:100', softdeletes: softDeletes, timestamps: timestamps, relationships: { hasMany: State } }
+    State: { country_id: unsignedBigInteger, name: 'string:100', softdeletes: softDeletes, timestamps: timestamps, relationships: { belongsTo: Country, hasMany: City } }
+    City: { state_id: unsignedBigInteger, name: 'string:100', softdeletes: softDeletes, timestamps: timestamps, relationships: { belongsTo: State, hasMany: District } }
+    District: { city_id: unsignedBigInteger, name: 'string:100', softdeletes: softDeletes, timestamps: timestamps, relationships: { belongsTo: City } }
+    PinCode: { district_id: unsignedBigInteger, code: 'string:10 unique', softdeletes: softDeletes, timestamps: timestamps, relationships: { belongsTo: District } }
+    User: { name: string, mobile: string, email: 'string unique', password: string, pincode_id: 'unsignedBigInteger nullable', otp: 'unsignedBigInteger nullable', otp_expires_at: 'datetime nullable', email_verified_at: 'datetime nullable', is_active: 'boolean default:0', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: PinCode, hasMany: 'Restaurant, Policy' } }
+    Plan: { name: string, price: 'decimal:10,2 nullable defult:0.00', duration_days: 'integer nullable', description: 'string nullable', is_active: 'boolean default:0', timestamps: timestamps, softdeletes: softDeletes, relationships: { hasMany: PlanFeature } }
+    PlanFeature: { plan_id: unsignedBigInteger, feature: string, is_active: 'boolean default:0', timestamps: timestamps, softdeletes: softDeletes, BelongsTo: Plan }
+    TaxSetting: { restaurant_id: unsignedBigInteger, name: string, rate: 'decimal:4,2 default:0.00', is_active: 'boolean default:0', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Restaurant } }
+    Restaurant: { user_id: unsignedBigInteger, pin_code_id: unsignedBigInteger, plan_id: 'unsignedBigInteger nullable', name: string, address: text, gstin: 'string nullable', plan_expiry_at: 'date nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'PinCode, Plan, User', hasMany: 'TaxSetting, Category, Area, Table, TableBooking, Order, Discount, Customer' } }
+    Category: { restaurant_id: 'id foreign', name: string, is_active: 'boolean default:0', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Restaurant, hasMany: Item } }
+    Item: { category_id: unsignedBigInteger, item_type: 'enum:non_veg,veg,beverage nullable', name: string, short_name: 'string nullable', code: 'string unique nullable', description: 'text nullable', price: 'decimal:10,2', is_active: 'boolean default:true', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Category, hasMany: 'Variant, OrderItem, KOTItem' } }
+    Variant: { item_id: unsignedBigInteger, name: string, price: 'decimal:10,2 nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Item, hasMany: 'OrderItem, KOTItem' } }
+    Discount: { code: 'string unique', type: 'enum:fixed,percentage', value: 'decimal:10,2', minimum_amount: 'decimal:10,2 nullable', maximum_discount: 'decimal:10,2 nullable', is_active: 'boolean default:true', starts_at: 'timestamp nullable', ends_at: 'timestamp nullable', max_uses: 'integer nullable', used_count: 'integer default:0', restaurant_id: unsignedBigInteger, timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Restaurant, hasMany: Order } }
+    Customer: { name: string, mobile: string, email: 'string nullable', dob: 'date nullable', anniversary: 'date nullable', restaurant_id: unsignedBigInteger, timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Restaurant, hasMany: 'Visit, Order' } }
+    Area: { restaurant_id: unsignedBigInteger, name: string, description: 'text nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Restaurant, hasMany: Table } }
+    Table: { area_id: unsignedBigInteger, name: string, capacity: integer, status: 'enum:available,occupied,reserved default:available', qr_token: 'string unique nullable', qr_enabled: 'boolean default:true nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Area, hasMany: 'TableBooking, Order, Kot' } }
+    TableBooking: { table_id: unsignedBigInteger, customer_name: string, mobile: string, booking_time: timestamp, deposit: 'decimal:10,2 nullable', status: 'enum:booked,cancel,done default:booked', notes: 'text nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Table, hasMany: Order } }
+    Order: { order_number: 'string uniqid', restaurant_id: unsignedBigInteger, table_id: 'unsignedBigInteger nullable', user_id: 'unsignedBigInteger nullable', customer_id: 'unsignedBigInteger nullable', discount_id: 'unsignedBigInteger nullable', order_type: 'enum:dine_in,takeaway,delivery', status: 'enum:pending,preparing,ready,served,complete,cancelled default:pending', sub_total: 'decimal:10,2 default:0.00', discount_amount: 'decimal:10,2 default:0.00', tax_amount: 'decimal:10,2 default:0.00', total_amount: 'decimal:10,2 default:0.00', notes: 'text nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Restaurant, Table, User, Customer, Discount', hasMany: 'OrderItem, Payment, Visit, Kot' } }
+    OrderItem: { order_id: unsignedBigInteger, item_id: unsignedBigInteger, variant_id: 'unsignedBigInteger nullable', quantity: integer, base_price: 'decimal:10,2', discount_amount: 'decimal:10,2 default:0.00 nullable', total_price: 'decimal:10,2', special_notes: 'text nullable', status: 'enum:pending,preparing,ready,served default:pending', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Order, Item, Variant', hasMany: KOTItem } }
+    Payment: { order_id: unsignedBigInteger, method: 'enum:cash,card,upi,duo,part', amount: 'decimal:10,2', split_group: 'string nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Order } }
+    Visit: { customer_id: unsignedBigInteger, order_id: unsignedBigInteger, visited_at: timestamp, timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Customer, Order' } }
+    Kot: { order_id: unsignedBigInteger, table_id: 'unsignedBigInteger nullable', kot_number: 'string uniqid', status: 'enum:pending,preparing,ready,cancelled default:pending', printed_at: 'timestamp nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Order, Table', hasMany: KOTItem } }
+    KOTItem: { kot_id: unsignedBigInteger, item_id: unsignedBigInteger, variant_id: 'unsignedBigInteger nullable', quantity: integer, status: 'enum:pending,preparing,ready,served,cancelled default:pending', special_notes: 'text nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Kot, Item, Variant' } }
+    Expense: { restaurant_id: unsignedBigInteger, category: 'enum:rent,salary,maintenance,raw_material,marketing,other', description: 'text nullable', amount: 'decimal:10,2', paid_at: 'date nullable', created_by: 'unsignedBigInteger nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Restaurant } }
+    Policy: { restaurant_id: 'unsignedBigInteger nullable', user_id: 'unsignedBigInteger nullable', title: 'string:150', content: longtext, is_active: 'boolean default:0', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Restaurant, User' } }
