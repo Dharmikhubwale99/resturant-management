@@ -2,35 +2,42 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Model
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, SoftDeletes, HasRoles;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array
      */
     protected $fillable = [
         'name',
+        'mobile',
         'email',
         'password',
+        'pincode_id',
+        'otp',
+        'otp_expires_at',
+        'email_verified_at',
+        'is_active',
+        'pin_code_id',
     ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     /**
@@ -41,8 +48,28 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'id' => 'integer',
+            'pincode_id' => 'integer',
+            'otp' => 'integer',
+            'otp_expires_at' => 'datetime',
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'is_active' => 'boolean',
+            'pin_code_id' => 'integer',
         ];
+    }
+
+    public function pinCode(): BelongsTo
+    {
+        return $this->belongsTo(PinCode::class);
+    }
+
+    public function restaurants(): HasMany
+    {
+        return $this->hasMany(Restaurant::class);
+    }
+
+    public function policies(): HasMany
+    {
+        return $this->hasMany(Policy::class);
     }
 }
