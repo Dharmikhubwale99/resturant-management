@@ -68,7 +68,7 @@ class Login extends Component
         }
 
         if ($user->role === 'admin') {
-            return to_route('admin.dashboard')->with('success', 'Login successfully.');
+            return to_route('resturant.dashboard')->with('success', 'Login successfully.');
         }
 
         Auth::logout();
