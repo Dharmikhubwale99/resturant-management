@@ -15,9 +15,12 @@ use \App\Livewire\Admin\{
     Admin\Create,
     Admin\Edit,
 
-    Plan\Index as PlanIndex
+    Plan\Index as PlanIndex,
+    Plan\Create as PlanCreate,
+    Plan\Edit as PlanEdit
 
   };
+use App\Models\Plan;
 
  Route::get('superadmin/login', Login::class)->name('superadmin.login');
  Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
@@ -38,12 +41,10 @@ use \App\Livewire\Admin\{
 
     Route::prefix('plans')->as('plans.')->group(function () {
         Route::get('/', PlanIndex::class)->name('index');
-
+        Route::get('/create', PlanCreate::class)->name('create');
+        Route::get('/edit/{id}', PlanEdit::class)->name('edit');
     });
  });
-
-
-
 
 // Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.', 'middleware' => ['web', 'auth', 'role:superadmin']], function(){
     Route::get('/', function () {
