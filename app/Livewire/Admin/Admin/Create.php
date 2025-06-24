@@ -6,13 +6,17 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use App\Models\{User, Restaurant, Country, State, City, District, PinCode};
+use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting};
+use Livewire\WithFileUploads;
+
 class Create extends Component
 {
+    use WithFileUploads;
     public $user_name, $email, $mobile, $password;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
     public $restaurant_name, $restaurant_address, $gst_no, $password_confirmation;
+    public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
 
     #[Layout('components.layouts.superadmin.app')]
     public function render()
@@ -83,13 +87,23 @@ class Create extends Component
         $this->validate([
             'user_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'mobile' => 'required|string|max:20',
+            'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
             'password' => 'required|min:6|confirmed',
             'pincode' => 'required|digits:6',
             'restaurant_name' => 'required|string|max:255',
             'restaurant_address' => 'nullable|string',
             'gst_no' => 'nullable|string|max:15',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
+            'favicon' => 'nullable|image|max:1024',
         ]);
+
+        $faviconPath = $this->oldFavicon;
+
+        if ($this->favicon) {
+            $faviconPath = $this->favicon->store('icon', 'public');
+        }
 
         $user = User::create([
             'name' => $this->user_name,
@@ -108,6 +122,14 @@ class Create extends Component
             'name' => $this->restaurant_name,
             'address' => $this->restaurant_address,
             'gstin' => $this->gst_no,
+        ]);
+
+        Setting::create([
+            'user_id' => $user->id,
+            'meta_title' => $this->meta_title,
+            'meta_description' => $this->meta_description,
+            'meta_keywords' => $this->meta_keywords,
+            'favicon' => $faviconPath,
         ]);
 
         session()->flash('success', 'User Restaurant created successfully.');

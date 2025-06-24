@@ -13,6 +13,7 @@ use \App\Livewire\Admin\{
     Admin\Index,
 
     Admin\Create,
+    Admin\Edit,
 
     Plan\Index as PlanIndex
 
@@ -30,8 +31,9 @@ use \App\Livewire\Admin\{
 
         Route::get('/', Index::class)->name('index');
         Route::get('/create', Create::class)->name('create');
+        Route::get('/edit/{id}', Edit::class)->name('edit');
 
-        Route::get('/', Index::class)->name('index');  
+        Route::get('/', Index::class)->name('index');
     });
 
     Route::prefix('plans')->as('plans.')->group(function () {
