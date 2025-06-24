@@ -23,10 +23,10 @@
 
                 <div>
                     <label for="mobile_number" class="block text-gray-700 text-sm font-medium mb-1 sm:mb-2">WhatsApp Number</label>
-                    <input wire:model="mobile_number" type="text" id="mobile_number"
+                    <input wire:model="login" type="text" id="mobile_number"
                         class="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 rounded-lg focus:border-transparent text-sm sm:text-base bg-white text-gray-800"
                         placeholder="Enter your WhatsApp number" required />
-                    @error('mobile_number')
+                    @error('login')
                         <span class="text-red-500 text-xs">{{ $message }}</span>
                     @enderror
                 </div>
