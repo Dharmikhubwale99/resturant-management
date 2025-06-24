@@ -25,7 +25,8 @@ class UserSeeder extends Seeder
             'name' => 'Super Admin',
             'email' => 'admin@email.com',
             'password' => bcrypt('password'),
-            'mobile' => '1234567890'
+            'mobile' => '1234567890',
+            'is_active' => 0,
         ]);
 
         $admin->assignRole('superadmin');
