@@ -14,12 +14,17 @@ class Index extends Component
     public $confirmingDelete = false;
     public $planToDelete = null;
 
+    public $search = '';
+
     #[Layout('components.layouts.superadmin.app')]
     public function render()
     {
+        $plans = plan::when($this->search, function($query) {
+            $query->where('name', 'like', '%' . $this->search . '%');
+        })->orderByDesc('id')->paginate(10);
         return view('livewire.admin.plan.index', [
-            'plans' => Plan::paginate(10)  // Adjust page size as needed
-        ]);
+                'plans' => $plans
+            ]);
     }
 
     public function confirmDelete($id)

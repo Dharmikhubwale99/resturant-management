@@ -25,6 +25,7 @@ class User extends Authenticatable
         'mobile',
         'email',
         'password',
+        'pincode_id',
         'otp',
         'otp_expires_at',
         'email_verified_at',
@@ -93,10 +94,4 @@ class User extends Authenticatable
     {
         return $this->roles()->first()->name;
     }
-
-    public function setting()
-    {
-        return $this->hasOne(Setting::class);
-    }
-
 }

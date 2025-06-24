@@ -9,15 +9,13 @@
 
             <div class="hidden md:flex space-x-8 items-center">
 
-                    <a href="{{ route('superadmin.admin.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Admin
-                    </a>
                     <a href="{{ route('superadmin.plans.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                         Plan
+
                     </a>
 
-                    <a href="{{ route('superadmin.settings') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Setting
+                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Users
                     </a>
 
                     <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
@@ -56,7 +54,7 @@
 
                                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Users</a>
 
-                                <a href="{{ route('superadmin.settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Leads</a>
 
                         </div>
 
