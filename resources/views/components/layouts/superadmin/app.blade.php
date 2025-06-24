@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('meta_title',        'Admin Dashboard | Hubwale')</title>
     <meta name="description" content="@yield('meta_description', 'Hubwale admin panel')">
-    <meta name="keywords" content="@yield('meta_keywords', 'hubwale, admin dashboard, job management, order control, it solution, backend panel, hubwale admin, user roles')">
+    <meta name="keywords" content="@yield('meta_keywords', '')">
 
-    <link rel="icon" type="image/png" href="{{ asset('icon/hubwalelogopng.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset($siteSettings->icon ?? 'icon/hubwalelogopng.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Admin  Dashboard</title>
+    <title>{{ $siteSettings->meta_title ?? 'Admin Dashboard | Hubwale' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     @stack('css')
@@ -118,6 +118,24 @@
                     pageLoader.remove();
                 }, 500);
             }
+        });
+
+        document.title = "{{ $siteSettings->meta_title ?? 'Hubwale' }}";
+        document.querySelector('meta[name="description"]').setAttribute('content', "{{ $siteSettings->meta_description ?? 'Hubwale admin panel' }}");
+        document.querySelector('meta[name="keywords"]').setAttribute('content', "{{ $siteSettings->meta_keywords ?? '' }}");
+        document.addEventListener("DOMContentLoaded", function () {
+        const faviconLink = document.querySelector("link[rel~='icon']");
+        const faviconPath = "{{ asset('storage/' . ($siteSettings->favicon ?? 'icon/hubwalelogopng.png')) }}";
+
+        if (faviconLink) {
+            faviconLink.href = faviconPath;
+        } else {
+            const newLink = document.createElement('link');
+            newLink.rel = 'icon';
+            newLink.href = faviconPath;
+            newLink.type = 'image/png';
+            document.head.appendChild(newLink);
+        }
         });
     </script>
 </body>

@@ -1,11 +1,9 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-white to-orange-500 p-4" style="background: linear-gradient(135deg, #000 60%, #F7931E 100%);">
-    <div class="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden mx-2 relative">
-        <!-- Logo as a watermark (optional) -->
-        <img src="{{ asset('assets/images/logo.jpeg') }}" alt="Logo" class="absolute opacity-10 w-3/4 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none" style="z-index:0;">
-        <div class="p-4 sm:p-6 md:p-8 relative z-10">
+<div class="min-h-screen flex items-center justify-center bg-black p-4">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden mx-2">
+        <div class="p-4 sm:p-6 md:p-8">
             <!-- Logo Section -->
             <div class="text-center mb-4">
-                <img src="{{ asset('assets/images/logo.jpeg') }}" alt="Hubwale" class="h-10 mx-auto mb-2">
+                <img src="{{ asset('assets/images/logo.jpeg') }}" alt="L-FENSO CERAMIC" class="h-10 mx-auto mb-2">
                 <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Login to Your Account</h2>
             </div>
 
@@ -54,7 +52,7 @@
                 </div>
 
                 <button type="submit"
-                    class="w-full bg-[#F7931E] hover:bg-[#FF8000] text-black font-semibold py-2 px-4 rounded-lg transition duration-200 relative text-sm">
+                    class="w-full bg-[#9CD118] hover:bg-[#8BBB0C] text-black font-semibold py-2 px-4 rounded-lg transition duration-200 relative text-sm">
                     <span wire:loading.remove>Login</span>
                     <span wire:loading class="flex items-center justify-center">
                         <svg class="animate-spin w-4 h-4 mr-2" viewBox="0 0 24 24">
