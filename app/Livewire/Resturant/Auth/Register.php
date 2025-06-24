@@ -18,7 +18,7 @@ class Register extends Component
     public $showOtpForm = false;
     public $tempData = [];
 
-    #[Layout('components.layouts.resturant.app')]
+    #[Layout('components.layouts.auth.app')]
     public function render()
     {
         return view('livewire.resturant.auth.register');
@@ -67,7 +67,7 @@ class Register extends Component
 
         if (!$this->tempData || $this->tempData['email'] !== $this->email) {
             session()->flash('error', 'Invalid session. Please restart registration.');
-            return redirect()->to('resturant.register');
+            return redirect()->to('resturant/register');
         }
 
         if (now()->diffInMinutes($this->otpSentAt) > 5) {
@@ -93,14 +93,14 @@ class Register extends Component
         $user->assignRole('admin');
 
         session()->flash('success', 'Verification complete! You can now log in.');
-        return redirect()->to('login');
+        return redirect()->to('resturant/login');
     }
 
     public function resendOtp()
     {
         if (!$this->tempData || !$this->tempData['email']) {
             session()->flash('error', 'Session expired. Please register again.');
-            return redirect()->to('resturant.register');
+            return redirect()->to('resturant/register');
         }
 
         $this->generatedOtp = rand(100000, 999999);

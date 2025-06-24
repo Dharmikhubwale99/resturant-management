@@ -1,7 +1,7 @@
 <div class="min-h-screen flex items-center justify-center bg-gray-100">
     <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
         <h2 class="text-xl font-semibold text-center mb-4">Register</h2>
-
+        <x-form.error />
         <form wire:submit.prevent="register" class="space-y-4">
 
             <x-form.input name="name" label="Personal Name" required wireModel="name" />
