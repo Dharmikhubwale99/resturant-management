@@ -20,7 +20,9 @@ use \App\Livewire\Admin\{
     Plan\Edit as PlanEdit
 
   };
-use App\Models\Plan;
+use \App\Livewire\Resturant\{
+    Dashboard as ResturantDashboard,
+};
 
  Route::get('superadmin/login', Login::class)->name('superadmin.login');
  Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
@@ -46,9 +48,6 @@ use App\Models\Plan;
     });
  });
 
-// Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.', 'middleware' => ['web', 'auth', 'role:superadmin']], function(){
-    Route::get('/', function () {
-        return view('welcome');
-    })->name('dashboard');
-//});
-
+Route::prefix('admin')->as('admin.')->middleware(['web', 'auth', 'role:admin'])->group(function () {
+    Route::get('/', ResturantDashboard::class)->name('dashboard');
+});
