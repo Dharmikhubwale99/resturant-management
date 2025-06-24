@@ -9,8 +9,9 @@
 
             <div class="hidden md:flex space-x-8 items-center">
 
-                    <a href="{{ route('superadmin.admin.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Admins
+                    <a href="{{ route('superadmin.plans.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Plan
+
                     </a>
 
                     <a href="{{ route('superadmin.settings') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
