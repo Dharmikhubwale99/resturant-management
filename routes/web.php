@@ -8,6 +8,7 @@ use App\Livewire\
 };
 
 use \App\Livewire\Admin\{
+    Dashboard,
     Admin\Index
   };
 
@@ -19,6 +20,8 @@ use \App\Livewire\Admin\{
 
 
  Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
+    Route::get('/', Dashboard::class)->name('dashboard');
+
     Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('/', Index::class)->name('index');
     });
