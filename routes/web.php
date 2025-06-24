@@ -9,6 +9,7 @@ use App\Livewire\
 
 use \App\Livewire\Admin\{
     Dashboard,
+    Settings,
     Admin\Index,
     Admin\Create,
   };
@@ -22,6 +23,7 @@ use \App\Livewire\Admin\{
 
  Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
+    Route::get('/settings', Settings::class)->name('settings');
 
     Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('/', Index::class)->name('index');
