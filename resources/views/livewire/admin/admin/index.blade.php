@@ -2,27 +2,13 @@
     <div class="flex justify-between items-center mb-4">
 
         <h2 class="text-xl font-bold">Admin List</h2>
-        @if (session()->has('message'))
-            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
-                class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-                role="alert">
-                <strong class="font-bold">Success!</strong>
-                <span class="block sm:inline">{{ session('message') }}</span>
-            </div>
-        @endif
-        @if (session()->has('error'))
-            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
-                class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <strong class="font-bold">Error!</strong>
-                <span class="block sm:inline">{{ session('error') }}</span>
-            </div>
-        @endif
 
         <div class="flex space-x-2">
-            <x-form.button title="+ Create" route="superadmin.admin.create"
+            <x-form.button title="+ Add" route="superadmin.admin.create"
                 class="bg-blue-600 hover:bg-blue-700 text-white" />
         </div>
     </div>
+    <x-form.error />
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
             <thead class="bg-gray-100">
@@ -35,12 +21,20 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                @foreach ($users as $index => $lead)
+                @foreach ($users as $index => $user)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 text-sm text-gray-900">{{ $index + 1 }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $lead->name }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $lead->mobile }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $lead->role }}</td>
+                        <td class="px-6 text-sm text-gray-900">{{ $user->name }}</td>
+                        <td class="px-6 text-sm text-gray-900">{{ $user->mobile }}</td>
+                        <td class="px-6 text-sm text-gray-900">{{ $user->role }}</td>
+                        <td class="px-6 text-sm text-gray-900">
+                            <x-form.button title=""
+                            class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3" :route="['superadmin.admin.edit', ['id' => $user->id]]">
+                            <span class="w-5 h-1 flex items-center justify-center">
+                                {!! file_get_contents(public_path('icon/edit.svg')) !!}
+                            </span>
+                        </x-form.button>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
@@ -48,6 +42,8 @@
         <div class="mt-4">
             {{ $users->links() }}
         </div>
+
+        <div class="mt-4">
 
         {{-- @if ($confirmingDelete)
             <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
