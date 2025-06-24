@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LogoutController;
 use App\Livewire\
 {
     Auth\Login
@@ -9,6 +10,13 @@ use App\Livewire\
 use \App\Livewire\Admin\{
     Admin\Index
   };
+
+
+
+
+ Route::get('/login', Login::class)->name('login');
+ Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
+
 
 Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.', 'middleware' => ['web', 'auth', 'role:superadmin']], function(){
     Route::get('/', function () {
@@ -25,5 +33,4 @@ Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.'], function(){
         return view('welcome');
     })->name('dashboard');
 //});
-    Route::get('/login', Login::class)->name('login');
 
