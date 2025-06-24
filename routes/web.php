@@ -9,9 +9,11 @@ use App\Livewire\
 
 use \App\Livewire\Admin\{
     Dashboard,
+    Settings,
     Admin\Index,
 
     Admin\Create,
+    Admin\Edit,
 
     Plan\Index as PlanIndex,
     Plan\Create as PlanCreate,
@@ -26,13 +28,15 @@ use App\Models\Plan;
 
  Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
+    Route::get('/settings', Settings::class)->name('settings');
 
     Route::prefix('admin')->as('admin.')->group(function () {
 
         Route::get('/', Index::class)->name('index');
         Route::get('/create', Create::class)->name('create');
+        Route::get('/edit/{id}', Edit::class)->name('edit');
 
-        Route::get('/', Index::class)->name('index');  
+        Route::get('/', Index::class)->name('index');
     });
 
     Route::prefix('plans')->as('plans.')->group(function () {
