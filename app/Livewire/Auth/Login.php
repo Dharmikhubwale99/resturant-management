@@ -10,7 +10,7 @@ use Livewire\Component;
 
 class Login extends Component
 {
-    public $mobile_number;
+    public $login;
 
     public $password;
 
@@ -26,8 +26,8 @@ class Login extends Component
     {
        if (Auth::check()) {
             $user = Auth::user();
-            if (in_array($user->role,['admin','subadmin'])) {
-                return redirect()->route('admin.dashboard');
+            if (in_array($user->role,['superadmin'])) {
+                return redirect()->route('superadmin.dashboard');
             } elseif ($user->role == 'client') {
                 return redirect()->route('home');
             }
@@ -37,31 +37,34 @@ class Login extends Component
      public function submit()
     {
         $this->validate([
-            'mobile_number' => 'required|exists:users,mobile_number',
+            'login' => 'required|string',
             'password' => 'required|min:6',
             'remember_me' => 'nullable|boolean',
         ]);
 
-        $creditionals = ['mobile_number' => $this->mobile_number,'password' => $this->password];
+        $fieldType = filter_var($this->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'mobile';
 
-        if(!Auth::attempt($creditionals,$this->remember_me)){
+         $credentials = [
+            $fieldType => $this->login,
+            'password' => $this->password
+        ];
+
+        if (!Auth::attempt($credentials, $this->remember_me)) {
             throw ValidationException::withMessages([
-                'mobile_number' => 'These credentials do not match our records.',
+                'login' => 'These credentials do not match our records.',
             ]);
         }
         $user = Auth::user();
 
-        $adminRole = ['admin', 'subadmin'];
-
         if($user->is_active != 0){
             Auth::logout();
             throw ValidationException::withMessages([
-                'mobile_number' => 'Unauthorized access.',
+                'login' => 'Unauthorized access.',
             ]);
         }
 
-        if (in_array($user->role, ['admin', 'subadmin'])) {
-            return to_route('admin.dashboard')->with('success', 'Login successfully.');
+        if (in_array($user->role, ['superadmin', 'subadmin'])) {
+            return to_route('superadmin.dashboard')->with('success', 'Login successfully.');
         }
 
         if ($user->role === 'client') {
@@ -70,7 +73,7 @@ class Login extends Component
 
         Auth::logout();
         throw ValidationException::withMessages([
-            'mobile_number' => 'Unauthorized access.',
+            'login' => 'Unauthorized access.',
         ]);
     }
 }
