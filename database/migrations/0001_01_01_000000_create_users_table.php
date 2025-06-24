@@ -22,7 +22,7 @@ return new class extends Migration
             $table->dateTime('otp_expires_at')->nullable();
             $table->dateTime('email_verified_at')->nullable();
             $table->boolean('is_active')->default(0);
-            $table->foreignId('pin_code_id')->nullable();
+            $table->foreignId('pin_code_id');
             $table->string('refer_code', 100)->nullable();
             $table->unsignedBigInteger('referred_by')->nullable();
             $table->rememberToken();

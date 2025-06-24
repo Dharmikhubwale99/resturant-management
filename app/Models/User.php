@@ -8,10 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Support\Str;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable
+class User extends Model
 {
     use HasFactory, SoftDeletes, HasRoles;
 
@@ -73,20 +71,5 @@ class User extends Authenticatable
     public function policies(): HasMany
     {
         return $this->hasMany(Policy::class);
-    }
-
-     protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($user) {
-            do {
-                $refer_code = Str::upper(Str::random(6));
-            } while (self::where('refer_code', $refer_code)->exists());
-
-            $user->refer_code = $refer_code;
-
-            return $user;
-        });
     }
 }

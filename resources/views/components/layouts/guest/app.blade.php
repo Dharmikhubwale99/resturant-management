@@ -68,8 +68,7 @@
         <img src="{{ asset('icon/Jobhubwale_Final_01.png') }}" alt="Logo" class="loader-logo">
     </div>
 
-    @include('components.layouts.auth.navbar')
-    @include('components.layouts.auth.plain')
+    @include('components.layouts.guest.navbar')
 
     <main class="">
         <div class="min-h-[calc(100vh-4rem-5rem)]">
@@ -78,7 +77,7 @@
         </div>
     </main>
 
-    @include('components.layouts.auth.footer')
+    @include('components.layouts.guest.footer')
 
     @livewireScripts
     @stack('scripts')
