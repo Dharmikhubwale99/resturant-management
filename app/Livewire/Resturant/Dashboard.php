@@ -7,7 +7,7 @@ use Livewire\Attributes\Layout;
 
 class Dashboard extends Component
 {
-    #[Layout('components.layouts.admin.app')]
+    #[Layout('components.layouts.resturant.app')]
     public function render()
     {
         return view('livewire.resturant.dashboard');

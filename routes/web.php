@@ -48,6 +48,6 @@ use \App\Livewire\Resturant\{
     });
  });
 
-Route::prefix('admin')->as('admin.')->middleware(['web', 'auth', 'role:admin'])->group(function () {
+Route::prefix('resturant')->as('resturant.')->middleware(['web', 'auth', 'role:admin'])->group(function () {
     Route::get('/', ResturantDashboard::class)->name('dashboard');
 });
