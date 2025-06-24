@@ -9,19 +9,19 @@
 
             <div class="hidden md:flex space-x-8 items-center">
 
-                    <a href="{{ route('superadmin.admin.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Admin
+                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        User
                     </a>
-                    <a href="{{ route('superadmin.plans.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Plan
-                    </a>
-
-                    <a href="{{ route('superadmin.settings') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Setting
+                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Category
                     </a>
 
                     <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Leads
+                        Items
+                    </a>
+
+                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Tables
                     </a>
 
             </div>
@@ -46,8 +46,8 @@
                         x-transition:leave-end="transform opacity-0 scale-95"
                         class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
                         <div class="px-4 py-3 border-b">
-                            <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->name }}</p>
-                            <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                            {{-- <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->personal_name }}</p>
+                            <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p> --}}
                         </div>
 
                         <div class="block md:hidden ">
