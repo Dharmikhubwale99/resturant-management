@@ -10,7 +10,11 @@ use App\Livewire\
 use \App\Livewire\Admin\{
     Dashboard,
     Admin\Index,
+
+    Admin\Create,
+
     Plan\Index as PlanIndex
+
   };
 
  Route::get('superadmin/login', Login::class)->name('superadmin.login');
@@ -21,11 +25,16 @@ use \App\Livewire\Admin\{
     Route::get('/', Dashboard::class)->name('dashboard');
 
     Route::prefix('admin')->as('admin.')->group(function () {
+
+        Route::get('/', Index::class)->name('index');
+        Route::get('/create', Create::class)->name('create');
+
         Route::get('/', Index::class)->name('index');  
     });
 
     Route::prefix('plans')->as('plans.')->group(function () {
         Route::get('/', PlanIndex::class)->name('index');
+
     });
  });
 
