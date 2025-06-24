@@ -9,7 +9,8 @@ use App\Livewire\
 
 use \App\Livewire\Admin\{
     Dashboard,
-    Admin\Index
+    Admin\Index,
+    Admin\Create,
   };
 
 
@@ -24,6 +25,7 @@ use \App\Livewire\Admin\{
 
     Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('/', Index::class)->name('index');
+        Route::get('/create', Create::class)->name('create');
     });
 });
 
