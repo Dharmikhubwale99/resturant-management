@@ -2,31 +2,29 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
             <div class="flex items-center">
-                <a href="{{ route('admin.dashboard') }}" class="text-xl font-bold text-gray-800">
+                <a href="#" class="text-xl font-bold text-gray-800">
                     <img src="{{ asset('icon/Jobhubwale_Final_01.png') }}" alt="Logo" class="h-10 w-auto">
                 </a>
             </div>
 
             <div class="hidden md:flex space-x-8 items-center">
-                @can('admin-index')
-                    <a href="{{ route('admin.owner.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+
+                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                         Admins
                     </a>
-                @endcan
-                @can('user-index')
-                    <a href="{{ route('admin.user.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+
+                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                         Users
                     </a>
-                @endcan
-                @can('lead-index')
-                    <a href="{{ route('admin.lead.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+
+                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                         Leads
                     </a>
-                @endcan
+
             </div>
 
             <div class="flex items-center space-x-4">
-                <a href="{{ route('logout') }}" class="hidden md:block text-gray-600 hover:text-blue-600 transition-colors duration-200">
+                <a href="#" class="hidden md:block text-gray-600 hover:text-blue-600 transition-colors duration-200">
                     <i class="fi fi-rr-sign-out-alt text-xl"></i>
                 </a>
 
@@ -45,34 +43,32 @@
                         x-transition:leave-end="transform opacity-0 scale-95"
                         class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
                         <div class="px-4 py-3 border-b">
-                            <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->personal_name }}</p>
-                            <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                            {{-- <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->personal_name }}</p>
+                            <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p> --}}
                         </div>
 
                         <div class="block md:hidden ">
-                            @can('admin-index')
-                                <a href="{{ route('admin.owner.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admins</a>
-                            @endcan
-                            @can('user-index')
-                                <a href="{{ route('admin.user.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Users</a>
-                            @endcan
-                            @can('lead-index')
-                                <a href="{{ route('admin.lead.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Leads</a>
-                            @endcan
+
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admins</a>
+
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Users</a>
+
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Leads</a>
+
                         </div>
 
                         <div class="py-1">
-                            <a href="{{ route('admin.owner.view-profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View Profile</a>
-                            <a href="{{ route('admin.owner.edit-profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View Profile</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
 
-                            @if (auth()->check() && auth()->user()->refer_code)
+                            {{-- @if (auth()->check() && auth()->user()->refer_code)
                                 <input type="text" id="referralLink"
                                     value="{{ route('register', ['ref' => auth()->user()->refer_code]) }}"
                                     class="hidden" readonly>
                                 <button onclick="copyReferralLink()" class="block py-2 px-4 text-sm w-full text-left hover:bg-gray-100">Copy Referral Link</button>
-                            @endif
+                            @endif --}}
 
-                            <a href="{{ route('logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
                         </div>
                     </div>
                 </div>
