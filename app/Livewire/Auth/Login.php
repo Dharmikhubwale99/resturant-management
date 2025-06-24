@@ -67,8 +67,8 @@ class Login extends Component
             return to_route('superadmin.dashboard')->with('success', 'Login successfully.');
         }
 
-        if ($user->role === 'client') {
-            return to_route('home')->with('success', 'Login successfully.');
+        if ($user->role === 'admin') {
+            return to_route('admin.dashboard')->with('success', 'Login successfully.');
         }
 
         Auth::logout();
