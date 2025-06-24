@@ -8,6 +8,8 @@ use Livewire\Attributes\Layout;
 
 class Create extends Component
 {
+    public $name, $price, $duration_days, $description;
+
     #[Layout('components.layouts.superadmin.app')]
     public function render()
     {
@@ -18,19 +20,21 @@ class Create extends Component
     {
         $this->validate([
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
+            'price' => 'nullable|numeric|min:0',
+            'duration_days' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 
         Plan::create([
             'name' => $this->name,
             'price' => $this->price,
+            'duration_days' => $this->duration_days,
             'description' => $this->description,
         ]);
 
         session()->flash('success', 'Plan created successfully!');
         $this->reset(['name', 'price', 'description']);
 
-        return redirect()->route('admin.plans.index');
+        return redirect()->route('superadmin.plans.index');
     }
 }
