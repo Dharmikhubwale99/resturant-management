@@ -9,8 +9,9 @@
 
             <div class="hidden md:flex space-x-8 items-center">
 
-                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Admins
+                    <a href="{{ route('superadmin.plans.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Plan
+
                     </a>
 
                     <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
@@ -68,7 +69,7 @@
                                 <button onclick="copyReferralLink()" class="block py-2 px-4 text-sm w-full text-left hover:bg-gray-100">Copy Referral Link</button>
                             @endif --}}
 
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                            <a href="{{ route('logout')}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
                         </div>
                     </div>
                 </div>

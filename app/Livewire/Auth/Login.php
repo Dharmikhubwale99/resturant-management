@@ -63,7 +63,7 @@ class Login extends Component
             ]);
         }
 
-        if (in_array($user->role, ['superadmin', 'subadmin'])) {
+        if (in_array($user->role, ['superadmin'])) {
             return to_route('superadmin.dashboard')->with('success', 'Login successfully.');
         }
 
