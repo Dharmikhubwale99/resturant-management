@@ -6,7 +6,7 @@ use App\Livewire\
     Auth\Login
 };
 
-<<<<<<< HEAD
+
 use \App\Livewire\Admin\{
     Admin\Index
 };
@@ -19,7 +19,7 @@ Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.', 'middleware' => [
 Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.'], function(){
     Route::get('/admin', Index::class)->name('admin.index');
 });
-=======
+
 
 // Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.', 'middleware' => ['web', 'auth', 'role:superadmin']], function(){
     Route::get('/', function () {
@@ -27,4 +27,4 @@ Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.'], function(){
     });
 // });
     Route::get('/login', Login::class)->name('login');
->>>>>>> 1bbd88658b15eb63f5d6f9503b7fb64865888cc7
+
