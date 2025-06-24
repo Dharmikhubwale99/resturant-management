@@ -18,14 +18,13 @@ use \App\Livewire\Admin\{
  Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
 
 
-Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.', 'middleware' => ['web', 'auth', 'role:superadmin']], function(){
-    Route::get('/', function () {
-        return view('welcome');
+ Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
+    Route::prefix('admin')->as('admin.')->group(function () {
+        Route::get('/', Index::class)->name('index');
     });
 });
-Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.'], function(){
-    Route::get('/admin', Index::class)->name('admin.index');
-});
+
+
 
 
 // Route::group(['prefix' => 'superadmin', 'as' => 'superadmin.', 'middleware' => ['web', 'auth', 'role:superadmin']], function(){
