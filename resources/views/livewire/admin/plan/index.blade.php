@@ -1,17 +1,8 @@
 <div class="p-6 bg-white rounded shadow">
-       <div class="p-6 bg-white rounded shadow">
-
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold">Plan List</h2>
-         <div class="flex items-center gap-4">
-            <x-form.input
-                name="search"
-                placeholder="Search by name"
-                wireModelLive="search"
-                wrapperClass="mb-0"     
-                inputClass="w-72"    
-            />
-            <x-form.button title="+ Add" route="superadmin.plans.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
+        <div class="flex space-x-2">
+            <x-form.button title="Add" route="" class="bg-blue-600 hover:bg-blue-700 text-white" />
         </div>
     </div>
     <x-form.error />
@@ -31,18 +22,12 @@
                         <td class="px-6 text-sm text-gray-900">{{ $loop->iteration }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $plan->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $plan->price }}</td>
-                        <td class="px-6 text-sm text-gray-900 flex flex-row">
-                            <x-form.button title="" class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                 :route="['superadmin.plans.edit', $plan->id]">
-                                <span class="w-5 h-1 flex items-center justify-center">
-                                    {!! file_get_contents(public_path('icon/edit.svg')) !!}
-                                </span>
-                            </x-form.button>
+                        <td class="px-6 text-sm text-gray-900">
                             <x-form.button title=""
-                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                    class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
                                     wireClick="confirmDelete({{ $plan->id }})">
                                     <span class="w-5 h-1 flex items-center justify-center">
-                                        {!! file_get_contents(public_path('icon/delete.svg')) !!}
+                                        {{-- {!! file_get_contents(public_path('icon/delete.svg')) !!} --}}
                                     </span>
                             </x-form.button>
                         </td>
