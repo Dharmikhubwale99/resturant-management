@@ -23,12 +23,14 @@ use \App\Livewire\Admin\{
 use \App\Livewire\Resturant\{
     Dashboard as ResturantDashboard,
 
-    Auth\Register ,
+    Auth\Register,
+    Auth\Login as ResturantLogin
 };
 
 Route::get('superadmin/login', Login::class)->name('superadmin.login');
 Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
 Route::get('resturant/register', Register::class)->name('resturant.register');
+Route::get('resturant/login', ResturantLogin::class)->name('resturant.login');
 
  Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
