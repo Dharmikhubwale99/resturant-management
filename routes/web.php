@@ -27,6 +27,15 @@ use \App\Livewire\Resturant\{
     Auth\Login as ResturantLogin,
     Auth\RestoRegister as RestoRegister,
     PlanPurchase as ResturantPlanPurchase,
+
+    Category\Index as CategoryIndex,
+    Category\Create as CategoryCreate,
+    Category\Edit as CategoryEdit,
+
+    Item\Index as ItemIndex,
+    Item\Create as ItemCreate,
+    Item\Edit as ItemEdit,
+
 };
 use App\Http\Controllers\PaymentController;
 
@@ -63,5 +72,17 @@ Route::get('/plan-purchase', ResturantPlanPurchase::class)->name('plan.purchase'
 Route::prefix('resturant')->as('resturant.')->middleware(['web', 'auth', 'role:admin', 'check.restaurant.plan'])->group(function () {
     Route::get('/resto-register', RestoRegister::class)->name('resto-register');
     Route::get('/', ResturantDashboard::class)->name('dashboard');
+
+    Route::prefix('categories')->as('categories.')->group(function () {
+        Route::get('/', CategoryIndex::class)->name('index');
+        Route::get('/create', CategoryCreate::class)->name('create');
+        Route::get('/edit/{id}', CategoryEdit::class)->name('edit');
+    });
+
+    Route::prefix('items')->as('items.')->group(function () {
+        Route::get('/', ItemIndex::class)->name('index');
+        Route::get('/create', ItemCreate::class)->name('create');
+        Route::get('/edit/{id}', ItemEdit::class)->name('edit');
+    });
 
 });

@@ -18,6 +18,7 @@ class Item extends Model
      * @var array
      */
     protected $fillable = [
+        'restaurant_id',
         'category_id',
         'item_type',
         'name',
@@ -61,5 +62,10 @@ class Item extends Model
     public function kOTItems(): HasMany
     {
         return $this->hasMany(KOTItem::class);
+    }
+
+    public function restaurant(): BelongsTo
+    {
+        return $this->belongsTo(Restaurant::class);
     }
 }
