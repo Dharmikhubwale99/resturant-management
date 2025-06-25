@@ -15,6 +15,7 @@ return new class extends Migration
 
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
+            $table->unique(['restaurant_id', 'name']);
             $table->foreignId('restaurant_id')->constrained();
             $table->string('name');
             $table->boolean('is_active')->default(0);
