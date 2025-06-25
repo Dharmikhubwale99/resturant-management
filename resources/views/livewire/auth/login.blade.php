@@ -9,9 +9,20 @@
                 <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Login to Your Account</h2>
             </div>
 
-           <x-form.error />
+            @if (session('success'))
+                <div class="mb-4 p-4 rounded-lg bg-green-100 border border-green-200">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <p class="text-green-700">{{ session('success') }}</p>
+                    </div>
+                </div>
+            @endif
 
             <form wire:submit.prevent="submit" class="space-y-3">
+                {{-- <x-wireui:errors only="admin" /> --}}
+
                 <div>
                     <label for="mobile_number" class="block text-gray-700 text-sm font-medium mb-1 sm:mb-2">WhatsApp Number</label>
                     <input wire:model="login" type="text" id="mobile_number"

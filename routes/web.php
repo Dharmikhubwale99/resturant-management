@@ -23,14 +23,18 @@ use \App\Livewire\Admin\{
 use \App\Livewire\Resturant\{
     Dashboard as ResturantDashboard,
 
-    Auth\Register,
-    Auth\Login as ResturantLogin
+    Category\Index as CategoryIndex,
+    Category\Create as CategoryCreate,
+    Category\Edit as CategoryEdit,
+
+    Item\Index as ItemIndex,
+    Item\Create as ItemCreate,
+    Item\Edit as ItemEdit,
 };
 
-Route::get('superadmin/login', Login::class)->name('superadmin.login');
-Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
-Route::get('resturant/register', Register::class)->name('resturant.register');
-Route::get('resturant/login', ResturantLogin::class)->name('resturant.login');
+ Route::get('superadmin/login', Login::class)->name('superadmin.login');
+ Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
+
 
  Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
@@ -54,5 +58,17 @@ Route::get('resturant/login', ResturantLogin::class)->name('resturant.login');
 
 Route::prefix('resturant')->as('resturant.')->middleware(['web', 'auth', 'role:admin'])->group(function () {
     Route::get('/', ResturantDashboard::class)->name('dashboard');
+
+    Route::prefix('categories')->as('categories.')->group(function () {
+        Route::get('/', CategoryIndex::class)->name('index');
+        Route::get('/create', CategoryCreate::class)->name('create');
+        Route::get('/edit/{id}', CategoryEdit::class)->name('edit');
+    });
+
+    Route::prefix('items')->as('items.')->group(function () {
+        Route::get('/', ItemIndex::class)->name('index');
+        Route::get('/create', ItemCreate::class)->name('create');
+        Route::get('/edit/{id}', ItemEdit::class)->name('edit');
+    });
 
 });
