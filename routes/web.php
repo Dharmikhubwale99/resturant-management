@@ -22,6 +22,14 @@ use \App\Livewire\Admin\{
   };
 use \App\Livewire\Resturant\{
     Dashboard as ResturantDashboard,
+
+    Category\Index as CategoryIndex,
+    Category\Create as CategoryCreate,
+    Category\Edit as CategoryEdit,
+
+    Item\Index as ItemIndex,
+    Item\Create as ItemCreate,
+    Item\Edit as ItemEdit,
 };
 
  Route::get('superadmin/login', Login::class)->name('superadmin.login');
@@ -50,4 +58,17 @@ use \App\Livewire\Resturant\{
 
 Route::prefix('resturant')->as('resturant.')->middleware(['web', 'auth', 'role:admin'])->group(function () {
     Route::get('/', ResturantDashboard::class)->name('dashboard');
+
+    Route::prefix('categories')->as('categories.')->group(function () {
+        Route::get('/', CategoryIndex::class)->name('index');
+        Route::get('/create', CategoryCreate::class)->name('create');
+        Route::get('/edit/{id}', CategoryEdit::class)->name('edit');
+    });
+
+    Route::prefix('items')->as('items.')->group(function () {
+        Route::get('/', ItemIndex::class)->name('index');
+        Route::get('/create', ItemCreate::class)->name('create');
+        Route::get('/edit/{id}', ItemEdit::class)->name('edit');
+    });
+
 });
