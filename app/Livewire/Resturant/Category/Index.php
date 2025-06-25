@@ -17,9 +17,10 @@ class Index extends Component
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
-        $category = Category::when($this->search, function($query) {
+        $category = Category::where('restaurant_id', auth()->user()->restaurants()->first()->id)
+        ->when($this->search, function($query) {
             $query->where('name', 'like', '%' . $this->search . '%');
-        })->orderByDesc('id')->paginate(5);
+        })->orderByDesc('id')->paginate(10);
         return view('livewire.resturant.category.index', [
             'categories' => $category
         ]);
