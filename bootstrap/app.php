@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'check.restaurant.plan' => \App\Http\Middleware\CheckRestaurantPlan::class,
+        ]);
+        $middleware->validateCsrfTokens(except: [
+            'razorpay/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

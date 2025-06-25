@@ -23,18 +23,20 @@ use \App\Livewire\Admin\{
 use \App\Livewire\Resturant\{
     Dashboard as ResturantDashboard,
 
-    Category\Index as CategoryIndex,
-    Category\Create as CategoryCreate,
-    Category\Edit as CategoryEdit,
-
-    Item\Index as ItemIndex,
-    Item\Create as ItemCreate,
-    Item\Edit as ItemEdit,
+    Auth\Register,
+    Auth\Login as ResturantLogin,
+    Auth\RestoRegister as RestoRegister,
+    PlanPurchase as ResturantPlanPurchase,
 };
+use App\Http\Controllers\PaymentController;
 
- Route::get('superadmin/login', Login::class)->name('superadmin.login');
- Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
+Route::get('superadmin/login', Login::class)->name('superadmin.login');
+Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
+Route::get('register', Register::class)->name('register');
+Route::get('/', ResturantLogin::class)->name('login');
 
+Route::get('/create-razorpay-order/{plan}', [PaymentController::class, 'createRazorpayOrder']);
+Route::post('/razorpay/callback', [PaymentController::class, 'handleCallback'])->name('razorpay.callback');
 
  Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
@@ -56,19 +58,10 @@ use \App\Livewire\Resturant\{
     });
  });
 
-Route::prefix('resturant')->as('resturant.')->middleware(['web', 'auth', 'role:admin'])->group(function () {
+Route::get('/plan-purchase', ResturantPlanPurchase::class)->name('plan.purchase');
+
+Route::prefix('resturant')->as('resturant.')->middleware(['web', 'auth', 'role:admin', 'check.restaurant.plan'])->group(function () {
+    Route::get('/resto-register', RestoRegister::class)->name('resto-register');
     Route::get('/', ResturantDashboard::class)->name('dashboard');
-
-    Route::prefix('categories')->as('categories.')->group(function () {
-        Route::get('/', CategoryIndex::class)->name('index');
-        Route::get('/create', CategoryCreate::class)->name('create');
-        Route::get('/edit/{id}', CategoryEdit::class)->name('edit');
-    });
-
-    Route::prefix('items')->as('items.')->group(function () {
-        Route::get('/', ItemIndex::class)->name('index');
-        Route::get('/create', ItemCreate::class)->name('create');
-        Route::get('/edit/{id}', ItemEdit::class)->name('edit');
-    });
 
 });

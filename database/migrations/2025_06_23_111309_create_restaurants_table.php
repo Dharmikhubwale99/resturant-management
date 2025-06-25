@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('restaurants', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
-            $table->foreignId('pin_code_id');
+            $table->foreignId('pin_code_id')->nullable();
             $table->foreignId('plan_id')->nullable();
-            $table->string('name');
-            $table->text('address');
+            $table->string('name')->nullable();
+            $table->string('email')->nullable();
+            $table->string('mobile')->nullable();
+            $table->text('address')->nullable();
             $table->string('gstin')->nullable();
             $table->date('plan_expiry_at')->nullable();
             $table->timestamps();
