@@ -10,10 +10,11 @@
 
             <x-form.input name="mobile" label="Personal Mobile" required wireModel="mobile" />
 
-            <x-form.input name="password" label="Password" type="password" required wireModel="password" />
+            <x-form.input name="password" label="Password" type="password" required wireModel="password"
+                autocomplete="current-password" showToggle="true" />
 
             <x-form.input name="confirm_password" label="Confirm Password" type="password" required
-                wireModel="confirm_password" />
+                wireModel="confirm_password" autocomplete="current-password" showToggle="true"/>
 
             <x-form.button title="Register" type="submit" class="w-full bg-indigo-600 text-white" />
 

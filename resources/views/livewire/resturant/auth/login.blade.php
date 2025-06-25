@@ -15,9 +15,9 @@
                 <x-form.input name="login" label="Email or Mobile" type="text"
                     placeholder="Enter your email or mobile" required wireModel="login" autocomplete="username" />
 
-                <x-form.input name="password" label="Password" type="password" placeholder="Enter your password"
-                    wireModel="password" required autocomplete="current-password"
-                    inputClass="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+                <x-form.input name="password" label="Password" type="password" wireModel="password"
+                    placeholder="Enter your password" required autocomplete="current-password" showToggle="true" />
+
 
                 <div class="flex flex-row sm:flex-row items-center justify-between gap-3 sm:gap-0">
                     <x-form.input name="remember" label="Remember me" type="checkbox"
@@ -36,7 +36,7 @@
                 <div class="text-center text-sm sm:text-base">
                     <p class="text-gray-600">
                         Don't have an account?
-                        <a href="{{ route('resturant.register') }}" class="text-blue-600 hover:text-blue-500 font-medium ml-1">
+                        <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-500 font-medium ml-1">
                             Sign up
                         </a>
                     </p>

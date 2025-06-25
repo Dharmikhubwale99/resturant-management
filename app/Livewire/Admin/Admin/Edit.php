@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Hash;
 use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting};
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Http;
 
 class Edit extends Component
 {
@@ -69,6 +70,34 @@ class Edit extends Component
         if ($cached) {
             $this->pincode_id = $cached->id;
             $this->setLocationFromModels($cached->district->city->state->country, $cached->district->city->state, $cached->district->city, $cached->district);
+            return;
+        }
+
+        $response = Http::get("https://api.postalpincode.in/pincode/{$value}");
+
+        if ($response->successful()) {
+            $data = $response->json()[0];
+            if ($data['Status'] === 'Success' && count($data['PostOffice']) > 0) {
+                $post = $data['PostOffice'][0];
+
+                $country = Country::firstOrCreate(['name' => $post['Country']]);
+                $state = State::firstOrCreate(['name' => $post['State'], 'country_id' => $country->id]);
+                $city = City::firstOrCreate(['name' => $post['Block'] ?? $post['District'], 'state_id' => $state->id]);
+                $district = District::firstOrCreate(['name' => $post['District'], 'city_id' => $city->id]);
+
+                $pincode = PinCode::create([
+                    'code' => $value,
+                    'district_id' => $district->id,
+                ]);
+
+                $this->pincode_id = $pincode->id;
+                $this->setLocationFromModels($country, $state, $city, $district);
+
+            } else {
+
+            }
+        } else {
+
         }
     }
 

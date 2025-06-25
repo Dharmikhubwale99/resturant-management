@@ -93,7 +93,7 @@ class Register extends Component
         $user->assignRole('admin');
 
         session()->flash('success', 'Verification complete! You can now log in.');
-        return redirect()->to('resturant/login');
+        return redirect()->to('/');
     }
 
     public function resendOtp()
