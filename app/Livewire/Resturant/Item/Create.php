@@ -6,9 +6,12 @@ use App\Models\{Item, Category};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Enums\ItemType;
+use Livewire\WithFileUploads;
+use Illuminate\Validation\ValidationException;
 
 class Create extends Component
 {
+    use WithFileUploads;
     public $category_id;
     public $item_type;
     public $name;
@@ -18,10 +21,10 @@ class Create extends Component
     public $price;     
     public $restaurant;      
     public $categories;  
+    public $images = [];
 
     #[Layout('components.layouts.resturant.app')]
 
-        // Livewire component
     public function mount(): void
     {
         $this->restaurant = auth()->user()->restaurants()->first();
@@ -30,7 +33,7 @@ class Create extends Component
         $this->categories = $this->restaurant
                                 ->categories()
                                 ->orderBy('name')
-                                ->pluck('name', 'id')   // ← already an array
+                                ->pluck('name', 'id')  
                                 ->toArray();
 
         // enum → array: ['non_veg' => 'Non-Veg', …]
@@ -53,23 +56,42 @@ class Create extends Component
             'category_id' => 'required',
             'name' => 'required',
             'item_type' => 'required',
-            'short_name' => 'nullable',
-            // 'code' => 'nullable',
+            'short_name' => 'nullable|unique:items,short_name,null,id,restaurant_id,' . $this->restaurant->id,
+            'code' => 'nullable|unique:items,code,null,id,restaurant_id,' . $this->restaurant->id,
             'description' => 'nullable',
             'price' => 'required|numeric',
         ]);
 
-        Item::create([
+        $isExists = Item::where([
+            'restaurant_id' => $this->restaurant->id,
+            'category_id'   => $this->category_id,
+            'name'          => $this->name,
+        ])->exists();
+
+        if ($isExists) {
+            if ($isExists) {
+                throw ValidationException::withMessages([
+                    'name' => 'An item with the same name already exists in this category.',
+                ]);
+            }
+
+        }
+
+        $item = Item::create([
             'restaurant_id' => $this->restaurant->id,
             'category_id'   => $this->category_id,
             'name'          => $this->name,
             'item_type'     => $this->item_type,
             'short_name'    => $this->short_name,
-            // 'code'          => $this->code ?? null,
+            'code'          => $this->code ?? null,
             'description'   => $this->description,
             'price'         => $this->price,
         ]);
+        
+        // foreach ($this->images as $image) {
+        //     $item->addMedia($image)->toMediaCollection('images');
+        // }
 
-        return redirect()->route('resturant.items.index')->with('success', 'Item created successfully.');
+        return redirect()->route('restaurant.items.index')->with('success', 'Item created successfully.');
     }
 }

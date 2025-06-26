@@ -12,7 +12,7 @@ class Index extends Component
     use WithPagination;
 
     public $user;
-    #[Layout('components.layouts.superadmin.app')]
+    #[Layout('components.layouts.admin.app')]
     public function render()
     {
         return view('livewire.admin.admin.index', [

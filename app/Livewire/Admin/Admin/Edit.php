@@ -20,7 +20,7 @@ class Edit extends Component
     public $restaurant_name, $restaurant_address, $gst_no;
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
 
-    #[Layout('components.layouts.superadmin.app')]
+    #[Layout('components.layouts.admin.app')]
     public function render()
     {
         return view('livewire.admin.admin.edit');

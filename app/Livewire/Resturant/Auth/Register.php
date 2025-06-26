@@ -100,7 +100,7 @@ class Register extends Component
     {
         if (!$this->tempData || !$this->tempData['email']) {
             session()->flash('error', 'Session expired. Please register again.');
-            return redirect()->to('resturant/register');
+            return redirect()->to('restaurant/register');
         }
 
         $this->generatedOtp = rand(100000, 999999);

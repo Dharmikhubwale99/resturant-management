@@ -11,7 +11,7 @@
                 wrapperClass="mb-0"     
                 inputClass="w-72"    
             />
-            <x-form.button title="+ Add" route="resturant.items.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
+            <x-form.button title="+ Add" route="restaurant.items.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
         </div>
     </div>
     <x-form.error />
@@ -22,6 +22,9 @@
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Item Type</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Short Name</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                 </tr>
             </thead>
@@ -31,11 +34,14 @@
                         <td class="px-6 text-sm text-gray-900">{{ $loop->iteration }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $item->category->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $item->name }}</td>
+                        <td class="px-6 text-sm text-gray-900">{{ $item->item_type }}</td>
+                        <td class="px-6 text-sm text-gray-900">{{ $item->short_name }}</td>
+                        <td class="px-6 text-sm text-gray-900">{{ $item->price }}</td>
                        <td class="px-2 text-sm text-gray-900">
                             <div class="flex items-center justify-start space-x-2">
                                 <x-form.button title=""
                                     class="w-8 h-8 rounded flex items-center justify-center"
-                                    :route="['resturant.items.edit', $item->id]">
+                                    :route="['restaurant.items.edit', $item->id]">
                                     <span class="w-4 h-4">
                                         {!! file_get_contents(public_path('icon/edit.svg')) !!}
                                     </span>

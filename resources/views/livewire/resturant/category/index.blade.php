@@ -11,7 +11,7 @@
                 wrapperClass="mb-0"     
                 inputClass="w-72"    
             />
-            <x-form.button title="+ Add" route="resturant.categories.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
+            <x-form.button title="+ Add" route="restaurant.categories.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
         </div>
     </div>
     <x-form.error />
@@ -33,7 +33,7 @@
                             <div class="flex items-center justify-start space-x-2">
                                 <x-form.button title=""
                                     class="w-8 h-8 rounded flex items-center justify-center"
-                                    :route="['resturant.categories.edit', $category->id]">
+                                    :route="['restaurant.categories.edit', $category->id]">
                                     <span class="w-4 h-4">
                                         {!! file_get_contents(public_path('icon/edit.svg')) !!}
                                     </span>
