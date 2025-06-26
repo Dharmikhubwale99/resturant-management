@@ -16,7 +16,7 @@ class Index extends Component
 
     public $search = '';
 
-    #[Layout('components.layouts.superadmin.app')]
+    #[Layout('components.layouts.admin.app')]
     public function render()
     {
         $plans = plan::when($this->search, function($query) {

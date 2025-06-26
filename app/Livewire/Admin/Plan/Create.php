@@ -10,7 +10,7 @@ class Create extends Component
 {
     public $name, $price, $duration_days, $description;
 
-    #[Layout('components.layouts.superadmin.app')]
+    #[Layout('components.layouts.admin.app')]
     public function render()
     {
         return view('livewire.admin.plan.create');
