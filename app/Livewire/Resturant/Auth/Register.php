@@ -18,7 +18,7 @@ class Register extends Component
     public $showOtpForm = false;
     public $tempData = [];
 
-    #[Layout('components.layouts.auth.app')]
+    #[Layout('components.layouts.auth.plain')]
     public function render()
     {
         return view('livewire.resturant.auth.register');

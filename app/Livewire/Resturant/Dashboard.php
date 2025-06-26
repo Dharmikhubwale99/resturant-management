@@ -5,6 +5,7 @@ namespace App\Livewire\Resturant;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class Dashboard extends Component
 {
@@ -22,7 +23,7 @@ class Dashboard extends Component
         $restaurant = $user->restaurants()->first();
 
         if (empty($restaurant->name) || empty($restaurant->email) || empty($restaurant->mobile) || empty($restaurant->address) || empty($restaurant->pin_code_id)) {
-            return redirect()->route('resturant.register')->with('info', 'Please complete your restaurant profile.');
+            return redirect()->route('restaurant.resto-register')->with('info', 'Please complete your restaurant profile.');
         }
     }
 }
