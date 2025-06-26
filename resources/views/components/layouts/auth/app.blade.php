@@ -69,7 +69,6 @@
     </div>
 
     @include('components.layouts.auth.navbar')
-    @include('components.layouts.auth.plain')
 
     <main class="">
         <div class="min-h-[calc(100vh-4rem-5rem)]">

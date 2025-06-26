@@ -11,7 +11,7 @@ class Login extends Component
 {
     public $login, $password, $remember_me;
 
-    #[Layout('components.layouts.auth.app')]
+    #[Layout('components.layouts.auth.plain')]
     public function render()
     {
         return view('livewire.resturant.auth.login');
