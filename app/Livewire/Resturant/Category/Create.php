@@ -21,7 +21,7 @@ class Create extends Component
     public function submit()
     {
        $this->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|unique:categories,name,NULL,id,restaurant_id,' . $this->resturant->id,
         ]);
 
         Category::create([
@@ -32,6 +32,6 @@ class Create extends Component
         session()->flash('success', 'Category created successfully!');
         $this->reset(['name']);
 
-        return redirect()->route('resturant.categories.index'); 
+        return redirect()->route('restaurants.categories.index'); 
     }
 }

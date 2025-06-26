@@ -18,11 +18,6 @@ class Dashboard extends Component
 
     public function mount()
     {
-        $user = Auth::user();
-        $restaurant = $user->restaurants()->first();
-
-        if (empty($restaurant->name) || empty($restaurant->email) || empty($restaurant->mobile) || empty($restaurant->address) || empty($restaurant->pin_code_id)) {
-            return redirect()->route('resturant.register')->with('info', 'Please complete your restaurant profile.');
-        }
+        $this->user = User::find(auth()->id());
     }
 }

@@ -9,7 +9,7 @@
             <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Save" wireClick="submit" wireTarget="submit" />
                 <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
-                    route="resturant.categories.index" />
+                    route="restaurant.categories.index" />
             </div>
         </form>
     </div>

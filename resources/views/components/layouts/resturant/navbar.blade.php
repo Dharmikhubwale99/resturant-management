@@ -12,11 +12,11 @@
                     <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                         User
                     </a>
-                    <a href="{{ route('resturant.categories.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                    <a href="{{ route('restaurant.categories.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                         Category
                     </a>
 
-                    <a href="{{ route('resturant.items.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                    <a href="{{ route('restaurant.items.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                         Item
                     </a>
 

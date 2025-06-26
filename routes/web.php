@@ -69,7 +69,7 @@ Route::post('/razorpay/callback', [PaymentController::class, 'handleCallback'])-
 
 Route::get('/plan-purchase', ResturantPlanPurchase::class)->name('plan.purchase');
 
-Route::prefix('resturant')->as('resturant.')->middleware(['web', 'auth', 'role:admin', 'check.restaurant.plan'])->group(function () {
+Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role:admin', 'check.restaurant.plan'])->group(function () {
     Route::get('/resto-register', RestoRegister::class)->name('resto-register');
     Route::get('/', ResturantDashboard::class)->name('dashboard');
 
