@@ -103,6 +103,6 @@ class RestoRegister extends Component
         );
 
         Auth::login($user);
-        return redirect()->route('resturant.dashboard')->with('success', 'Restaurant registered successfully.');
+        return redirect()->route('restaurant.dashboard')->with('success', 'Restaurant registered successfully.');
     }
 }

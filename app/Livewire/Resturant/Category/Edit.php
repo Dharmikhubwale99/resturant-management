@@ -25,13 +25,13 @@ class Edit extends Component
     public function submit()
     {
         $this->validate([
-            'name' => 'required',
+            'name' => 'required|unique:categories,name,' . $this->category->id . ',id,restaurant_id,' . $this->category->restaurant_id,
         ]);
 
         $this->category->update([
             'name' => $this->name,
         ]);
 
-        return redirect()->route('resturant.categories.index')->with('success', 'Category updated successfully.');
+        return redirect()->route('restaurant.categories.index')->with('success', 'Category updated successfully.');
     }
 }
