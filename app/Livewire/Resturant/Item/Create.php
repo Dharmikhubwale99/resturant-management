@@ -21,6 +21,7 @@ class Create extends Component
 
     #[Layout('components.layouts.resturant.app')]
 
+        // Livewire component
     public function mount(): void
     {
         $this->restaurant = auth()->user()->restaurants()->first();
@@ -29,7 +30,7 @@ class Create extends Component
         $this->categories = $this->restaurant
                                 ->categories()
                                 ->orderBy('name')
-                                ->pluck('name', 'id')  
+                                ->pluck('name', 'id')   // ← already an array
                                 ->toArray();
 
         // enum → array: ['non_veg' => 'Non-Veg', …]
