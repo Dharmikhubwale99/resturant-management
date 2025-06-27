@@ -21,13 +21,26 @@
                 placeholder="Enter description" />
 
             <x-form.input label="Images" name="images" type="file" wireModel="images" multiple />
-              @if ($images)
+            @if ($images)
                 <div class="flex gap-2 mt-2">
                     @foreach ($images as $image)
                         <img src="{{ $image->temporaryUrl() }}" alt="Preview" class="w-20 h-20 object-cover rounded" />
                     @endforeach
                 </div>
             @endif
+            @php
+                $existingImages = $item->getMedia('images');
+            @endphp
+
+            @foreach ($existingImages as $media)
+                <div class="flex items-center gap-4 mb-4">
+                    <img src="{{ $media->getUrl() }}" class="w-20 h-20 object-cover rounded">
+                    <button wire:click.prevent="removeImage({{ $media->id }})"
+                        class="bg-red-600 text-white px-4 py-1 rounded-full text-xs hover:bg-red-700">
+                        Delete
+                    </button>
+                </div>
+            @endforeach
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Variants</label>

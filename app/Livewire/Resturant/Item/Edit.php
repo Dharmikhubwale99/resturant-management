@@ -35,7 +35,7 @@ class Edit extends Component
     }
     public function mount($id)
     {
-        $this->item = Item::findOrFail($id);
+        $this->item = Item::with('media')->findOrFail($id);
 
         $this->category_id = $this->item->category_id;
         $this->item_type = $this->item->item_type;
@@ -75,6 +75,13 @@ class Edit extends Component
         $this->variants = array_values($this->variants); // reindex
     }
 
+    public function removeImage($mediaId)
+    {
+        $this->item->deleteMedia($mediaId);
+        $this->item->refresh();
+    }
+
+
     public function submit()
     {
         $this->validate([
@@ -109,7 +116,6 @@ class Edit extends Component
             'price' => $this->price,
         ]);
 
-        // Save variants
         foreach ($this->variants as $variant) {
             if (!empty($variant['name']) && !empty($variant['price'])) {
                 if (!empty($variant['id'])) {
@@ -128,7 +134,6 @@ class Edit extends Component
             }
         }
 
-        // Optional: handle new images
         if (is_array($this->images)) {
             foreach ($this->images as $image) {
                 $this->item->addMedia($image)->toMediaCollection('images');
