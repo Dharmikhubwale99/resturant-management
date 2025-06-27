@@ -1,33 +1,43 @@
 <div class="p-6 bg-white rounded shadow">
     <div class="p-6 bg-white rounded shadow">
-
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">Item List</h2>
-            <div class="flex items-center gap-4">
-                <x-form.input name="search" placeholder="Search by name" wireModelLive="search" wrapperClass="mb-0"
-                    inputClass="w-72" />
-                <x-form.button title="+ Add" route="restaurant.items.create"
-                    class="bg-blue-600 hover:bg-blue-700 text-white" />
-            </div>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Item List</h2>
+         <div class="flex items-center gap-4">
+            <x-form.input
+                name="search"
+                placeholder="Search by name"
+                wireModelLive="search"
+                wrapperClass="mb-0"
+                inputClass="w-72"
+            />
+            <x-form.button title="+ Add" route="restaurant.items.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
         </div>
-        <x-form.error />
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Item Type</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Short Name</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
+    </div>
+    <x-form.error />
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Image</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Item Type</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Short Name</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     @foreach ($items as $item)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 text-sm text-gray-900">{{ $loop->iteration }}</td>
+                            @php
+                                $imgUrl = $item->getFirstMediaUrl('images') ?: asset('icon/hubwalelogopng.png');
+                            @endphp
+                            <td class="px-6 text-sm text-gray-900">
+                                <img src="{{ $imgUrl }}" alt="Item Image" class="w-12 h-8 object-cover rounded">
+                            </td>
                             <td class="px-6 text-sm text-gray-900">{{ $item->category->name }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ $item->name }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ $item->item_type }}</td>
