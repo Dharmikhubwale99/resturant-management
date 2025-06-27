@@ -16,14 +16,11 @@ class Index extends Component
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
-    {       
+    {
         $item = Item::where('restaurant_id', auth()->user()->restaurants()->first()->id)
         ->when($this->search, function ($query, $search) {
             $query->where('name', 'like', '%' . $search . '%');
-        })
-        ->orderByDesc('id')
-        ->paginate(10);
-        dd($this->itemTypeFilter);
+        })->orderByDesc('id')->paginate(10);
         return view('livewire.resturant.item.index', [
             'items' => $item
         ]);

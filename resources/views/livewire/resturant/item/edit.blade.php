@@ -21,25 +21,26 @@
                 placeholder="Enter description" />
 
             <x-form.input label="Images" name="images" type="file" wireModel="images" multiple />
-              @if ($images)
+            @if ($images)
                 <div class="flex gap-2 mt-2">
                     @foreach ($images as $image)
                         <img src="{{ $image->temporaryUrl() }}" alt="Preview" class="w-20 h-20 object-cover rounded" />
                     @endforeach
                 </div>
             @endif
+            @php
+                $existingImages = $item->getMedia('images');
+            @endphp
 
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Variants</label>
-                @foreach ($variants as $index => $variant)
-                    <div class="flex gap-2 mb-2">
-                        <input type="text" wire:model="variants.{{ $index }}.name" placeholder="Variant Name" class="border rounded px-2 py-1" />
-                        <input type="number" wire:model="variants.{{ $index }}.price" placeholder="Price" class="border rounded px-2 py-1" step="0.01" />
-                        <button type="button" wire:click="removeVariant({{ $index }})" class="text-red-500">Remove</button>
-                    </div>
-                @endforeach
-                <button type="button" wire:click="addVariant" class="bg-blue-500 text-white px-2 py-1 rounded">+ Variant</button>
-            </div>
+            @foreach ($existingImages as $media)
+                <div class="flex items-center gap-4 mb-4">
+                    <img src="{{ $media->getUrl() }}" class="w-20 h-20 object-cover rounded">
+                    <button wire:click.prevent="removeImage({{ $media->id }})"
+                        class="bg-red-600 text-white px-4 py-1 rounded-full text-xs hover:bg-red-700">
+                        Delete
+                    </button>
+                </div>
+            @endforeach
 
             <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Save" wireTarget="submit" />

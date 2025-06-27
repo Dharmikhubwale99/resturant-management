@@ -7,8 +7,6 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Enums\ItemType;
 use Livewire\Attributes\Layout;
-use Illuminate\Validation\ValidationException;
-use App\Models\Variant;
 
 class Edit extends Component
 {
@@ -26,16 +24,10 @@ class Edit extends Component
     public $images = [];
     public $categories;
     public $itemTypes;
-    public $restaurant;   
-    public $variants = [];
 
-     public function render()
-    {
-        return view('livewire.resturant.item.edit');
-    }
     public function mount($id)
     {
-        $this->item = Item::findOrFail($id);
+        $this->item = Item::with('media')->findOrFail($id);
 
         $this->category_id = $this->item->category_id;
         $this->item_type = $this->item->item_type;
@@ -46,34 +38,16 @@ class Edit extends Component
         $this->price = $this->item->price;
 
         $restaurant = auth()->user()->restaurants()->first();
-        $this->restaurant = $restaurant;
         $this->categories = $restaurant->categories()->orderBy('name')->pluck('name', 'id')->toArray();
         $this->itemTypes = collect(ItemType::cases())->mapWithKeys(fn ($c) => [$c->value => $c->label()])->toArray();
-
-        // Load existing variants
-        $this->variants = $this->item->variants->map(function($variant) {
-            return [
-                'id' => $variant->id,
-                'name' => $variant->name,
-                'price' => $variant->price,
-            ];
-        })->toArray();
     }
 
-    public function addVariant()
+    public function removeImage($mediaId)
     {
-        $this->variants[] = ['id' => null, 'name' => '', 'price' => ''];
+        $this->item->deleteMedia($mediaId);
+        $this->item->refresh();
     }
 
-    public function removeVariant($index)
-    {
-        // If variant exists in DB, delete it
-        if (!empty($this->variants[$index]['id'])) {
-            Variant::find($this->variants[$index]['id'])->delete();
-        }
-        unset($this->variants[$index]);
-        $this->variants = array_values($this->variants); // reindex
-    }
 
     public function submit()
     {
@@ -81,23 +55,11 @@ class Edit extends Component
             'category_id' => 'required',
             'name' => 'required',
             'item_type' => 'required',
-            'short_name' => 'nullable|unique:items,short_name,'. $this->item->id . ',id,restaurant_id,' . $this->item->restaurant_id,
-            'code' => 'nullable|unique:items,code,'. $this->item->id . ',id,restaurant_id,' . $this->item->restaurant_id,
+            'short_name' => 'nullable',
+            'code' => 'nullable',
             'description' => 'nullable',
             'price' => 'required|numeric',
         ]);
-
-        $isExists = Item::where([
-            'restaurant_id' => $this->restaurant->id,
-            'category_id'   => $this->category_id,
-            'name'          => $this->name,
-        ])->whereNot('id', $this->item->id)->exists();
-
-        if ($isExists) {
-            throw ValidationException::withMessages([
-                'name' => 'An item with the same name already exists in this category.',
-            ]);
-        }
 
         $this->item->update([
             'category_id' => $this->category_id,
@@ -109,26 +71,6 @@ class Edit extends Component
             'price' => $this->price,
         ]);
 
-        // Save variants
-        foreach ($this->variants as $variant) {
-            if (!empty($variant['name']) && !empty($variant['price'])) {
-                if (!empty($variant['id'])) {
-                    // Update existing
-                    Variant::where('id', $variant['id'])->update([
-                        'name' => $variant['name'],
-                        'price' => $variant['price'],
-                    ]);
-                } else {
-                    // Create new
-                    $this->item->variants()->create([
-                        'name' => $variant['name'],
-                        'price' => $variant['price'],
-                    ]);
-                }
-            }
-        }
-
-        // Optional: handle new images
         if (is_array($this->images)) {
             foreach ($this->images as $image) {
                 $this->item->addMedia($image)->toMediaCollection('images');
@@ -136,5 +78,10 @@ class Edit extends Component
         }
 
         return redirect()->route('restaurant.items.index')->with('success', 'Item updated successfully.');
+    }
+
+    public function render()
+    {
+        return view('livewire.resturant.item.edit');
     }
 }
