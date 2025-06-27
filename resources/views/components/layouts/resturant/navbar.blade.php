@@ -24,8 +24,8 @@
                         Area
                     </a>
 
-                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Tables
+                    <a href="{{ route('restaurant.tables.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Table
                     </a>
 
             </div>
