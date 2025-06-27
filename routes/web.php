@@ -37,6 +37,9 @@ use \App\Livewire\Resturant\{
     Item\Edit as ItemEdit,
     Item\Show as ItemShow,
 
+    Area\Index as AreaIndex,
+    Area\Create as AreaCreate,
+    Area\Edit as AreaEdit,
 };
 use App\Http\Controllers\PaymentController;
 
@@ -85,6 +88,12 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/create', ItemCreate::class)->name('create');
         Route::get('/edit/{id}', ItemEdit::class)->name('edit');
         Route::get('/show/{id}', ItemShow::class)->name('show');
+    });
+
+     Route::prefix('areas')->as('areas.')->group(function () {
+        Route::get('/', AreaIndex::class)->name('index');
+        Route::get('/create', AreaCreate::class)->name('create');
+        Route::get('/edit/{id}', AreaEdit::class)->name('edit');
     });
 
 });
