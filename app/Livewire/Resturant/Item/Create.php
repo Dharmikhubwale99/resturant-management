@@ -23,6 +23,7 @@ class Create extends Component
     public $categories;
     public $images = [];
     public $itemTypes = [];
+    public $variants = []; 
 
     #[Layout('components.layouts.resturant.app')]
 
@@ -93,6 +94,26 @@ class Create extends Component
             $item->addMedia($image)->toMediaCollection('images');
         }
 
+        foreach ($this->variants as $variant) {
+            if (!empty($variant['name']) && !empty($variant['price'])) {
+                $item->variants()->create([
+                    'name' => $variant['name'],
+                    'price' => $variant['price'],
+                ]);
+            }
+        }
+
         return redirect()->route('restaurant.items.index')->with('success', 'Item created successfully.');
+    }
+
+    public function addVariant()
+    {
+        $this->variants[] = ['name' => '', 'price' => ''];
+    }
+
+    public function removeVariant($index)
+    {
+        unset($this->variants[$index]);
+        $this->variants = array_values($this->variants); 
     }
 }
