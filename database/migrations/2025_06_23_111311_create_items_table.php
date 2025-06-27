@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 return new class extends Migration
 {
@@ -19,7 +20,7 @@ return new class extends Migration
             $table->foreignId('restaurant_id')->constrained();
             $table->enum('item_type', ["non_veg","veg","beverage"])->nullable();
             $table->string('name');
-            $table->string('short_name')->nullable();
+            $table->string('short_name')->unique()->nullable();
             $table->string('code')->unique()->nullable();
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
