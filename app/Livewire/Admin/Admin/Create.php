@@ -96,7 +96,7 @@ class Create extends Component
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
-            'favicon' => 'nullable|image|max:1024',
+            'favicon' => 'nullable|file|max:1024',
         ]);
 
         $faviconPath = $this->oldFavicon;

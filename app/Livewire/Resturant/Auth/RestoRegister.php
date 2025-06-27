@@ -23,13 +23,48 @@ class RestoRegister extends Component
         return view('livewire.resturant.auth.resto-register');
     }
 
+    public function mount()
+    {
+        $user = Auth::user();
+        if ($user) {
+            $this->name = $user->name;
+            $this->email = $user->email;
+            $this->mobile = $user->mobile;
+            $this->gst = $user->gstin;
+            $this->pincode = $user->pin_code_id;
+
+            if ($user->pin_code_id) {
+                $pincode = \App\Models\PinCode::with('district.city.state.country')
+                    ->find($user->pin_code_id);
+
+                if ($pincode) {
+                    $this->pincode_id = $pincode->id;
+                    $this->pincode = $pincode->code;
+                    $this->country_name = $pincode->district->city->state->country->name ?? '';
+                    $this->state_name = $pincode->district->city->state->name ?? '';
+                    $this->city_name = $pincode->district->city->name ?? '';
+                    $this->district_name = $pincode->district->name ?? '';
+
+                    $this->country_id = $pincode->district->city->state->country->id ?? null;
+                    $this->state_id = $pincode->district->city->state->id ?? null;
+                    $this->city_id = $pincode->district->city->id ?? null;
+                    $this->district_id = $pincode->district->id ?? null;
+                }
+            }
+        }
+    }
     public function updatedPincode($value)
     {
         $cached = PinCode::with('district.city.state.country')->where('code', $value)->first();
 
         if ($cached) {
             $this->pincode_id = $cached->id;
-            $this->setLocationFromModels($cached->district->city->state->country, $cached->district->city->state, $cached->district->city, $cached->district);
+            $this->setLocationFromModels(
+                $cached->district->city->state->country,
+                $cached->district->city->state,
+                $cached->district->city,
+                $cached->district
+            );
             return;
         }
 
@@ -82,7 +117,7 @@ class RestoRegister extends Component
             'email' => [
                 'required',
                 'email',
-                'unique:users,email',
+                'unique:users,email,' . Auth::id(),
                 'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
             ],
         ], [
