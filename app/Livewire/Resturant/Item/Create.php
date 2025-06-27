@@ -8,6 +8,7 @@ use Livewire\Attributes\Layout;
 use App\Enums\ItemType;
 use Livewire\WithFileUploads;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class Create extends Component
 {
@@ -23,7 +24,7 @@ class Create extends Component
     public $categories;
     public $images = [];
     public $itemTypes = [];
-    public $variants = []; 
+    public $variants = [];
 
     #[Layout('components.layouts.resturant.app')]
 
@@ -50,6 +51,11 @@ class Create extends Component
         return view('livewire.resturant.item.create', [
             'itemTypes' => ItemType::cases(),
         ]);
+    }
+
+    public function getRestaurantFolder(): string
+    {
+        return Str::slug($this->restaurant->name);
     }
 
     public function submit()
@@ -91,7 +97,18 @@ class Create extends Component
         ]);
 
         foreach ($this->images as $image) {
-            $item->addMedia($image)->toMediaCollection('images');
+            $folder = 'images/' . $this->getRestaurantFolder();
+
+            $originalName = $image->getClientOriginalName();
+            $fileName = uniqid() . '-' . $originalName;
+
+            $storedPath = $image->storeAs($folder, $fileName, 'public');
+
+            $item->addMedia(storage_path("app/public/{$storedPath}"))
+                 ->preservingOriginal()
+                 ->usingName(pathinfo($fileName, PATHINFO_FILENAME))
+                 ->usingFileName($fileName)
+                 ->toMediaCollection('images');
         }
 
         foreach ($this->variants as $variant) {
@@ -114,6 +131,6 @@ class Create extends Component
     public function removeVariant($index)
     {
         unset($this->variants[$index]);
-        $this->variants = array_values($this->variants); 
+        $this->variants = array_values($this->variants);
     }
 }
