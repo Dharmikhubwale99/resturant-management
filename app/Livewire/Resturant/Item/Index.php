@@ -23,7 +23,6 @@ class Index extends Component
         })
         ->orderByDesc('id')
         ->paginate(10);
-        dd($this->itemTypeFilter);
         return view('livewire.resturant.item.index', [
             'items' => $item
         ]);
