@@ -18,11 +18,12 @@ class Create extends Component
     public $short_name;
     public $code;
     public $description;
-    public $price;
-    public $restaurant;
-    public $categories;
+    public $price;     
+    public $restaurant;      
+    public $categories;  
     public $images = [];
-    public $itemTypes = [];
+    public $itemTypes;
+    public $variants = []; 
 
     #[Layout('components.layouts.resturant.app')]
 
@@ -34,7 +35,7 @@ class Create extends Component
         $this->categories = $this->restaurant
                                 ->categories()
                                 ->orderBy('name')
-                                ->pluck('name', 'id')
+                                ->pluck('name', 'id')  
                                 ->toArray();
 
         // enum → array: ['non_veg' => 'Non-Veg', …]
@@ -88,11 +89,31 @@ class Create extends Component
             'description'   => $this->description,
             'price'         => $this->price,
         ]);
+        
+        // foreach ($this->images as $image) {
+        //     $item->addMedia($image)->toMediaCollection('images');
+        // }
 
-        foreach ($this->images as $image) {
-            $item->addMedia($image)->toMediaCollection('images');
+        foreach ($this->variants as $variant) {
+            if (!empty($variant['name']) && !empty($variant['price'])) {
+                $item->variants()->create([
+                    'name' => $variant['name'],
+                    'price' => $variant['price'],
+                ]);
+            }
         }
 
         return redirect()->route('restaurant.items.index')->with('success', 'Item created successfully.');
+    }
+
+    public function addVariant()
+    {
+        $this->variants[] = ['name' => '', 'price' => ''];
+    }
+
+    public function removeVariant($index)
+    {
+        unset($this->variants[$index]);
+        $this->variants = array_values($this->variants); 
     }
 }

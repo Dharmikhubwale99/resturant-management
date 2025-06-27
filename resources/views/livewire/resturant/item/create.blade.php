@@ -29,6 +29,18 @@
                 </div>
             @endif
 
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Variants</label>
+                @foreach ($variants as $index => $variant)
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" wire:model="variants.{{ $index }}.name" placeholder="Variant Name" class="border rounded px-2 py-1" />
+                        <input type="number" wire:model="variants.{{ $index }}.price" placeholder="Price" class="border rounded px-2 py-1" step="0.01" />
+                        <button type="button" wire:click="removeVariant({{ $index }})" class="text-red-500">Remove</button>
+                    </div>
+                @endforeach
+                <button type="button" wire:click="addVariant" class="bg-blue-500 text-white px-2 py-1 rounded">+ Variant</button>
+            </div>
+
             <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Save" wireTarget="submit" />
                 <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"

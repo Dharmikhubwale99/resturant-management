@@ -14,7 +14,7 @@ class Create extends Component
     public function render()
     {
         $this->resturant = auth()->user()->restaurants()->first();
-
+       
         return view('livewire.resturant.category.create');
     }
 
@@ -32,6 +32,6 @@ class Create extends Component
         session()->flash('success', 'Category created successfully!');
         $this->reset(['name']);
 
-        return redirect()->route('restaurant.categories.index');
+        return redirect()->route('restaurant.categories.index'); 
     }
 }

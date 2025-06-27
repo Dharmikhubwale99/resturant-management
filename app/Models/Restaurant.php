@@ -22,8 +22,6 @@ class Restaurant extends Model
         'pin_code_id',
         'plan_id',
         'name',
-        'email',
-        'mobile',
         'address',
         'gstin',
         'plan_expiry_at',
