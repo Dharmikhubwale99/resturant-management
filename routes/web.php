@@ -40,6 +40,11 @@ use \App\Livewire\Resturant\{
     Area\Index as AreaIndex,
     Area\Create as AreaCreate,
     Area\Edit as AreaEdit,
+
+    Table\Index as TableIndex,
+    Table\Create as TableCreate,
+    Table\Edit as TableEdit,
+    Table\Show as TableShow,
 };
 use App\Http\Controllers\PaymentController;
 
@@ -96,4 +101,15 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/edit/{id}', AreaEdit::class)->name('edit');
     });
 
+    Route::prefix('tables')->as('tables.')->group(function () {
+        Route::get('/', TableIndex::class)->name('index');
+        Route::get('/create', TableCreate::class)->name('create');
+        Route::get('/edit/{id}', TableEdit::class)->name('edit');
+        Route::get('/show/{id}', TableShow::class)->name('show');
+    });
+
 });
+
+// Route::get('/table/{qr_token}/menu', function($qr_token) {
+//     return "Menu for table token: " . $qr_token;
+// })->name('table.menu');
