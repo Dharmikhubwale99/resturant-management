@@ -71,11 +71,10 @@ class PaymentController extends Controller
             );
 
             if (empty($restaurant->name) || empty($restaurant->email) || empty($restaurant->mobile) || empty($restaurant->address) || empty($restaurant->pin_code_id)) {
-                return redirect()->route('restaurant.resto-register')->with('info', 'Please complete your restaurant profile.');
-            } else {
-                return redirect()->route('restaurant.dashboard')->with('success', 'Payment successful!');
+                return redirect()->route('resturant.register')->with('info', 'Please complete your restaurant profile.');
             }
 
+            return redirect()->route('resturant.dashboard')->with('success', 'Payment successful!');
         } catch (\Exception $e) {
             return redirect()->route('plan.purchase')->with('error', 'Payment failed or signature mismatch.');
         }

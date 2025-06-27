@@ -7,7 +7,7 @@
 
             <h3 class="text-lg font-semibold text-gray-700">Restaurant Information</h3>
 
-            <x-form.input name="name" label="Resturant Name" type="text" wireModel="restaurant_name" required />
+            <x-form.input name="name" label="Resturant Name" type="text" wireModel="name" required />
 
             <x-form.input name="email" label="Email" type="email" wireModel="email" />
 

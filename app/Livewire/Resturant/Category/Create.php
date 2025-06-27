@@ -32,6 +32,6 @@ class Create extends Component
         session()->flash('success', 'Category created successfully!');
         $this->reset(['name']);
 
-        return redirect()->route('restaurants.categories.index'); 
+        return redirect()->route('restaurant.categories.index'); 
     }
 }

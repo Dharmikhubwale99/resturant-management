@@ -8,7 +8,7 @@ use App\Models\Plan;
 
 class PlanPurchase extends Component
 {
-    #[Layout('components.layouts.auth.app')]
+    #[Layout('components.layouts.resturant.app')]
     public function render()
     {
         $plan = Plan::get();
