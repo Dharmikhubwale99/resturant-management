@@ -27,7 +27,7 @@ class Edit extends Component
 
     public function mount($id)
     {
-        $this->item = Item::findOrFail($id);
+        $this->item = Item::with('media')->findOrFail($id);
 
         $this->category_id = $this->item->category_id;
         $this->item_type = $this->item->item_type;
@@ -41,6 +41,13 @@ class Edit extends Component
         $this->categories = $restaurant->categories()->orderBy('name')->pluck('name', 'id')->toArray();
         $this->itemTypes = collect(ItemType::cases())->mapWithKeys(fn ($c) => [$c->value => $c->label()])->toArray();
     }
+
+    public function removeImage($mediaId)
+    {
+        $this->item->deleteMedia($mediaId);
+        $this->item->refresh();
+    }
+
 
     public function submit()
     {
@@ -64,7 +71,6 @@ class Edit extends Component
             'price' => $this->price,
         ]);
 
-        // Optional: handle new images
         if (is_array($this->images)) {
             foreach ($this->images as $image) {
                 $this->item->addMedia($image)->toMediaCollection('images');

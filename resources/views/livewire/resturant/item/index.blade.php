@@ -8,8 +8,8 @@
                 name="search"
                 placeholder="Search by name"
                 wireModelLive="search"
-                wrapperClass="mb-0"     
-                inputClass="w-72"    
+                wrapperClass="mb-0"
+                inputClass="w-72"
             />
             <x-form.button title="+ Add" route="restaurant.items.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
         </div>
@@ -20,6 +20,7 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Image</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Item Type</th>
@@ -32,6 +33,12 @@
                 @foreach ($items as $item)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 text-sm text-gray-900">{{ $loop->iteration }}</td>
+                        @php
+                            $imgUrl = $item->getFirstMediaUrl('images') ?: asset('icon/hubwalelogopng.png');
+                        @endphp
+                        <td class="px-6 text-sm text-gray-900">
+                            <img src="{{ $imgUrl }}" alt="Item Image" class="w-12 h-8 object-cover rounded">
+                        </td>
                         <td class="px-6 text-sm text-gray-900">{{ $item->category->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $item->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $item->item_type }}</td>
