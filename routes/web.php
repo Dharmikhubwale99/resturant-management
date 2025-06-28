@@ -37,6 +37,18 @@ use \App\Livewire\Resturant\{
     Item\Edit as ItemEdit,
     Item\Show as ItemShow,
 
+    Area\Index as AreaIndex,
+    Area\Create as AreaCreate,
+    Area\Edit as AreaEdit,
+
+    Table\Index as TableIndex,
+    Table\Create as TableCreate,
+    Table\Edit as TableEdit,
+    Table\Show as TableShow,
+
+    User\Index as UserIndex,
+    User\Create as UserCreate,
+    User\Edit as UserEdit,
 };
 use App\Http\Controllers\PaymentController;
 
@@ -87,4 +99,27 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/show/{id}', ItemShow::class)->name('show');
     });
 
+     Route::prefix('areas')->as('areas.')->group(function () {
+        Route::get('/', AreaIndex::class)->name('index');
+        Route::get('/create', AreaCreate::class)->name('create');
+        Route::get('/edit/{id}', AreaEdit::class)->name('edit');
+    });
+
+    Route::prefix('tables')->as('tables.')->group(function () {
+        Route::get('/', TableIndex::class)->name('index');
+        Route::get('/create', TableCreate::class)->name('create');
+        Route::get('/edit/{id}', TableEdit::class)->name('edit');
+        Route::get('/show/{id}', TableShow::class)->name('show');
+    });
+
+    Route::prefix('users')->as('users.')->group(function () {
+        Route::get('/', UserIndex::class)->name('index');
+        Route::get('/create', UserCreate::class)->name('create');
+        Route::get('/edit/{id}', UserEdit::class)->name('edit');
+    });
+
 });
+
+// Route::get('/table/{qr_token}/menu', function($qr_token) {
+//     return "Menu for table token: " . $qr_token;
+// })->name('table.menu');
