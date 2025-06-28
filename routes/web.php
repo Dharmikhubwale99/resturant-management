@@ -45,6 +45,10 @@ use \App\Livewire\Resturant\{
     Table\Create as TableCreate,
     Table\Edit as TableEdit,
     Table\Show as TableShow,
+
+    User\Index as UserIndex,
+    User\Create as UserCreate,
+    User\Edit as UserEdit,
 };
 use App\Http\Controllers\PaymentController;
 
@@ -106,6 +110,12 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/create', TableCreate::class)->name('create');
         Route::get('/edit/{id}', TableEdit::class)->name('edit');
         Route::get('/show/{id}', TableShow::class)->name('show');
+    });
+
+    Route::prefix('users')->as('users.')->group(function () {
+        Route::get('/', UserIndex::class)->name('index');
+        Route::get('/create', UserCreate::class)->name('create');
+        Route::get('/edit/{id}', UserEdit::class)->name('edit');
     });
 
 });

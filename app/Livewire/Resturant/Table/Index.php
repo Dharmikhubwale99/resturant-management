@@ -21,7 +21,16 @@ class Index extends Component
     {
         $restaurant = auth()->user()->restaurants()->first();
         $tables = Table::where('restaurant_id', $restaurant->id)
-            ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%"))
+            ->when($this->search, function($q) {
+                $q->where(function($query) {
+                    $query->where('name', 'like', "%{$this->search}%")
+                          ->orWhere('capacity', 'like', "%{$this->search}%")
+                          ->orWhere('status', 'like', "%{$this->search}%")
+                          ->orWhereHas('area', function($areaQuery) {
+                              $areaQuery->where('name', 'like', "%{$this->search}%");
+                          });
+                });
+            })
             ->with('area')
             ->orderByDesc('id')
             ->paginate(10);
