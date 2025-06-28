@@ -46,10 +46,11 @@ class Item extends Model implements HasMedia
         ];
     }
 
-    public function category(): BelongsTo
+    public function category()
     {
         return $this->belongsTo(Category::class);
     }
+
 
     public function variants(): HasMany
     {
