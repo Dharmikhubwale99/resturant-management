@@ -15,7 +15,6 @@ return new class extends Migration
 
         Schema::create('tables', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('restaurant_id');
             $table->foreignId('area_id');
             $table->string('name');
             $table->integer('capacity');

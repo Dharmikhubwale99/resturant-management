@@ -17,7 +17,9 @@ use \App\Livewire\Admin\{
 
     Plan\Index as PlanIndex,
     Plan\Create as PlanCreate,
-    Plan\Edit as PlanEdit
+    Plan\Edit as PlanEdit,
+
+    UserAccess
 
   };
 use \App\Livewire\Resturant\{
@@ -37,14 +39,6 @@ use \App\Livewire\Resturant\{
     Item\Edit as ItemEdit,
     Item\Show as ItemShow,
 
-    Area\Index as AreaIndex,
-    Area\Create as AreaCreate,
-    Area\Edit as AreaEdit,
-
-    Table\Index as TableIndex,
-    Table\Create as TableCreate,
-    Table\Edit as TableEdit,
-    Table\Show as TableShow,
 };
 use App\Http\Controllers\PaymentController;
 
@@ -67,6 +61,8 @@ Route::post('/razorpay/callback', [PaymentController::class, 'handleCallback'])-
         Route::get('/edit/{id}', Edit::class)->name('edit');
 
         Route::get('/', Index::class)->name('index');
+
+        Route::get('/access/{id}', UserAccess::class)->name('access');
     });
 
     Route::prefix('plans')->as('plans.')->group(function () {
@@ -95,21 +91,4 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/show/{id}', ItemShow::class)->name('show');
     });
 
-     Route::prefix('areas')->as('areas.')->group(function () {
-        Route::get('/', AreaIndex::class)->name('index');
-        Route::get('/create', AreaCreate::class)->name('create');
-        Route::get('/edit/{id}', AreaEdit::class)->name('edit');
-    });
-
-    Route::prefix('tables')->as('tables.')->group(function () {
-        Route::get('/', TableIndex::class)->name('index');
-        Route::get('/create', TableCreate::class)->name('create');
-        Route::get('/edit/{id}', TableEdit::class)->name('edit');
-        Route::get('/show/{id}', TableShow::class)->name('show');
-    });
-
 });
-
-// Route::get('/table/{qr_token}/menu', function($qr_token) {
-//     return "Menu for table token: " . $qr_token;
-// })->name('table.menu');

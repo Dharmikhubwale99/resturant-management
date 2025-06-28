@@ -19,7 +19,6 @@ class Table extends Model
      */
     protected $fillable = [
         'area_id',
-        'restaurant_id',
         'name',
         'capacity',
         'status',
@@ -44,11 +43,6 @@ class Table extends Model
     public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class);
-    }
-
-      public function restaurant(): BelongsTo
-    {
-        return $this->belongsTo(Restaurant::class);
     }
 
     public function tableBookings(): HasMany
