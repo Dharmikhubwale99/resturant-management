@@ -9,6 +9,8 @@ use App\Enums\ItemType;
 use Livewire\Attributes\Layout;
 use Illuminate\Validation\ValidationException;
 use App\Models\Variant;
+use Illuminate\Support\Str;
+
 
 class Edit extends Component
 {
@@ -26,7 +28,7 @@ class Edit extends Component
     public $images = [];
     public $categories;
     public $itemTypes;
-    public $restaurant;   
+    public $restaurant;
     public $variants = [];
 
      public function render()
@@ -67,7 +69,6 @@ class Edit extends Component
 
     public function removeVariant($index)
     {
-        // If variant exists in DB, delete it
         if (!empty($this->variants[$index]['id'])) {
             Variant::find($this->variants[$index]['id'])->delete();
         }
@@ -79,6 +80,11 @@ class Edit extends Component
     {
         $this->item->deleteMedia($mediaId);
         $this->item->refresh();
+    }
+
+    public function getRestaurantFolder(): string
+    {
+        return Str::slug($this->restaurant->name);
     }
 
 
@@ -136,9 +142,21 @@ class Edit extends Component
 
         if (is_array($this->images)) {
             foreach ($this->images as $image) {
-                $this->item->addMedia($image)->toMediaCollection('images');
+                $folder = 'images/' . $this->getRestaurantFolder();
+
+                $originalName = $image->getClientOriginalName();
+                $fileName = uniqid() . '-' . $originalName;
+
+                $storedPath = $image->storeAs($folder, $fileName, 'public');
+
+                $this->item->addMedia(storage_path("app/public/{$storedPath}"))
+                    ->preservingOriginal()
+                    ->usingName(pathinfo($fileName, PATHINFO_FILENAME))
+                    ->usingFileName($fileName)
+                    ->toMediaCollection('images');
             }
         }
+
 
         return redirect()->route('restaurant.items.index')->with('success', 'Item updated successfully.');
     }

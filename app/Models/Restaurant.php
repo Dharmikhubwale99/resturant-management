@@ -110,4 +110,10 @@ class Restaurant extends Model
     {
         return $this->hasMany(Customer::class);
     }
+
+    public function configurations()
+    {
+        return $this->hasMany(RestaurantConfiguration::class);
+    }
+
 }
