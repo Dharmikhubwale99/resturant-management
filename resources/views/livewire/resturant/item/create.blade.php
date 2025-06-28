@@ -4,9 +4,7 @@
         <x-form.error />
         <form wire:submit.prevent="submit" class="space-y-4" enctype="multipart/form-data">
 
-            @if (setting('category_module'))
             <x-form.select name="category_id" label="Category" wireModel="category_id" required :options="$categories" />
-            @endif
 
             <x-form.select name="item_type" label="Item Type" wire:model="item_type" :options="$itemTypes" required />
 

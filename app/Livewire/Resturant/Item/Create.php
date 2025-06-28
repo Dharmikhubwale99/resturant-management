@@ -8,7 +8,6 @@ use Livewire\Attributes\Layout;
 use App\Enums\ItemType;
 use Livewire\WithFileUploads;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Str;
 
 class Create extends Component
 {
@@ -24,7 +23,7 @@ class Create extends Component
     public $categories;
     public $images = [];
     public $itemTypes = [];
-    public $variants = [];
+    public $variants = []; 
 
     #[Layout('components.layouts.resturant.app')]
 
@@ -53,20 +52,10 @@ class Create extends Component
         ]);
     }
 
-    public function getRestaurantFolder(): string
-    {
-        return Str::slug($this->restaurant->name);
-    }
-
     public function submit()
     {
-        if (setting('category_module')) {
-            $this->validate([
-                'category_id' => 'required|exists:categories,id',
-            ]);
-        }
-
         $this->validate([
+            'category_id' => 'required',
             'name' => 'required',
             'item_type' => 'required',
             'short_name' => 'nullable|unique:items,short_name,null,id,restaurant_id,' . $this->restaurant->id,
@@ -102,18 +91,7 @@ class Create extends Component
         ]);
 
         foreach ($this->images as $image) {
-            $folder = 'images/' . $this->getRestaurantFolder();
-
-            $originalName = $image->getClientOriginalName();
-            $fileName = uniqid() . '-' . $originalName;
-
-            $storedPath = $image->storeAs($folder, $fileName, 'public');
-
-            $item->addMedia(storage_path("app/public/{$storedPath}"))
-                 ->preservingOriginal()
-                 ->usingName(pathinfo($fileName, PATHINFO_FILENAME))
-                 ->usingFileName($fileName)
-                 ->toMediaCollection('images');
+            $item->addMedia($image)->toMediaCollection('images');
         }
 
         foreach ($this->variants as $variant) {
@@ -136,6 +114,6 @@ class Create extends Component
     public function removeVariant($index)
     {
         unset($this->variants[$index]);
-        $this->variants = array_values($this->variants);
+        $this->variants = array_values($this->variants); 
     }
 }

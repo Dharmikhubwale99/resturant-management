@@ -13,36 +13,20 @@ class Index extends Component
     public $confirmingDelete = false;
     public $itemToDelete = null;
     public $search = '';
-    public $filterItemType = '';
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
-    {
-        $restaurantId = auth()->user()->restaurants()->first()->id;
-
-        $items = Item::where('restaurant_id', $restaurantId)
-            ->where(function ($query) {
-                $query->when($this->search, function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('code', 'like', '%' . $this->search . '%')
-                      ->orWhere('short_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('price', 'like', '%' . $this->search . '%')
-                      ->orWhereHas('category', function ($q2) {
-                          $q2->where('name', 'like', '%' . $this->search . '%');
-                      });
-                });
-            })
-            ->when($this->filterItemType, function ($q) {
-                $q->where('item_type', $this->filterItemType);
-            })
-            ->orderByDesc('id')
-            ->paginate(10);
-
+    {       
+        $item = Item::where('restaurant_id', auth()->user()->restaurants()->first()->id)
+        ->when($this->search, function ($query, $search) {
+            $query->where('name', 'like', '%' . $search . '%');
+        })
+        ->orderByDesc('id')
+        ->paginate(10);
         return view('livewire.resturant.item.index', [
-            'items' => $items
+            'items' => $item
         ]);
     }
-
 
     public function confirmDelete($id)
     {

@@ -29,18 +29,11 @@
                         <td class="px-6 text-sm text-gray-900">{{ $user->role }}</td>
                         <td class="px-6 text-sm text-gray-900">
                             <x-form.button title=""
-                                class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3" :route="['superadmin.admin.edit', ['id' => $user->id]]">
-                                <span class="w-5 h-1 flex items-center justify-center">
-                                    {!! file_get_contents(public_path('icon/edit.svg')) !!}
-                                </span>
-                            </x-form.button>
-
-                            <x-form.button title=""
-                                class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                :route="['superadmin.admin.access', ['id' => $user->id]]">
-                                Access
-                            </x-form.button>
-
+                            class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3" :route="['superadmin.admin.edit', ['id' => $user->id]]">
+                            <span class="w-5 h-1 flex items-center justify-center">
+                                {!! file_get_contents(public_path('icon/edit.svg')) !!}
+                            </span>
+                        </x-form.button>
                         </td>
                     </tr>
                 @endforeach
@@ -52,7 +45,7 @@
 
         <div class="mt-4">
 
-            {{-- @if ($confirmingDelete)
+        {{-- @if ($confirmingDelete)
             <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
                 <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
                     <h3 class="text-lg font-semibold mb-4 text-red-600">Confirm Delete</h3>
@@ -68,5 +61,5 @@
                 </div>
             </div>
         @endif --}}
-        </div>
     </div>
+</div>
