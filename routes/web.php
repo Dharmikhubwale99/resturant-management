@@ -17,7 +17,9 @@ use \App\Livewire\Admin\{
 
     Plan\Index as PlanIndex,
     Plan\Create as PlanCreate,
-    Plan\Edit as PlanEdit
+    Plan\Edit as PlanEdit,
+
+    UserAccess
 
   };
 use \App\Livewire\Resturant\{
@@ -71,6 +73,8 @@ Route::post('/razorpay/callback', [PaymentController::class, 'handleCallback'])-
         Route::get('/edit/{id}', Edit::class)->name('edit');
 
         Route::get('/', Index::class)->name('index');
+
+        Route::get('/access/{id}', UserAccess::class)->name('access');
     });
 
     Route::prefix('plans')->as('plans.')->group(function () {
