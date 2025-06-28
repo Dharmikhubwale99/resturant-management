@@ -9,12 +9,15 @@
 
             <div class="hidden md:flex space-x-8 items-center">
 
-                <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                    User
-                </a>
-                @if (setting('category_module'))
-                    <a href="{{ route('restaurant.categories.index') }}"
-                        class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+
+
+                    <a href="{{ route('restaurant.users.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        User
+                    </a>
+                                    @if (setting('category_module'))
+
+                    <a href="{{ route('restaurant.categories.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+
                         Category
                     </a>
                 @endif
@@ -24,9 +27,13 @@
                     Item
                 </a>
 
-                <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                    Tables
-                </a>
+                    <a href="{{ route('restaurant.areas.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Area
+                    </a>
+
+                    <a href="{{ route('restaurant.tables.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Table
+                    </a>
 
             </div>
 
