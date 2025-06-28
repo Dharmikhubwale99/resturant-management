@@ -26,7 +26,9 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Image</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
+                        @if (setting('category_module'))
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
+                        @endif
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Item Type</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Short Name</th>
@@ -44,7 +46,9 @@
                             <td class="px-6 text-sm text-gray-900">
                                 <img src="{{ $imgUrl }}" alt="Item Image" class="w-12 h-8 object-cover rounded">
                             </td>
-                            <td class="px-6 text-sm text-gray-900">{{ $item->category->name }}</td>
+                            @if (setting('category_module'))
+                                <td class="px-6 text-sm text-gray-900">{{ $item->category->name ?? '' }}</td>
+                            @endif
                             <td class="px-6 text-sm text-gray-900">{{ $item->name }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ $item->item_type }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ $item->short_name }}</td>

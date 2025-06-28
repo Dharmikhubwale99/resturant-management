@@ -60,8 +60,13 @@ class Create extends Component
 
     public function submit()
     {
+        if (setting('category_module')) {
+            $this->validate([
+                'category_id' => 'required|exists:categories,id',
+            ]);
+        }
+
         $this->validate([
-            'category_id' => 'required',
             'name' => 'required',
             'item_type' => 'required',
             'short_name' => 'nullable|unique:items,short_name,null,id,restaurant_id,' . $this->restaurant->id,
