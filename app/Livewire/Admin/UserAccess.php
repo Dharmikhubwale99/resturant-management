@@ -35,6 +35,7 @@ class UserAccess extends Component
 
         $this->access = RestaurantConfiguration::where('restaurant_id', $this->restaurantId)
         ->pluck('value', 'configuration_id')
+        ->map(fn ($v) => (bool) $v)
         ->toArray();
     }
 

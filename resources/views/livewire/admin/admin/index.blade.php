@@ -28,18 +28,22 @@
                         <td class="px-6 text-sm text-gray-900">{{ $user->mobile }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->role }}</td>
                         <td class="px-6 text-sm text-gray-900">
-                            <x-form.button title=""
-                                class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3" :route="['superadmin.admin.edit', ['id' => $user->id]]">
-                                <span class="w-5 h-1 flex items-center justify-center">
-                                    {!! file_get_contents(public_path('icon/edit.svg')) !!}
-                                </span>
-                            </x-form.button>
+                            <div class="flex flex-row items-center space-x-3">
+                                <x-form.button title=""
+                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                    :route="['superadmin.admin.edit', ['id' => $user->id]]">
+                                    <span class="w-5 h-1 flex items-center justify-center">
+                                        {!! file_get_contents(public_path('icon/edit.svg')) !!}
+                                    </span>
+                                </x-form.button>
 
-                            <x-form.button title=""
-                                class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                :route="['superadmin.admin.access', ['id' => $user->id]]">
-                                Access
-                            </x-form.button>
+                                <x-form.button title=""
+                                    class="p-1 w-15 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition mt-4"
+                                    :route="['superadmin.admin.access', ['id' => $user->id]]">
+                                    <img src="{{ asset('icon/access.png') }}" alt="Access"
+                                        class="w-6 h-6 object-contain" />
+                                </x-form.button>
+                            </div>
 
                         </td>
                     </tr>
