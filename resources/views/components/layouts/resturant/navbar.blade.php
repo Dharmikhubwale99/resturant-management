@@ -26,11 +26,12 @@
                     Item
                 </a>
 
+
                 @if (setting('area_module'))
-                <a href="{{ route('restaurant.areas.index') }}"
-                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                    Area
-                </a>
+                  <a href="{{ route('restaurant.areas.index') }}"
+                      class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                      Area
+                  </a>
                 @endif
               
                 <a href="{{ route('restaurant.tables.index') }}"
