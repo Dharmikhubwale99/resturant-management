@@ -18,7 +18,7 @@ class Expense extends Model
      */
     protected $fillable = [
         'restaurant_id',
-        'category',
+        'expense_type_id',
         'description',
         'amount',
         'paid_at',
@@ -35,6 +35,7 @@ class Expense extends Model
         return [
             'id' => 'integer',
             'restaurant_id' => 'integer',
+            'expense_type_id' => 'integer',
             'amount' => 'decimal:2',
             'paid_at' => 'date',
             'created_by' => 'integer',
@@ -44,5 +45,10 @@ class Expense extends Model
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
