@@ -31,8 +31,13 @@ class Create extends Component
 
     public function submit()
     {
+        if (setting('area_module')) {
+            $this->validate([
+                'area_id' => 'required|exists:areas,id',
+            ]);
+        }
+
         $this->validate([
-            'area_id' => 'required|exists:areas,id',
             'name' => 'required|string|max:255',
             'capacity' => 'required|integer|min:1',
             'status' => 'required|in:available,occupied,reserved',
