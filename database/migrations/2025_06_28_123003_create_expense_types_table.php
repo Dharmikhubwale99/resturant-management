@@ -11,22 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::disableForeignKeyConstraints();
-
-        Schema::create('expenses', function (Blueprint $table) {
+        Schema::create('expense_types', function (Blueprint $table) {
             $table->id();
             $table->foreignId('restaurant_id');
-            $table->foreignId('expense_type_id');
             $table->string('name');
-            $table->text('description')->nullable();
-            $table->decimal('amount', 10, 2);
-            $table->date('paid_at')->nullable();
-            $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
-
-        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -34,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('expenses');
+        Schema::dropIfExists('expense_types');
     }
 };

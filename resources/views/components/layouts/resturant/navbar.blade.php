@@ -3,20 +3,19 @@
         <div class="flex justify-between h-16 items-center">
             <div class="flex items-center">
                 <a href="#" class="text-xl font-bold text-gray-800">
-                    <img src="{{ asset('icon/Jobhubwale_Final_01.png') }}" alt="Logo" class="h-10 w-auto">
+                    <img src="{{ asset('icon/logo.png') }}" alt="Logo" class="h-10 w-auto">
                 </a>
             </div>
 
             <div class="hidden md:flex space-x-8 items-center">
 
-
-
-                    <a href="{{ route('restaurant.users.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        User
-                    </a>
-                                    @if (setting('category_module'))
-
-                    <a href="{{ route('restaurant.categories.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                <a href="{{ route('restaurant.users.index') }}"
+                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                    User
+                </a>
+                @if (setting('category_module'))
+                    <a href="{{ route('restaurant.categories.index') }}"
+                        class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
 
                         Category
                     </a>
@@ -27,14 +26,17 @@
                     Item
                 </a>
 
-                    <a href="{{ route('restaurant.areas.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Area
-                    </a>
-
-                    <a href="{{ route('restaurant.tables.index') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Table
-                    </a>
-
+                @if (setting('area_module'))
+                <a href="{{ route('restaurant.areas.index') }}"
+                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                    Area
+                </a>
+                @endif
+              
+                <a href="{{ route('restaurant.tables.index') }}"
+                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                    Table
+                </a>
             </div>
 
             <div class="flex items-center space-x-4">
