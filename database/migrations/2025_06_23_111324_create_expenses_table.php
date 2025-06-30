@@ -16,8 +16,7 @@ return new class extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('restaurant_id');
-            $table->foreignId('expense_type_id');
-            $table->string('name');
+            $table->enum('category', ["rent","salary","maintenance","raw_material","marketing","other"]);
             $table->text('description')->nullable();
             $table->decimal('amount', 10, 2);
             $table->date('paid_at')->nullable();

@@ -90,13 +90,8 @@ class Edit extends Component
 
     public function submit()
     {
-        if (setting('category_module')) {
-            $this->validate([
-                'category_id' => 'required',
-            ]);
-        }
-
         $this->validate([
+            'category_id' => 'required',
             'name' => 'required',
             'item_type' => 'required',
             'short_name' => 'nullable|unique:items,short_name,'. $this->item->id . ',id,restaurant_id,' . $this->item->restaurant_id,

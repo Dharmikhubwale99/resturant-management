@@ -1,3 +1,4 @@
+<div class="p-6 bg-white rounded shadow">
     <div class="p-6 bg-white rounded shadow">
 
         <div class="flex justify-between items-center mb-4">

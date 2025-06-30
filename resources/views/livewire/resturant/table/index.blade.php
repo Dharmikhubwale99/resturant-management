@@ -19,9 +19,7 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-                    @if (setting('area_module'))
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Area</th>
-                    @endif
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Capacity</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
@@ -33,9 +31,7 @@
                     @foreach ($tables as $table)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 text-sm text-gray-900">{{ $loop->iteration }}</td>
-                            @if (setting('area_module'))
-                            <td class="px-6 text-sm text-gray-900">{{ $table->area->name ?? '' }}</td>
-                            @endif
+                            <td class="px-6 text-sm text-gray-900">{{ $table->area->name ?? '-' }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ $table->name }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ $table->capacity }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ ucfirst($table->status) }}</td>
