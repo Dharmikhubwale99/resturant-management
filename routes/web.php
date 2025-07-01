@@ -67,6 +67,8 @@ Route::get('/', ResturantLogin::class)->name('login');
 
 Route::get('/create-razorpay-order/{plan}', [PaymentController::class, 'createRazorpayOrder']);
 Route::post('/razorpay/callback', [PaymentController::class, 'handleCallback'])->name('razorpay.callback');
+Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFreePlan']);
+
 
  Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
