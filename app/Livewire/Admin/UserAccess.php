@@ -65,6 +65,7 @@ class UserAccess extends Component
         });
 
         session()->flash('success', 'Access updated successfully.');
+        return redirect()->route('superadmin.admin.index');
     }
 
 

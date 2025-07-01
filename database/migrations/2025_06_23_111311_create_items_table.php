@@ -16,7 +16,7 @@ return new class extends Migration
 
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id');
+            $table->foreignId('category_id')->nullable();
             $table->foreignId('restaurant_id')->constrained();
             $table->enum('item_type', ["non_veg","veg","beverage"])->nullable();
             $table->string('name');
