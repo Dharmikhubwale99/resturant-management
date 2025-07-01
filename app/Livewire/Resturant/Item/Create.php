@@ -92,7 +92,7 @@ class Create extends Component
 
         $item = Item::create([
             'restaurant_id' => $this->restaurant->id,
-            'category_id'   => $this->category_id,
+            'category_id'   => $this->category_id ?? null,
             'name'          => $this->name,
             'item_type'     => $this->item_type,
             'short_name'    => $this->short_name,

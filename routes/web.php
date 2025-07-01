@@ -52,6 +52,12 @@ use \App\Livewire\Resturant\{
     User\Create as UserCreate,
     User\Edit as UserEdit,
 };
+
+use App\Livewire\Waiter\{
+    Dashboard as WaiterDashboard,
+
+    Item,
+};
 use App\Http\Controllers\PaymentController;
 
 Route::get('superadmin/login', Login::class)->name('superadmin.login');
@@ -124,6 +130,12 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
 
 });
 
+
+Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {
+    Route::get('/', WaiterDashboard::class)->name('dashboard');
+
+    Route::get('/item/{table_id}', Item::class)->name('item');
+});
 // Route::get('/table/{qr_token}/menu', function($qr_token) {
 //     return "Menu for table token: " . $qr_token;
 // })->name('table.menu');

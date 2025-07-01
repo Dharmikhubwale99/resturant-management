@@ -11,12 +11,11 @@ class Index extends Component
 {
     use WithPagination;
 
-    public $user;
     #[Layout('components.layouts.admin.app')]
     public function render()
     {
         return view('livewire.admin.admin.index', [
-            'users' => User::paginate(10),
+            'users' => User::role(['admin', 'superadmin'])->paginate(10),
         ]);
     }
 }
