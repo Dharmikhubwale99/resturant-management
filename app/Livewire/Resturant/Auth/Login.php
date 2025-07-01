@@ -54,6 +54,10 @@ class Login extends Component
             return to_route('restaurant.dashboard')->with('success', 'Login successfully.');
         }
 
+        if ($user->role === 'waiter') {
+            return to_route('waiter.dashboard')->with('success', 'Login successfully.');
+        }
+
         Auth::logout();
         throw ValidationException::withMessages([
             'login' => 'Unauthorized access.',

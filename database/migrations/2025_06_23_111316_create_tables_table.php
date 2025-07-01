@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('tables', function (Blueprint $table) {
             $table->id();
             $table->foreignId('restaurant_id');
-            $table->foreignId('area_id');
+            $table->foreignId('area_id')->nullable();
             $table->string('name');
             $table->integer('capacity');
             $table->enum('status', ["available","occupied","reserved"])->default('available');
