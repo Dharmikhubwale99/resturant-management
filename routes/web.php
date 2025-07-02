@@ -48,27 +48,18 @@ use \App\Livewire\Resturant\{
     Table\Edit as TableEdit,
     Table\Show as TableShow,
 
-    ExpenseType\Index as ExpenseTypeIndex,
-    ExpenseType\Create as ExpenseTypeCreate,
-    ExpenseType\Edit as ExpenseTypeEdit,
-
-    Expenses\Index as ExpensesIndex,
-    Expenses\Create as ExpensesCreate,
-    Expenses\Edit as ExpensesEdit,
-    Expenses\Show as ExpensesShow,
-
     User\Index as UserIndex,
     User\Create as UserCreate,
-    User\Edit as UserEdit
+    User\Edit as UserEdit,
 };
 
 use App\Livewire\Waiter\{
     Dashboard as WaiterDashboard,
 
     Item,
+    KotPrint,
 };
 use App\Http\Controllers\PaymentController;
-use App\Models\ExpenseType;
 
 Route::get('superadmin/login', Login::class)->name('superadmin.login');
 Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
@@ -134,19 +125,6 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/show/{id}', TableShow::class)->name('show');
     });
 
-     Route::prefix('expense-types')->as('expense-types.')->group(function () {
-        Route::get('/', ExpenseTypeIndex::class)->name('index');
-        Route::get('/create', ExpenseTypeCreate::class)->name('create');
-        Route::get('/edit/{id}', ExpenseTypeEdit::class)->name('edit');
-    });
-
-     Route::prefix('expenses')->as('expenses.')->group(function () {
-        Route::get('/', ExpensesIndex::class)->name('index');
-        Route::get('/create', ExpensesCreate::class)->name('create');
-        Route::get('/edit/{id}', ExpensesEdit::class)->name('edit');
-        Route::get('/show/{id}', ExpensesShow::class)->name('show');
-    });
-
     Route::prefix('users')->as('users.')->group(function () {
         Route::get('/', UserIndex::class)->name('index');
         Route::get('/create', UserCreate::class)->name('create');
@@ -160,6 +138,7 @@ Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|w
     Route::get('/', WaiterDashboard::class)->name('dashboard');
 
     Route::get('/item/{table_id}', Item::class)->name('item');
+    Route::get('/kot-print/{kot_id}', KotPrint::class)->name('kot.print');
 });
 // Route::get('/table/{qr_token}/menu', function($qr_token) {
 //     return "Menu for table token: " . $qr_token;
