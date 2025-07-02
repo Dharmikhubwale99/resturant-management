@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 class Order extends Model
 {
@@ -99,14 +98,4 @@ class Order extends Model
     {
         return $this->hasMany(Kot::class);
     }
-
-    protected static function booted()
-    {
-        static::creating(function ($order) {
-            if (empty($order->order_number)) {
-                $order->order_number = 'ORD-' . now()->format('Ymd') . Str::upper(Str::random(6));
-            }
-        });
-    }
-
 }

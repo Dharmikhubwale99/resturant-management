@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 class Kot extends Model
 {
@@ -55,14 +54,4 @@ class Kot extends Model
     {
         return $this->hasMany(KOTItem::class);
     }
-
-    protected static function booted()
-    {
-        static::creating(function ($kot) {
-            if (empty($kot->kot_number)) {
-                $kot->kot_number = 'KOT-' . now()->format('ymd') . Str::upper(Str::random(4));
-            }
-        });
-    }
-
 }

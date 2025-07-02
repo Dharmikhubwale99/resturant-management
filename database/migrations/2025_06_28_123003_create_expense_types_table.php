@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('restaurant_id');
             $table->string('name');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

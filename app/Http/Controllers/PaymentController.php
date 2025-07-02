@@ -19,14 +19,14 @@ class PaymentController extends Controller
         $api_key = config('razorpay.api_key');
         $api_secret = config('razorpay.api_secret');
         $api = new Api($api_key, $api_secret);
-        Log::info('message', ['plan' => $plan]);
+        Log::info("message", ['plan' => $plan]);
 
         $razorpayOrder = $api->order->create([
             'receipt' => 'order_rcptid_' . uniqid(),
             'amount' => $plan->price * 100,
-            'currency' => 'INR',
+            'currency' => 'INR'
         ]);
-        Log::info('message', ['razorpayOrder' => $razorpayOrder]);
+        Log::info("message", ['razorpayOrder' => $razorpayOrder]);
 
         session([
             'razorpay_order_id' => $razorpayOrder['id'],
@@ -37,7 +37,7 @@ class PaymentController extends Controller
             'order_id' => $razorpayOrder['id'],
             'amount' => $razorpayOrder['amount'],
             'callback_url' => route('razorpay.callback'),
-            'plan_name' => $plan->name,
+            'plan_name' => $plan->name
         ]);
     }
 
@@ -51,23 +51,23 @@ class PaymentController extends Controller
 
         try {
             $api->utility->verifyPaymentSignature([
-                'razorpay_order_id' => $expectedOrderId,
+                'razorpay_order_id'   => $expectedOrderId,
                 'razorpay_payment_id' => $request->razorpay_payment_id,
-                'razorpay_signature' => $request->razorpay_signature,
+                'razorpay_signature'  => $request->razorpay_signature,
             ]);
 
-            Log::info('message Attribubte verified successfully');
-            $user = Auth::user();
+            Log::info("message Attribubte verified successfully");
+            $user     = Auth::user();
             $restaurant = Auth::user()->restaurants()->first();
             $plan = Plan::find(session('plan_id'));
-            Log::info('message', ['restaurant' => $restaurant]);
+            Log::info("message", ['restaurant' => $restaurant]);
 
             $restaurant = Restaurant::firstOrCreate(
                 ['user_id' => $user->id],
                 [
                     'plan_id' => $plan->id,
                     'plan_expiry_at' => Carbon::now()->addDays($plan->duration_days),
-                ],
+                ]
             );
 
             if (empty($restaurant->name) || empty($restaurant->email) || empty($restaurant->mobile) || empty($restaurant->address) || empty($restaurant->pin_code_id)) {
@@ -75,36 +75,9 @@ class PaymentController extends Controller
             } else {
                 return redirect()->route('restaurant.dashboard')->with('success', 'Payment successful!');
             }
+
         } catch (\Exception $e) {
             return redirect()->route('plan.purchase')->with('error', 'Payment failed or signature mismatch.');
         }
-    }
-
-    public function activateFreePlan(Plan $plan)
-    {
-        if ($plan->price > 0) {
-            return response()->json(['success' => false], 403);
-        }
-
-        $user = Auth::user();
-        $restaurant = $user->restaurants()->firstOrCreate(
-            ['user_id' => $user->id],
-            [
-                'plan_id' => $plan->id,
-                'plan_expiry_at' => Carbon::now()->addDays($plan->duration_days),
-            ],
-        );
-
-        $restaurant->update([
-            'plan_id' => $plan->id,
-            'plan_expiry_at' => Carbon::now()->addDays($plan->duration_days),
-        ]);
-        // Log::info('message', ['restaurant' => $restaurant]);
-        session()->forget(['razorpay_order_id', 'plan_id']);
-
-        return response()->json([
-            'success' => true,
-            'redirect' => route('restaurant.dashboard'),
-        ]);
     }
 }
