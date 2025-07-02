@@ -1,5 +1,4 @@
 <div class="p-4" x-data="{ selectedTable: null, showModal: false }">
-    <x-form.error />
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         @foreach ($tables as $table)
             @php

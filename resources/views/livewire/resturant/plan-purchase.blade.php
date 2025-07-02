@@ -1,9 +1,6 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
     @foreach ($plans as $plan)
-        <div x-data="{ show: false }"
-            x-init="setTimeout(() => show = true, 100 * {{ $loop->index }})"
-            x-show="show"
-            x-transition.duration.500ms
+        <div x-data="{ show: false }" x-init="setTimeout(() => show = true, 100 * {{ $loop->index }})" x-show="show" x-transition.duration.500ms
             class="bg-white shadow-xl rounded-2xl border border-gray-200 hover:shadow-2xl transition-transform transform hover:-translate-y-1 cursor-pointer">
             <div class="p-6 space-y-3">
                 <h2 class="text-2xl font-bold text-indigo-600">{{ $plan->name }}</h2>
@@ -15,9 +12,9 @@
                 </div>
 
                 <div class="mt-6">
-                    <button onclick="startPlanPurchase({{ $plan->id }}, {{ (int) $plan->price * 100 }})"
+                    <button onclick="startRazorpayPayment({{ $plan->id }})"
                         class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300">
-                        {{ $plan->price == 0 ? 'Start Free Trial' : 'Buy Now' }}
+                        Buy Now
                     </button>
                 </div>
             </div>
@@ -26,30 +23,14 @@
 </div>
 
 @push('scripts')
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-    function startPlanPurchase(planId, amountPaisa) {
-        if (amountPaisa === 0) {
-            fetch(`/activate-free-plan/${planId}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
-            .then(r => r.json())
-            .then(({ success, redirect }) => {
-                if (success) {
-                    window.location.href = redirect;
-                } else {
-                    alert("Unable to activate free trial.");
-                }
-            })
-            .catch(() => alert("Something went wrong. Try again."));
-        } else {
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+        function startRazorpayPayment(planId) {
             fetch(`/create-razorpay-order/${planId}`)
                 .then(response => response.json())
                 .then(data => {
-                    const options = {
+                    var options = {
                         key: data.api_key,
                         amount: data.amount,
                         currency: "INR",
@@ -58,12 +39,18 @@
                         image: "https://cdn.razorpay.com/logos/GhRQcyean79PqE_medium.png",
                         order_id: data.order_id,
                         callback_url: data.callback_url,
-                        theme: { color: "#738276" }
+                        theme: {
+                            color: "#738276"
+                        }
                     };
-                    new Razorpay(options).open();
+
+                    var rzp = new Razorpay(options);
+                    rzp.open();
                 })
-                .catch(() => alert("Payment initiation failed."));
+                .catch(error => {
+                    console.error("Payment initiation failed:", error);
+                    alert("Something went wrong. Try again.");
+                });
         }
-    }
-</script>
+    </script>
 @endpush

@@ -26,7 +26,6 @@
                     Item
                 </a>
 
-
                 @if (setting('area_module'))
                   <a href="{{ route('restaurant.areas.index') }}"
                       class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
@@ -37,6 +36,16 @@
                 <a href="{{ route('restaurant.tables.index') }}"
                     class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                     Table
+                </a>
+
+                <a href="{{ route('restaurant.expense-types.index') }}"
+                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                    Expense-Type
+                </a>
+
+                <a href="{{ route('restaurant.expenses.index') }}"
+                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                    Expenses
                 </a>
             </div>
 
