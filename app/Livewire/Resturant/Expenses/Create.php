@@ -36,8 +36,13 @@ class Create extends Component
 
     public function submit()
     {
+        if (setting('expense-type-module')) {
+            $this->validate([
+                 'expense_type_id' => 'required',
+            ]);
+        }
+
         $this->validate([
-            'expense_type_id' => 'required',
             'name' => 'required',
             'amount' => 'required',
             'paid_at' => 'nullable',

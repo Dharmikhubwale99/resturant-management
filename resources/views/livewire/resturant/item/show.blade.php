@@ -40,6 +40,31 @@
                 </tbody>
             </table>
         </div>
+
+        <div>
+            <strong>Addons:</strong>
+            <table class="w-full mt-2 border">
+                <thead>
+                    <tr>
+                        <th class="border px-2 py-1">Name</th>
+                        <th class="border px-2 py-1">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($item->addons as $addon)
+                        <tr>
+                            <td class="border px-2 py-1">{{ $addon->name }}</td>
+                            <td class="border px-2 py-1">₹{{ $addon->price }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="2" class="text-center py-2">No addons</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
         <div class="flex justify-end mt-4">
             <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
                 route="restaurant.items.index" />

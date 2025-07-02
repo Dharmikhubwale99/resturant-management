@@ -12,6 +12,7 @@ class Edit extends Component
     public $expense_type_id;
     public $name;
     public $amount;
+    public $paid_at;
     public $description;
     public $expenseTypes;
     public $expense;
@@ -28,6 +29,7 @@ class Edit extends Component
         $this->expense_type_id = $this->expense->expense_type_id;
         $this->name = $this->expense->name;
         $this->amount = $this->expense->amount;
+        $this->paid_at = $this->expense->paid_at ? \Carbon\Carbon::parse($this->expense->paid_at)->format('Y-m-d') : null;
         $this->description = $this->expense->description;
 
         $restaurant = auth()->user()->restaurants()->first();
@@ -37,10 +39,15 @@ class Edit extends Component
 
     public function submit()
     {
+        if (setting('expense-type-module')) {
+            $this->validate([
+                'expense_type_id' => 'required',
+            ]);
+        }
         $this->validate([
-            'expense_type_id' => 'required',
             'name' => 'required',
             'amount' => 'required',
+            'paid_at' => 'nullable',
             'description' => 'nullable',
         ]);
 
@@ -48,6 +55,7 @@ class Edit extends Component
             'expense_type_id' => $this->expense_type_id,
             'name' => $this->name,
             'amount' => $this->amount,
+            'paid_at' => $this->paid_at,
             'description' => $this->description,
         ]);
 
