@@ -58,7 +58,9 @@ class Item extends Component
 
         $this->categories = $this->items->pluck('category')->unique('id')->values();
 
-        $this->orderTypes = collect(OrderType::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
+        $this->orderTypes = collect(OrderType::cases())
+            ->mapWithKeys(fn($c) => [$c->value => $c->label()])
+            ->toArray();
     }
 
     public function getFilteredItems()
@@ -122,9 +124,7 @@ class Item extends Component
     public function addSelectedVariant()
     {
         $v = collect($this->variantOptions)->firstWhere('id', $this->selectedVariantId);
-        if (!$v) {
-            return;
-        }
+        if (!$v) return;
 
         $key = 'v' . $v['id'];
 
@@ -136,6 +136,7 @@ class Item extends Component
         $this->showVariantModal = false;
     }
 
+
     private function addToCart($key, $name, $price)
     {
         if (isset($this->cart[$key])) {
@@ -146,7 +147,7 @@ class Item extends Component
                 'name' => $name,
                 'price' => $price,
                 'qty' => 1,
-                'note' => '',
+                'note'  => '',
             ];
         }
     }
@@ -233,21 +234,24 @@ class Item extends Component
             // ]);
 
             $kot = Kot::create([
-                'table_id' => $this->table_id,
-                'order_id' => null,
-                'status' => 'pending',
+                'table_id'   => $this->table_id,
+                'order_id'   => null,
+                'status'     => 'pending',
                 'printed_at' => null,
             ]);
 
             $table = Table::findOrFail($this->table_id);
             $table->update([
                 'status' => 'occupied',
-            ]);
+            ])->save();
+
 
             foreach ($this->cart as $row) {
                 $variantId = str_starts_with($row['id'], 'v') ? (int) substr($row['id'], 1) : null;
 
-                $baseItemId = $variantId ? $row['item_id'] : $row['id'];
+                $baseItemId = $variantId
+                    ? $row['item_id']
+                    : $row['id'];
 
                 // OrderItem::create([
                 //     'order_id' => $order->id,
@@ -276,60 +280,5 @@ class Item extends Component
         $this->orderTypes = [];
         $this->showVariantModal = false;
         return redirect()->route('waiter.dashboard')->with('success', 'Order placed!');
-    }
-
-    public function placeOrderAndPrint()
-    {
-        if (empty($this->cart)) {
-            $this->addError('cart', 'Cart is empty!');
-            return;
-        }
-
-        $this->validate([
-            'order_type' => 'required|in:' . implode(',', array_keys($this->orderTypes)),
-        ]);
-
-        $kotId = null;
-
-        DB::transaction(function () use (&$kotId) {
-            $restaurantId = auth()->user()?->restaurant_id;
-
-            $subTotal = $this->getCartTotal();
-            $discountAmount = 0;
-            $taxAmount = 0;
-            $totalAmount = $subTotal + $taxAmount - $discountAmount;
-
-            $kot = Kot::create([
-                'table_id' => $this->table_id,
-                'order_id' => null,
-                'status' => 'pending',
-                'printed_at' => now(),
-            ]);
-
-            $kotId = $kot->id;
-
-            Table::findOrFail($this->table_id)->update(['status' => 'occupied']);
-
-            foreach ($this->cart as $row) {
-                $variantId = str_starts_with($row['id'], 'v') ? (int) substr($row['id'], 1) : null;
-
-                $baseItemId = $variantId ? $row['item_id'] : $row['id'];
-
-                KOTItem::create([
-                    'kot_id' => $kot->id,
-                    'item_id' => $baseItemId,
-                    'variant_id' => $variantId,
-                    'quantity' => $row['qty'],
-                    'status' => 'pending',
-                    'special_notes' => $row['note'] ?? null,
-                ]);
-            }
-        });
-
-        $this->cart = [];
-        $this->orderTypes = [];
-        $this->showVariantModal = false;
-
-        $this->dispatch('printKot', kotId: $kotId);
     }
 }

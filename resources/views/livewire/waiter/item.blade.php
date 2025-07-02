@@ -5,18 +5,18 @@
             <ul class="space-y-2">
                 <li>
                     <button wire:click="clearCategory"
-                        class="w-full px-3 py-2 text-left rounded {{ $selectedCategory === null ? 'bg-blue-200' : 'hover:bg-blue-100' }}">
+                            class="w-full px-3 py-2 text-left rounded {{ $selectedCategory === null ? 'bg-blue-200' : 'hover:bg-blue-100' }}">
                         All
                     </button>
                 </li>
-                @foreach ($categories as $category)
-                    <button wire:click="selectCategory({{ $category->id }})"
-                        class="w-full mb-2 p-2 flex flex-col rounded
+            @foreach ($categories as $category)
+                <button wire:click="selectCategory({{ $category->id }})"
+                    class="w-full mb-2 p-2 flex flex-col rounded
                     {{ $selectedCategory === $category->id ? 'bg-blue-200' : 'hover:bg-blue-100' }}">
-                        <span class="text-sm font-medium">{{ $category->name }}</span>
-                    </button>
-                @endforeach
-            </ul>
+                    <span class="text-sm font-medium">{{ $category->name }}</span>
+                </button>
+            @endforeach
+        </ul>
         </div>
     @endif
 
@@ -29,7 +29,7 @@
                 <div class="bg-white p-2 rounded shadow hover:shadow-md transition"
                     wire:click="itemClicked({{ $item->id }})">
                     <img src="{{ $item->getFirstMediaUrl('images') ?: asset('icon/hubwalelogopng.png') }}"
-                        alt="{{ $item->name }}" class="w-full h-28 object-cover rounded mb-2">
+                        alt="{{ $item->name }}" class="w-full h-28 object-fit rounded mb-2">
                     <h3 class="text-sm font-semibold text-center">{{ $item->name }}</h3>
                     <p class="text-center text-blue-700 font-bold text-sm mt-1">
                         ₹{{ number_format($item->price, 2) }}
@@ -62,7 +62,7 @@
                                 = ₹{{ number_format($row['price'] * $row['qty'], 2) }}
                             </p>
                             <button class="text-xs bg-blue-100 text-blue-700 px-2 rounded"
-                                wire:click="openNoteModal('{{ $row['id'] }}')">Note</button>
+                            wire:click="openNoteModal('{{ $row['id'] }}')">Note</button>
                         </div>
 
                         <div class="flex items-center gap-2">
@@ -83,22 +83,17 @@
             </div>
 
             @if (count($cartItems))
-                <div class="border-t pt-4 mt-4 space-y-2">
-                    <p class="text-right font-bold">
-                        Total: ₹{{ number_format($cartTotal, 2) }}
-                    </p>
+            <div class="border-t pt-4 mt-4 space-y-2">
+                <p class="text-right font-bold">
+                    Total: ₹{{ number_format($cartTotal,2) }}
+                </p>
 
-                    <button wire:click="placeOrder"
-                        class="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                        Kot Order
-                    </button>
-                    <button wire:click="placeOrderAndPrint"
-                        class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                        Kot & Print
-                    </button>
-
-                </div>
-            @endif
+                <button  wire:click="placeOrder"
+                         class="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                    Place Order
+                </button>
+            </div>
+        @endif
         @else
             <div class="flex-1 flex flex-col items-center justify-center text-gray-500">
                 <p>Cart empty</p>
@@ -134,31 +129,24 @@
     @endif
 
     @if ($showNoteModal)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white p-6 rounded shadow w-full max-w-md">
-                <h2 class="text-lg font-bold mb-4">Add Note</h2>
-                <textarea wire:model.defer="noteInput" rows="4" class="w-full border rounded p-2"
-                    placeholder="Enter special instructions..."></textarea>
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded shadow w-full max-w-md">
+            <h2 class="text-lg font-bold mb-4">Add Note</h2>
+            <textarea wire:model.defer="noteInput"
+                      rows="4"
+                      class="w-full border rounded p-2"
+                      placeholder="Enter special instructions..."></textarea>
 
-                <div class="flex justify-end gap-2 mt-4">
-                    <button wire:click="$set('showNoteModal', false)" class="px-4 py-2 bg-gray-200 rounded">
-                        Cancel
-                    </button>
-                    <button wire:click="saveNote" class="px-4 py-2 bg-blue-600 text-white rounded">
-                        Save Note
-                    </button>
-                </div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button wire:click="$set('showNoteModal', false)" class="px-4 py-2 bg-gray-200 rounded">
+                    Cancel
+                </button>
+                <button wire:click="saveNote" class="px-4 py-2 bg-blue-600 text-white rounded">
+                    Save Note
+                </button>
             </div>
         </div>
-    @endif
+    </div>
+@endif
 
 </div>
-@push('scripts')
-<script>
-    Livewire.on('printKot', (event) => {
-        const kotId = event.kotId;
-        window.open(`/waiter/kot-print/${kotId}`, '_blank');
-    });
-</script>
-
-@endpush

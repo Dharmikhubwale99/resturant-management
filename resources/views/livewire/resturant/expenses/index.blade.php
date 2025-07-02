@@ -20,11 +20,12 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-                        {{-- @if (setting('category_module')) --}}
+                        @if (setting('expense-type-module'))
                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Expense-Type</th>
-                        {{-- @endif --}}
+                        @endif
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Paid At</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                     </tr>
                 </thead>
@@ -33,11 +34,14 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 text-sm text-gray-900">{{ $loop->iteration }}</td>
                            
-                            {{-- @if (setting('category_module')) --}}
+                            @if (setting('expense-type-module'))
                                 <td class="px-6 text-sm text-gray-900">{{ $expense->expenseType->name ?? '' }}</td>
-                            {{-- @endif --}}
+                            @endif
                             <td class="px-6 text-sm text-gray-900">{{ $expense->name }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ $expense->amount }}</td>
+                            <td class="px-6 text-sm text-gray-900">
+                                {{ $expense->paid_at ? $expense->paid_at->format('d-m-Y') : '' }}
+                            </td>
                             <td class="px-2 text-sm text-gray-900">
                                 <div class="flex items-center justify-start space-x-2">
                                     <x-form.button title=""

@@ -20,5 +20,9 @@ class ModuleSeeder extends Seeder
        AppConfiguration::firstOrCreate([
             'key' => 'area_module',
     ]);
+
+        AppConfiguration::firstOrCreate([
+            'key' => 'expense-type-module',
+        ]); 
     }
 }

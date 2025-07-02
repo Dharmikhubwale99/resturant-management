@@ -71,6 +71,11 @@ class Item extends Model implements HasMedia
         return $this->belongsTo(Restaurant::class);
     }
 
+    public function addons()
+    {
+        return $this->hasMany(Addon::class);
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('images');

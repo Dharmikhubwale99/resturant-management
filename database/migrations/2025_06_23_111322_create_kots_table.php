@@ -15,7 +15,7 @@ return new class extends Migration
 
         Schema::create('kots', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->nullable();
+            $table->foreignId('order_id');
             $table->foreignId('table_id')->nullable();
             $table->string('kot_number');
             $table->enum('status', ["pending","preparing","ready","cancelled"])->default('pending');

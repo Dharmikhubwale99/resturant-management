@@ -51,7 +51,7 @@ class Kot extends Model
         return $this->belongsTo(Table::class);
     }
 
-    public function kotItems(): HasMany
+    public function kOTItems(): HasMany
     {
         return $this->hasMany(KOTItem::class);
     }
