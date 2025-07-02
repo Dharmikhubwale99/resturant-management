@@ -66,6 +66,7 @@ use App\Livewire\Waiter\{
     Dashboard as WaiterDashboard,
 
     Item,
+    KotPrint,
 };
 use App\Http\Controllers\PaymentController;
 use App\Models\ExpenseType;
@@ -160,6 +161,7 @@ Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|w
     Route::get('/', WaiterDashboard::class)->name('dashboard');
 
     Route::get('/item/{table_id}', Item::class)->name('item');
+    Route::get('/kot-print/{kot_id}', KotPrint::class)->name('kot.print');
 });
 // Route::get('/table/{qr_token}/menu', function($qr_token) {
 //     return "Menu for table token: " . $qr_token;
