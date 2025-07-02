@@ -38,10 +38,12 @@
                     Table
                 </a>
 
+                @if (setting('expense-type-module'))
                 <a href="{{ route('restaurant.expense-types.index') }}"
                     class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                     Expense-Type
                 </a>
+                @endif
 
                 <a href="{{ route('restaurant.expenses.index') }}"
                     class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">

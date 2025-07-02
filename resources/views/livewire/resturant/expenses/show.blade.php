@@ -7,6 +7,7 @@
         <h2 class="text-2xl font-bold mb-4">{{ $expense->name }}</h2>
         <div class="mb-2"><strong>Expense:</strong> {{ $expense->expenseType->name ?? '-' }}</div>
         <div class="mb-2"><strong>Amount:</strong> {{ $expense->amount }}</div>
+        <div class="mb-2"><strong>Paid At:</strong> {{ $expense->paid_at ? $expense->paid_at->format('d-m-Y') : '-' }}</div>
         <div class="mb-2"><strong>Description:</strong> {{ $expense->description }}</div>
 
         <div class="flex flex-row text-center space-x-3 mt-4">

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Resturant\Item;
 
-use App\Models\{Item, Category};
+use App\Models\{Item, Category, Addon};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Enums\ItemType;
@@ -25,6 +25,7 @@ class Create extends Component
     public $images = [];
     public $itemTypes = [];
     public $variants = [];
+    public $addons = [];
 
     #[Layout('components.layouts.resturant.app')]
 
@@ -125,6 +126,15 @@ class Create extends Component
             }
         }
 
+        foreach ($this->addons as $addon) {
+            if (!empty($addon['name']) && !empty($addon['price'])) {
+                $item->addons()->create([
+                    'name' => $addon['name'],
+                    'price' => $addon['price'],
+                ]);
+            }
+        }
+
         return redirect()->route('restaurant.items.index')->with('success', 'Item created successfully.');
     }
 
@@ -137,5 +147,19 @@ class Create extends Component
     {
         unset($this->variants[$index]);
         $this->variants = array_values($this->variants);
+    }
+
+    public function addAddon()
+    {
+        $this->addons[] = ['id' => null, 'name' => '', 'price' => ''];
+    }
+
+    public function removeAddon($index)
+    {
+        if (!empty($this->addons[$index]['id'])) {
+            Addon::find($this->addons[$index]['id'])->delete();
+        }
+        unset($this->addons[$index]);
+        $this->addons = array_values($this->addons); // reindex
     }
 }
