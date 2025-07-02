@@ -10,6 +10,7 @@ use Livewire\Attributes\Layout;
 use Illuminate\Validation\ValidationException;
 use App\Models\Variant;
 use Illuminate\Support\Str;
+use App\Models\Addon;
 
 
 class Edit extends Component
@@ -30,6 +31,7 @@ class Edit extends Component
     public $itemTypes;
     public $restaurant;
     public $variants = [];
+    public $addons = [];
 
      public function render()
     {
@@ -58,6 +60,15 @@ class Edit extends Component
                 'id' => $variant->id,
                 'name' => $variant->name,
                 'price' => $variant->price,
+            ];
+        })->toArray();
+
+        // Load existing addons
+        $this->addons = $this->item->addons->map(function($addon) {
+            return [
+                'id' => $addon->id,
+                'name' => $addon->name,
+                'price' => $addon->price,
             ];
         })->toArray();
     }
@@ -145,6 +156,24 @@ class Edit extends Component
             }
         }
 
+        foreach ($this->addons as $addon) {
+            if (!empty($addon['name']) && !empty($addon['price'])) {
+                if (!empty($addon['id'])) {
+                    // Update existing
+                    Addon::where('id', $addon['id'])->update([
+                        'name' => $addon['name'],
+                        'price' => $addon['price'],
+                    ]);
+                } else {
+                    // Create new
+                    $this->item->addons()->create([
+                        'name' => $addon['name'],
+                        'price' => $addon['price'],
+                    ]);
+                }
+            }
+        }
+
         if (is_array($this->images)) {
             foreach ($this->images as $image) {
                 $folder = 'images/' . $this->getRestaurantFolder();
@@ -161,8 +190,20 @@ class Edit extends Component
                     ->toMediaCollection('images');
             }
         }
-
-
         return redirect()->route('restaurant.items.index')->with('success', 'Item updated successfully.');
+    }
+
+    public function addAddon()
+    {
+        $this->addons[] = ['id' => null, 'name' => '', 'price' => ''];
+    }
+
+    public function removeAddon($index)
+    {
+        if (!empty($this->addons[$index]['id'])) {
+            Addon::find($this->addons[$index]['id'])->delete();
+        }
+        unset($this->addons[$index]);
+        $this->addons = array_values($this->addons); // reindex
     }
 }
