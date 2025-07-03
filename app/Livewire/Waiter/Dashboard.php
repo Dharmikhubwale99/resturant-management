@@ -8,17 +8,20 @@ use App\Models\Table;
 
 class Dashboard extends Component
 {
-    public $tables;
-
     public $showConfirm = false;
-
     public $selectedTable = null;
+    public $tables;
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
     {
-        return view('livewire.waiter.dashboard',[
-            'tables' => $this->tables,
+        // Group tables by area name (or 'No Area' if null)
+        $tablesByArea = $this->tables->groupBy(function ($table) {
+            return $table->area->name ?? 'No Area';
+        });
+
+        return view('livewire.waiter.dashboard', [
+            'tablesByArea' => $tablesByArea,
         ]);
     }
 
@@ -36,5 +39,4 @@ class Dashboard extends Component
         $this->selectedTable = Table::findOrFail($tableId);
         $this->showConfirm = true;
     }
-
 }
