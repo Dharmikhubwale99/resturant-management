@@ -51,7 +51,7 @@ class AuthController extends Controller
                 'input' => $request->only(['email']),
             ]);
 
-            throw $e; // rethrow so Laravel handles the error response
+            throw $e;
         } catch (\Throwable $e) {
             Log::critical('Unexpected login error', [
                 'message' => $e->getMessage(),

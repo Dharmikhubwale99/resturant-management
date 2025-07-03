@@ -1,34 +1,30 @@
 <div class="p-4" x-data="{ selectedTable: null, showModal: false }">
     <x-form.error />
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        @foreach ($tables as $table)
+            @php
+                $statusColor = match ($table->status) {
+                    'available' => 'bg-green-200',
+                    'occupied' => 'bg-red-200',
+                    'reserved' => 'bg-yellow-200',
+                    default => 'bg-gray-400',
+                };
+            @endphp
 
-    @foreach ($tablesByArea as $areaName => $tables)
-        <h2 class="text-xl font-bold mb-2 mt-6">{{ $areaName }}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-            @foreach ($tables as $table)
-                @php
-                    $statusColor = match ($table->status) {
-                        'available' => 'bg-green-200',
-                        'occupied' => 'bg-red-200',
-                        'reserved' => 'bg-yellow-200',
-                        default => 'bg-gray-400',
-                    };
-                @endphp
+            <div wire:click="openConfirm({{ $table->id }})"
+                class="relative p-4 text-black rounded shadow cursor-pointer {{ $statusColor }}">
 
-                <div wire:click="openConfirm({{ $table->id }})"
-                    class="relative p-4 text-black rounded shadow cursor-pointer {{ $statusColor }}">
-
-                    <div class="absolute top-2 right-2 text-xs bg-white text-black px-2 py-0.5 rounded">
-                        {{ $table->capacity }} Seats
-                    </div>
-                    <div class="text-lg font-bold">{{ $table->name }}</div>
-                    @if (setting('area_module'))
-                        <div class="text-sm mt-1 italic">{{ $table->area->name ?? '' }}</div>
-                    @endif
-                    <div class="text-sm mt-1 italic">{{ ucfirst($table->status) }}</div>
+                <div class="absolute top-2 right-2 text-xs bg-white text-black px-2 py-0.5 rounded">
+                    {{ $table->capacity }} Seats
                 </div>
-            @endforeach
-        </div>
-    @endforeach
+                <div class="text-lg font-bold">{{ $table->name }}</div>
+                @if (setting('area_module'))
+                    <div class="text-sm mt-1 italic">{{ $table->area->name ?? '' }}</div>
+                @endif
+                <div class="text-sm mt-1 italic">{{ ucfirst($table->status) }}</div>
+            </div>
+        @endforeach
+    </div>
 
     @if ($showConfirm && $selectedTable)
         <div

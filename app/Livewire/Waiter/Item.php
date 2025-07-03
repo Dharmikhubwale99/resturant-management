@@ -40,11 +40,6 @@ class Item extends Component
 
     public $order_type;
 
-    public $showTableList = false;
-    public $occupiedTables = [];
-    public $selectedTable = null;
-    public $ordersForTable = [];
-
     #[Layout('components.layouts.waiter.app')]
     public function render()
     {
@@ -336,20 +331,5 @@ class Item extends Component
         $this->showVariantModal = false;
 
         $this->dispatch('printKot', kotId: $kotId);
-    }
-
-    public function showTables()
-    {
-        $this->occupiedTables = Table::where('restaurant_id', auth()->user()->restaurant_id)
-            ->where('status', 'occupied')
-            ->get();
-        $this->showTableList = true;
-    }
-
-    public function selectTable($tableId)
-    {
-        $this->selectedTable = Table::with('orders')->findOrFail($tableId);
-        $this->ordersForTable = $this->selectedTable->orders()->latest()->get();
-        $this->showTableList = false;
     }
 }
