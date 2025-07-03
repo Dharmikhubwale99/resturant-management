@@ -26,25 +26,20 @@
         <x-form.error />
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
             @forelse ($filteredItems as $item)
-                <div wire:click="itemClicked({{ $item->id }})"
-                    class="relative bg-white p-2 rounded shadow hover:shadow-md transition
-               border-2 {{ $item->type_color_class }}">
-                    {{-- Veg/Non-veg dot/icon --}}
-                    <span
-                        class="absolute top-1 right-1 w-3 h-3 rounded-full
-                     {{ $item->type_dot_class }}"></span>
-
+                <div class="bg-white p-2 rounded shadow hover:shadow-md transition"
+                    wire:click="itemClicked({{ $item->id }})">
                     <img src="{{ $item->getFirstMediaUrl('images') ?: asset('icon/hubwalelogopng.png') }}"
-                        class="w-full h-28 object-cover rounded mb-2" alt="{{ $item->name }}">
+                        alt="{{ $item->name }}" class="w-full h-28 object-cover rounded mb-2">
                     <h3 class="text-sm font-semibold text-center">{{ $item->name }}</h3>
                     <p class="text-center text-blue-700 font-bold text-sm mt-1">
                         ₹{{ number_format($item->price, 2) }}
                     </p>
                 </div>
             @empty
-                …
+                <p class="flex items-center col-span-full text-gray-500 text-center">
+                    No items found in this category.
+                </p>
             @endforelse
-
         </div>
     </div>
 
@@ -57,12 +52,41 @@
 
         @if (count($cartItems))
             <div class="flex-1 overflow-y-auto space-y-3">
-                @foreach ($cartItems as $row)
-                    <div class="border rounded p-2 flex items-center justify-between"
-                        wire:key="row-{{ $row['id'] }}">
-
+                @foreach ($cartItems as $key => $row)
+                @if (in_array($key, $originalKotItemKeys))
+                    <div class="border rounded p-2 flex items-center justify-between bg-gray-50"
+                         wire:key="row-{{ $row['id'] }}">
                         <div>
-                            <p class="font-semibold">{{ $row['name'] }}</p>
+                            <p class="font-semibold flex items-center gap-2">
+                                {{ $row['name'] }}
+                                <span class="text-[10px] bg-gray-300 text-gray-700 px-1.5 py-0.5 rounded">
+                                    EXISTING
+                                </span>
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                ₹{{ number_format($row['price'], 2) }} × {{ $row['qty'] }}
+                            </p>
+                            <p class="text-xs text-green-600 font-semibold">
+                                = ₹{{ number_format($row['price'] * $row['qty'], 2) }}
+                            </p>
+                        </div>
+                    </div>
+                @endif
+            @endforeach
+            <hr class="my-2 border-t">
+            <p class="text-sm font-semibold text-blue-600">New Items</p>
+
+            @foreach ($cartItems as $key => $row)
+                @if (!in_array($key, $originalKotItemKeys))
+                    <div class="border rounded p-2 flex items-center justify-between"
+                         wire:key="row-{{ $row['id'] }}">
+                        <div>
+                            <p class="font-semibold flex items-center gap-2">
+                                {{ $row['name'] }}
+                                <span class="text-[10px] bg-yellow-200 text-yellow-800 px-1.5 py-0.5 rounded">
+                                    NEW
+                                </span>
+                            </p>
                             <p class="text-xs text-gray-500">
                                 ₹{{ number_format($row['price'], 2) }} × {{ $row['qty'] }}
                             </p>
@@ -84,10 +108,12 @@
                             <button class="px-2 bg-gray-200 rounded"
                                 wire:click="increment('{{ $row['id'] }}')">＋</button>
 
-                            <button class="text-red-500 text-sm" wire:click="remove('{{ $row['id'] }}')">✕</button>
+                            <button class="text-red-500 text-sm"
+                                wire:click="remove('{{ $row['id'] }}')">✕</button>
                         </div>
                     </div>
-                @endforeach
+                @endif
+            @endforeach
             </div>
 
             @if (count($cartItems))
@@ -96,10 +122,18 @@
                         Total: ₹{{ number_format($cartTotal, 2) }}
                     </p>
 
-                    <button wire:click="placeOrder"
-                        class="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                        Kot Order
-                    </button>
+                    @if (request()->query('mode') === 'edit')
+                        <button wire:click="updateOrder"
+                            class="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Update KOT
+                        </button>
+                    @else
+                        <button wire:click="placeOrder"
+                            class="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Kot Order
+                        </button>
+                    @endif
+
                     <button wire:click="placeOrderAndPrint"
                         class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                         Kot & Print
@@ -117,15 +151,15 @@
     @if ($showVariantModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div class="bg-white w-full max-w-sm rounded shadow-lg p-6">
-                <h3 class="text-lg font-bold mb-4">Select Variant</h3>
+                <h3 class="text-lg font-bold mb-4">Select Variant <span class="text-sm font-normal">(optional)</span>
+                </h3>
 
                 <div class="space-y-2 mb-6">
                     @foreach ($variantOptions as $opt)
                         <label class="flex items-center gap-2">
                             <input type="radio" wire:model="selectedVariantId" value="{{ $opt['id'] }}">
                             <span>
-                                {{ $opt['variant_name'] }}
-                                — ₹{{ number_format($opt['combined_price'], 2) }}
+                                {{ $opt['variant_name'] }} — ₹{{ number_format($opt['combined_price'], 2) }}
                             </span>
                         </label>
                     @endforeach
@@ -134,12 +168,15 @@
                 <div class="flex justify-end gap-2">
                     <button class="px-4 py-2 bg-gray-200 rounded"
                         wire:click="$set('showVariantModal', false)">Cancel</button>
-                    <button class="px-4 py-2 bg-indigo-600 text-white rounded" wire:click="addSelectedVariant">Add to
-                        Cart</button>
+
+                    <button class="px-4 py-2 bg-indigo-600 text-white rounded" wire:click="addSelectedVariant">
+                        Add to Cart
+                    </button>
                 </div>
             </div>
         </div>
     @endif
+
 
     @if ($showNoteModal)
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -190,7 +227,6 @@
                     @foreach ($ordersForTable as $order)
                         <li class="mb-2 border-b pb-2">
                             Order #{{ $order->id }} - {{ $order->status }} - ₹{{ $order->total_amount }}
-                            {{-- Add more order details as needed --}}
                         </li>
                     @endforeach
                 </ul>

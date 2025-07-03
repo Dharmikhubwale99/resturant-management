@@ -80,24 +80,4 @@ class Item extends Model implements HasMedia
     {
         $this->addMediaCollection('images');
     }
-
-    //frontent color show
-    public function getTypeColorClassAttribute(): string
-    {
-        return match ($this->item_type) {
-            'veg'     => 'border-green-500',
-            'non_veg' => 'border-red-500',
-            default   => 'border-gray-300',
-        };
-    }
-
-    public function getTypeDotClassAttribute(): string
-    {
-        return match ($this->item_type) {
-            'veg'     => 'bg-green-600',
-            'non_veg' => 'bg-red-600',
-            default   => 'bg-gray-400',
-        };
-    }
-
 }
