@@ -39,4 +39,13 @@ class Dashboard extends Component
         $this->selectedTable = Table::findOrFail($tableId);
         $this->showConfirm = true;
     }
+
+    public function editTable($tableId)
+    {
+        return redirect()->route('waiter.item', [
+            'table_id' => $tableId,
+            'mode'     => 'edit'       // extra query-string flag
+        ]);
+    }
+
 }
