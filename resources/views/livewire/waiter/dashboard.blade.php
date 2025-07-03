@@ -4,6 +4,7 @@
     @foreach ($tablesByArea as $areaName => $tables)
         <h2 class="text-xl font-bold mb-2 mt-6">{{ $areaName }}</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+            {{-- dashboard.blade.php  (only the table card block changes) --}}
             @foreach ($tables as $table)
                 @php
                     $statusColor = match ($table->status) {
@@ -14,12 +15,26 @@
                     };
                 @endphp
 
-                <div wire:click="openConfirm({{ $table->id }})"
-                    class="relative p-4 text-black rounded shadow cursor-pointer {{ $statusColor }}">
+                <div class="relative p-4 text-black rounded shadow {{ $statusColor }}" {{-- default click still opens confirmation --}}
+                    wire:click="openConfirm({{ $table->id }})">
 
-                    <div class="absolute top-2 right-2 text-xs bg-white text-black px-2 py-0.5 rounded">
+                    {{-- capacity badge --}}
+                    <div class="absolute top-2 right-2 text-xs bg-white px-2 py-0.5 rounded">
                         {{ $table->capacity }} Seats
                     </div>
+
+                    {{-- 👁 eye button only if occupied; stopPropagation so parent click not triggered --}}
+                    @if ($table->status === 'occupied')
+                        <button wire:click.stop="editTable({{ $table->id }})"
+                            class="absolute top-2 left-2 text-gray-700 hover:text-gray-900" title="View / Edit order">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-current" viewBox="0 0 24 24">
+                                <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12c-3 0-5-2-5-5s2-5 5-5
+                 5 2 5 5-2 5-5 5zm0-8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343
+                 3-3-1.343-3-3-3z" />
+                            </svg>
+                        </button>
+                    @endif
+
                     <div class="text-lg font-bold">{{ $table->name }}</div>
                     @if (setting('area_module'))
                         <div class="text-sm mt-1 italic">{{ $table->area->name ?? '' }}</div>
@@ -27,6 +42,7 @@
                     <div class="text-sm mt-1 italic">{{ ucfirst($table->status) }}</div>
                 </div>
             @endforeach
+
         </div>
     @endforeach
 

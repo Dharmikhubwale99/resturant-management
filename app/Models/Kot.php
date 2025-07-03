@@ -65,4 +65,8 @@ class Kot extends Model
         });
     }
 
+    public function items()
+    {
+        return $this->hasMany(KOTItem::class, 'kot_id');
+    }
 }
