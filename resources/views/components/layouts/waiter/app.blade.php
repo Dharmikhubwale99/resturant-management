@@ -7,6 +7,7 @@
 
     <title>{{ $siteSettings->meta_title ?? 'Waiter Dashboard' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     @livewireStyles
     @stack('css')
     <style>
@@ -67,7 +68,7 @@
         <img src="{{ asset('icon/Jobhubwale_Final_01.png') }}" alt="Logo" class="loader-logo">
     </div>
 
-    @include('components.layouts.waiter.navbar')
+    {{-- @include('components.layouts.waiter.navbar') --}}
 
     <main class="">
         <div class="min-h-[calc(100vh-4rem-5rem)]">

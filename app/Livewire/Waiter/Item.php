@@ -26,8 +26,6 @@ class Item extends Component
 
     public $showVariantModal = false;
 
-    public $currentItem = null;
-
     public $variantOptions = [];
 
     public $selectedVariantId = null;
@@ -46,8 +44,6 @@ class Item extends Component
     public $occupiedTables = [];
     public $selectedTable = null;
     public $ordersForTable = [];
-
-    public array $originalKotItemKeys = [];
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -68,38 +64,6 @@ class Item extends Component
         $this->categories = $this->items->pluck('category')->unique('id')->values();
 
         $this->orderTypes = collect(OrderType::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
-
-        if (request()->query('mode') === 'edit') {
-            $latestKot = KOT::where('table_id', $table_id)
-                            ->where('status', 'pending')
-                            ->latest()
-                            ->first();
-
-            if ($latestKot) {
-                $latestKot->items()->each(function ($kotItem) {
-                    $key = $kotItem->variant_id
-                          ? 'v' . $kotItem->variant_id
-                          : $kotItem->item_id;
-
-                          $this->originalKotItemKeys[] = $key;
-
-                          $name = $kotItem->variant_id
-                          ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')'
-                          : $kotItem->item->name;
-
-                    $this->cart[$key] = [
-                        'id'       => $key,
-                        'item_id'  => $kotItem->item_id,
-                        'name'     => $name,
-                        'price'    => $kotItem->variant_id
-                                        ? $kotItem->item->price + $kotItem->variant->price
-                                        : $kotItem->item->price,
-                        'qty'      => $kotItem->quantity,
-                        'note'     => $kotItem->special_notes ?? '',
-                    ];
-                });
-            }
-        }
     }
 
     public function getFilteredItems()
@@ -139,23 +103,22 @@ class Item extends Component
             return;
         }
 
-        $this->currentItem = [
-            'id'    => $item->id,
-            'name'  => $item->name,
-            'price' => $item->price,
-        ];
-
         if ($item->variants->isNotEmpty()) {
-            $this->variantOptions = $item->variants->map(fn ($v) => [
-                'id'              => $v->id,
-                'item_id'         => $item->id,
-                'combined_name'   => $item->name . ' (' . $v->name . ')',
-                'combined_price'  => $item->price + $v->price,   // base + extra
-                'variant_name'    => $v->name,
-            ])->toArray();
+            $this->variantOptions = $item->variants
+                ->map(
+                    fn($v) => [
+                        'id' => $v->id,
+                        'item_id' => $item->id,
+                        'combined_name' => $item->name . ' (' . $v->name . ')',
+                        'combined_price' => $item->price + $v->price,
+                        'variant_name' => $v->name,
+                        'variant_price' => $v->price,
+                    ],
+                )
+                ->toArray();
 
-            $this->selectedVariantId = null;
-            $this->showVariantModal  = true;
+            $this->selectedVariantId = $this->variantOptions[0]['id'] ?? null;
+            $this->showVariantModal = true;
         } else {
             $this->addToCart($item->id, $item->name, $item->price);
         }
@@ -163,22 +126,19 @@ class Item extends Component
 
     public function addSelectedVariant()
     {
-        if ($this->selectedVariantId) {
-            $v = collect($this->variantOptions)->firstWhere('id', $this->selectedVariantId);
-            if (!$v) return;
-
-            $key = 'v' . $v['id'];                                   // unique key
-            $this->addToCart($key, $v['combined_name'], $v['combined_price']);
-            $this->cart[$key]['item_id'] = $v['item_id'];
-        } elseif ($this->currentItem) {
-            $this->addToCart(
-                $this->currentItem['id'],
-                $this->currentItem['name'],
-                $this->currentItem['price']
-            );
+        $v = collect($this->variantOptions)->firstWhere('id', $this->selectedVariantId);
+        if (!$v) {
+            return;
         }
 
-        $this->reset(['showVariantModal', 'variantOptions', 'selectedVariantId', 'currentItem']);
+        $key = 'v' . $v['id'];
+
+        // create row if not exists
+        $this->addToCart($key, $v['combined_name'], $v['combined_price']);
+
+        $this->cart[$key]['item_id'] = $v['item_id'];
+
+        $this->showVariantModal = false;
     }
 
     private function addToCart($key, $name, $price)
