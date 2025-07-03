@@ -26,20 +26,25 @@
         <x-form.error />
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
             @forelse ($filteredItems as $item)
-                <div class="bg-white p-2 rounded shadow hover:shadow-md transition"
-                    wire:click="itemClicked({{ $item->id }})">
+                <div wire:click="itemClicked({{ $item->id }})"
+                    class="relative bg-white p-2 rounded shadow hover:shadow-md transition
+               border-2 {{ $item->type_color_class }}">
+                    {{-- Veg/Non-veg dot/icon --}}
+                    <span
+                        class="absolute top-1 right-1 w-3 h-3 rounded-full
+                     {{ $item->type_dot_class }}"></span>
+
                     <img src="{{ $item->getFirstMediaUrl('images') ?: asset('icon/hubwalelogopng.png') }}"
-                        alt="{{ $item->name }}" class="w-full h-28 object-cover rounded mb-2">
+                        class="w-full h-28 object-cover rounded mb-2" alt="{{ $item->name }}">
                     <h3 class="text-sm font-semibold text-center">{{ $item->name }}</h3>
                     <p class="text-center text-blue-700 font-bold text-sm mt-1">
                         ₹{{ number_format($item->price, 2) }}
                     </p>
                 </div>
             @empty
-                <p class="flex items-center col-span-full text-gray-500 text-center">
-                    No items found in this category.
-                </p>
+                …
             @endforelse
+
         </div>
     </div>
 
@@ -155,33 +160,34 @@
         </div>
     @endif
 
-    @if($showTableList)
+    @if ($showTableList)
         <div class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
             <div class="bg-white p-6 rounded shadow-lg max-w-md w-full">
                 <h2 class="text-lg font-bold mb-4">Occupied Tables</h2>
                 <ul>
-                    @foreach($occupiedTables as $table)
+                    @foreach ($occupiedTables as $table)
                         <li>
                             <button wire:click="selectTable({{ $table->id }})"
-                                    class="block w-full text-left px-4 py-2 hover:bg-blue-100 rounded">
+                                class="block w-full text-left px-4 py-2 hover:bg-blue-100 rounded">
                                 {{ $table->name }} ({{ $table->area->name ?? '' }})
                             </button>
                         </li>
                     @endforeach
                 </ul>
-                <button wire:click="$set('showTableList', false)" class="mt-4 bg-gray-500 text-white px-4 py-2 rounded">Close</button>
+                <button wire:click="$set('showTableList', false)"
+                    class="mt-4 bg-gray-500 text-white px-4 py-2 rounded">Close</button>
             </div>
         </div>
     @endif
 
-    @if($selectedTable)
+    @if ($selectedTable)
         <div class="mt-6">
             <h3 class="text-lg font-bold mb-2">Orders for Table: {{ $selectedTable->name }}</h3>
-            @if($ordersForTable->isEmpty())
+            @if ($ordersForTable->isEmpty())
                 <p>No orders for this table.</p>
             @else
                 <ul>
-                    @foreach($ordersForTable as $order)
+                    @foreach ($ordersForTable as $order)
                         <li class="mb-2 border-b pb-2">
                             Order #{{ $order->id }} - {{ $order->status }} - ₹{{ $order->total_amount }}
                             {{-- Add more order details as needed --}}
@@ -194,11 +200,10 @@
 
 </div>
 @push('scripts')
-<script>
-    Livewire.on('printKot', (event) => {
-        const kotId = event.kotId;
-        window.open(`/waiter/kot-print/${kotId}`, '_blank');
-    });
-</script>
-
+    <script>
+        Livewire.on('printKot', (event) => {
+            const kotId = event.kotId;
+            window.open(`/waiter/kot-print/${kotId}`, '_blank');
+        });
+    </script>
 @endpush
