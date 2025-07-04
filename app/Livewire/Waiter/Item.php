@@ -42,10 +42,6 @@ class Item extends Component
 
     public $order_type;
 
-    public $kotId;
-
-    public $kotTime;
-
     public $showTableList = false;
     public $occupiedTables = [];
     public $selectedTable = null;
@@ -78,8 +74,7 @@ class Item extends Component
         $this->editMode = request()->query('mode') === 'edit';
         if (request()->query('mode') === 'edit') {
             $latestKot = KOT::where('table_id', $table_id)->where('status', 'pending')->latest()->first();
-            $this->kotId = $latestKot?->kot_number;
-            $this->kotTime = $latestKot?->created_at;
+
             if ($latestKot) {
                 $latestKot->items()->each(function ($kotItem) {
                     $key = $kotItem->variant_id ? 'v' . $kotItem->variant_id : $kotItem->item_id;
@@ -283,12 +278,6 @@ class Item extends Component
         $this->currentNoteKey = null;
     }
 
-    public function selectOrderType(string $type): void
-    {
-        $this->order_type = $type;   // just set; Livewire re-renders buttons
-    }
-
-
     public function placeOrder()
     {
         if (empty($this->cart)) {
@@ -297,7 +286,7 @@ class Item extends Component
         }
 
         $this->validate([
-            'order_type' => 'required|in:' . implode(',', array_keys($this->orderTypes))
+            'order_type' => 'required|in:' . implode(',', array_keys($this->orderTypes)),
         ]);
 
         DB::transaction(function () {
@@ -435,10 +424,10 @@ class Item extends Component
                     'special_notes' => $row['note'] ?? null,
                 ]);
             }
-            $this->dispatch('printKot', kotId: $kot->id);
         });
 
         $this->reset(['cart', 'showVariantModal', 'noteInput', 'currentNoteKey']);
+        $this->dispatch('printKot', kotId: $kot0->id);
         return redirect()->route('waiter.dashboard')->with('success', 'Order placed!');
     }
 
@@ -466,10 +455,6 @@ class Item extends Component
             $addToSubTotal = 0;
 
             foreach ($this->cart as $key => $row) {
-                if (in_array($key, $this->originalKotItemKeys)) {
-                    continue;
-                }
-
                 $variantId = str_starts_with($key, 'v') ? (int) substr($key, 1) : null;
                 $baseItemId = $variantId ? $row['item_id'] : $row['id'];
                 $lineTotal = $row['qty'] * $row['price'];
@@ -506,6 +491,8 @@ class Item extends Component
                 $order->save();
             }
         });
+
+        $this->reset(['cart', 'showVariantModal', 'noteInput', 'currentNoteKey']);
 
         session()->flash('success', 'KOT updated & sent to kitchen!');
     }
