@@ -20,8 +20,8 @@ return new class extends Migration
             $table->foreignId('restaurant_id')->constrained();
             $table->enum('item_type', ["non_veg","veg","beverage"])->nullable();
             $table->string('name');
-            $table->string('short_name')->unique()->nullable();
-            $table->string('code')->unique()->nullable();
+            $table->string('short_name')->nullable();
+            $table->string('code')->nullable();
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
             $table->boolean('is_active')->default(true);
