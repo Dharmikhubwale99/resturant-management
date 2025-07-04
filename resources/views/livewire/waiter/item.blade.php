@@ -194,13 +194,16 @@
                                         Print</button>
                                     <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Save &
                                         eBill</button>
-                                    @if (request()->query('mode') === 'edit')
+                                        @if ($editMode)
                                         <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-                                            wire:click="updateOrder">Update KOT</button>
+                                                wire:click="updateOrder">
+                                            Update KOT
+                                        </button>
                                     @else
                                         <button wire:click="placeOrder"
-                                            class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Kot
-                                            Order</button>
+                                                class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+                                            Kot Order
+                                        </button>
                                     @endif
                                     <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
                                         wire:click="placeOrderAndPrint">KOT &
@@ -310,9 +313,7 @@
 </div>
 @push('scripts')
     <script>
-        // Add basic interactivity
         document.addEventListener('DOMContentLoaded', function() {
-            // Menu item clicks
             const menuItems = document.querySelectorAll('.grid > div');
             menuItems.forEach(item => {
                 item.addEventListener('click', function() {
@@ -323,7 +324,6 @@
                 });
             });
 
-            // Quantity buttons
             const minusButtons = document.querySelectorAll('.fa-minus');
             const plusButtons = document.querySelectorAll('.fa-plus');
 
@@ -345,7 +345,6 @@
                 });
             });
 
-            // Order type buttons
             const orderTypeButtons = document.querySelectorAll('.bg-red-500, .bg-gray-300');
             orderTypeButtons.forEach(btn => {
                 btn.addEventListener('click', function() {
