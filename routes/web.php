@@ -67,8 +67,7 @@ use App\Livewire\Waiter\{
 
     Item,
     KotPrint,
-    PendingKotOrders
-    };
+};
 use App\Http\Controllers\PaymentController;
 use App\Models\ExpenseType;
 
@@ -163,7 +162,6 @@ Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|w
 
     Route::get('/item/{table_id}', Item::class)->name('item');
     Route::get('/kot-print/{kot_id}', KotPrint::class)->name('kot.print');
-    Route::get('/kots/pending', PendingKotOrders::class)->name('kots.pending');
 });
 // Route::get('/table/{qr_token}/menu', function($qr_token) {
 //     return "Menu for table token: " . $qr_token;

@@ -41,12 +41,7 @@
                     <span class="text-sm font-medium">9099912483</span>
                 </div>
                 <div class="flex items-center space-x-3">
-<!-- Pending KOT  (PDF icon) -->
-<a href="{{ route('waiter.kots.pending') }}"
-   class="text-gray-600 hover:text-gray-800"
-   title="Pending KOT Orders">
-    <i class="fas fa-file-pdf text-lg"></i>
-</a>
+                    <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-print text-lg"></i></button>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-calculator text-lg"></i></button>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-th text-lg"></i></button>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-clock text-lg"></i></button>
@@ -172,8 +167,7 @@
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
                 @if (count($cartItems))
                     <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
-                        <p class="text-xs md:text-sm font-semibold text-blue-600">Old - #{{ $kotId ?? '-' }} •
-                            {{ \Carbon\Carbon::parse($kotTime)->format('h:i') }}</p>
+                        <p class="text-xs md:text-sm font-semibold text-blue-600">Old - #{{ $kotId ?? '-' }} • {{ \Carbon\Carbon::parse($kotTime)->format('h:i') }}</p>
                         @foreach ($cartItems as $key => $row)
                             @if (in_array($key, $originalKotItemKeys))
                                 <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"
@@ -199,8 +193,7 @@
 
                         @if (count($cartItems) > count($originalKotItemKeys))
                             <hr class="my-1 md:my-2 border-t">
-                            <p class="text-xs md:text-sm font-semibold text-blue-600">New -
-                                {{ \Carbon\Carbon::parse(now())->format('h:i:s') }}</p>
+                            <p class="text-xs md:text-sm font-semibold text-blue-600">New - {{ \Carbon\Carbon::parse(now())->format('h:i:s') }}</p>
                             @foreach ($cartItems as $key => $row)
                                 @if (!in_array($key, $originalKotItemKeys))
                                     <div class="border rounded p-1 md:p-2 flex items-center justify-between"
@@ -256,32 +249,32 @@
                                 Total: ₹{{ number_format($cartTotal, 2) }}
                             </div>
 
-                            <!-- Custom Radio Group for Payment -->
-                            <div class="flex flex-wrap justify-center gap-4 mt-3 mb-3">
-                                @php
-                                    $paymentMethods = [
-                                        'cash' => 'Cash',
-                                        'card' => 'Card',
-                                        'due' => 'Due',
-                                        'other' => 'Other',
-                                        'part' => 'Part',
-                                    ];
-                                @endphp
-
-                                @foreach ($paymentMethods as $value => $label)
-                                    <label
-                                        class="inline-flex items-center space-x-2 text-sm font-medium text-gray-700 cursor-pointer">
-                                        <input type="radio" name="payment_method" value="{{ $value }}"
-                                            wire:model="payment_method" class="peer hidden" />
-                                        <div
-                                            class="w-4 h-4 rounded-full border-2 border-gray-400 peer-checked:border-red-500 peer-checked:bg-red-500 transition duration-200">
-                                        </div>
-                                        <span class="select-none">{{ $label }}</span>
-                                    </label>
-                                @endforeach
+                            <div class="grid grid-cols-3 gap-1 md:gap-2 mt-2">
+                                <button
+                                    class="flex items-center justify-center gap-1 px-2 py-1 md:px-4 md:py-2 rounded border bg-red-500 text-white text-xs md:text-sm">
+                                    <i class="fas fa-money-bill-wave"></i> <span class="hidden sm:inline">Cash</span>
+                                </button>
+                                <button
+                                    class="flex items-center justify-center gap-1 px-2 py-1 md:px-4 md:py-2 rounded border bg-gray-200 text-gray-700 text-xs md:text-sm">
+                                    <i class="fas fa-credit-card"></i> <span class="hidden sm:inline">Card</span>
+                                </button>
+                                <button
+                                    class="flex items-center justify-center gap-1 px-2 py-1 md:px-4 md:py-2 rounded border bg-gray-200 text-gray-700 text-xs md:text-sm">
+                                    <i class="fas fa-clock"></i> <span class="hidden sm:inline">Due</span>
+                                </button>
+                                <button
+                                    class="flex items-center justify-center gap-1 px-2 py-1 md:px-4 md:py-2 rounded border bg-gray-200 text-gray-700 text-xs md:text-sm">
+                                    <i class="fas fa-ellipsis-h"></i> <span class="hidden sm:inline">Other</span>
+                                </button>
+                                <button
+                                    class="flex items-center justify-center gap-1 px-2 py-1 md:px-4 md:py-2 rounded border bg-gray-200 text-gray-700 text-xs md:text-sm">
+                                    <i class="fas fa-percentage"></i> <span class="hidden sm:inline">Part</span>
+                                </button>
+                                <button
+                                    class="flex items-center justify-center gap-1 px-2 py-1 md:px-4 md:py-2 rounded border bg-gray-200 text-gray-700 text-xs md:text-sm">
+                                    <i class="fas fa-receipt"></i> <span>Split Bill</span>
+                                </button>
                             </div>
-
-
 
                             <div class="p-2 md:p-4 border-t mt-2">
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-2">
