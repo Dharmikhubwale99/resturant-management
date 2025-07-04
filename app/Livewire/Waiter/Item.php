@@ -151,7 +151,7 @@ class Item extends Component
                         'id' => $v->id,
                         'item_id' => $item->id,
                         'combined_name' => $item->name . ' (' . $v->name . ')',
-                        'combined_price' => $item->price + $v->price,
+                        'combined_price' => $item->price + $v->price, // base + extra
                         'variant_name' => $v->name,
                     ],
                 )
@@ -185,60 +185,53 @@ class Item extends Component
     private function addToCart($key, $name, $price)
     {
         $isEdit = $this->editMode;
-
         if ($isEdit && in_array($key, $this->originalKotItemKeys)) {
+            $suffix = 1;
+            $newKey = $key . '-new';
 
-            $existingNewKey = collect(array_keys($this->cart))
-                ->first(fn ($k) => str_starts_with($k, $key . '-new'));
-
-            if ($existingNewKey) {
-                $this->cart[$existingNewKey]['qty']++;
-                return;
+            while (isset($this->cart[$newKey])) {
+                $suffix++;
+                $newKey = $key . "-new$suffix";
             }
 
-            $newKey = $key . '-new';
             $this->cart[$newKey] = [
-                'id'      => $newKey,
+                'id' => $newKey,
                 'item_id' => str_starts_with($key, 'v') ? null : $key,
-                'name'    => $name,
-                'price'   => $price,
-                'qty'     => 1,
-                'note'    => '',
+                'name' => $name,
+                'price' => $price,
+                'qty' => 1,
+                'note' => '',
             ];
-            return;
-        }
-
-        if ($isEdit) {
-            $existingKey = collect(array_keys($this->cart))
-                ->first(fn ($k) => $k === $key || str_starts_with($k, $key . '-new'));
+        } elseif ($isEdit) {
+            $existingKey = collect(array_keys($this->cart))->first(fn($k) => $k === $key || str_starts_with($k, "$key-new"));
 
             if ($existingKey) {
                 $this->cart[$existingKey]['qty']++;
             } else {
+
                 $this->cart[$key] = [
-                    'id'    => $key,
-                    'name'  => $name,
+                    'id' => $key,
+                    'name' => $name,
                     'price' => $price,
-                    'qty'   => 1,
-                    'note'  => '',
+                    'qty' => 1,
+                    'note' => '',
                 ];
             }
-            return;
-        }
-
-        if (isset($this->cart[$key])) {
-            $this->cart[$key]['qty']++;
         } else {
-            $this->cart[$key] = [
-                'id'    => $key,
-                'name'  => $name,
-                'price' => $price,
-                'qty'   => 1,
-                'note'  => '',
-            ];
+
+            if (isset($this->cart[$key])) {
+                $this->cart[$key]['qty']++;
+            } else {
+                $this->cart[$key] = [
+                    'id' => $key,
+                    'name' => $name,
+                    'price' => $price,
+                    'qty' => 1,
+                    'note' => '',
+                ];
+            }
         }
     }
-
 
     public function increment($key)
     {
@@ -478,9 +471,7 @@ class Item extends Component
                 }
 
                 $variantId = str_starts_with($key, 'v') ? (int) substr($key, 1) : null;
-                $baseItemId = $variantId
-                    ? $row['item_id']
-                    : (int) preg_replace('/-new\d*/', '', $row['id']);
+                $baseItemId = $variantId ? $row['item_id'] : $row['id'];
                 $lineTotal = $row['qty'] * $row['price'];
 
                 OrderItem::create([
