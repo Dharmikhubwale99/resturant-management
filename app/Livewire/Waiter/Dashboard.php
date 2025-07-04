@@ -32,6 +32,7 @@ class Dashboard extends Component
         $this->tables = Table::with('area')
             ->where('restaurant_id', $restaurantId)
             ->get();
+
     }
 
     public function openConfirm($tableId)
@@ -44,7 +45,7 @@ class Dashboard extends Component
     {
         return redirect()->route('waiter.item', [
             'table_id' => $tableId,
-            'mode'     => 'edit'       // extra query-string flag
+            'mode'     => 'edit'
         ]);
     }
 
