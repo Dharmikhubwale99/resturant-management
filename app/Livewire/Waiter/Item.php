@@ -49,6 +49,8 @@ class Item extends Component
 
     public array $originalKotItemKeys = [];
 
+    public bool $editMode = false;
+
     #[Layout('components.layouts.waiter.app')]
     public function render()
     {
@@ -69,33 +71,25 @@ class Item extends Component
 
         $this->orderTypes = collect(OrderType::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
 
+        $this->editMode = request()->query('mode') === 'edit';
         if (request()->query('mode') === 'edit') {
-            $latestKot = KOT::where('table_id', $table_id)
-                            ->where('status', 'pending')
-                            ->latest()
-                            ->first();
+            $latestKot = KOT::where('table_id', $table_id)->where('status', 'pending')->latest()->first();
 
             if ($latestKot) {
                 $latestKot->items()->each(function ($kotItem) {
-                    $key = $kotItem->variant_id
-                          ? 'v' . $kotItem->variant_id
-                          : $kotItem->item_id;
+                    $key = $kotItem->variant_id ? 'v' . $kotItem->variant_id : $kotItem->item_id;
 
-                          $this->originalKotItemKeys[] = $key;
+                    $this->originalKotItemKeys[] = $key;
 
-                          $name = $kotItem->variant_id
-                          ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')'
-                          : $kotItem->item->name;
+                    $name = $kotItem->variant_id ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')' : $kotItem->item->name;
 
                     $this->cart[$key] = [
-                        'id'       => $key,
-                        'item_id'  => $kotItem->item_id,
-                        'name'     => $name,
-                        'price'    => $kotItem->variant_id
-                                        ? $kotItem->item->price + $kotItem->variant->price
-                                        : $kotItem->item->price,
-                        'qty'      => $kotItem->quantity,
-                        'note'     => $kotItem->special_notes ?? '',
+                        'id' => $key,
+                        'item_id' => $kotItem->item_id,
+                        'name' => $name,
+                        'price' => $kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price,
+                        'qty' => $kotItem->quantity,
+                        'note' => $kotItem->special_notes ?? '',
                     ];
                 });
             }
@@ -140,22 +134,26 @@ class Item extends Component
         }
 
         $this->currentItem = [
-            'id'    => $item->id,
-            'name'  => $item->name,
+            'id' => $item->id,
+            'name' => $item->name,
             'price' => $item->price,
         ];
 
         if ($item->variants->isNotEmpty()) {
-            $this->variantOptions = $item->variants->map(fn ($v) => [
-                'id'              => $v->id,
-                'item_id'         => $item->id,
-                'combined_name'   => $item->name . ' (' . $v->name . ')',
-                'combined_price'  => $item->price + $v->price,   // base + extra
-                'variant_name'    => $v->name,
-            ])->toArray();
+            $this->variantOptions = $item->variants
+                ->map(
+                    fn($v) => [
+                        'id' => $v->id,
+                        'item_id' => $item->id,
+                        'combined_name' => $item->name . ' (' . $v->name . ')',
+                        'combined_price' => $item->price + $v->price, // base + extra
+                        'variant_name' => $v->name,
+                    ],
+                )
+                ->toArray();
 
             $this->selectedVariantId = null;
-            $this->showVariantModal  = true;
+            $this->showVariantModal = true;
         } else {
             $this->addToCart($item->id, $item->name, $item->price);
         }
@@ -165,17 +163,15 @@ class Item extends Component
     {
         if ($this->selectedVariantId) {
             $v = collect($this->variantOptions)->firstWhere('id', $this->selectedVariantId);
-            if (!$v) return;
+            if (!$v) {
+                return;
+            }
 
-            $key = 'v' . $v['id'];                                   // unique key
+            $key = 'v' . $v['id']; // unique key
             $this->addToCart($key, $v['combined_name'], $v['combined_price']);
             $this->cart[$key]['item_id'] = $v['item_id'];
         } elseif ($this->currentItem) {
-            $this->addToCart(
-                $this->currentItem['id'],
-                $this->currentItem['name'],
-                $this->currentItem['price']
-            );
+            $this->addToCart($this->currentItem['id'], $this->currentItem['name'], $this->currentItem['price']);
         }
 
         $this->reset(['showVariantModal', 'variantOptions', 'selectedVariantId', 'currentItem']);
@@ -183,16 +179,52 @@ class Item extends Component
 
     private function addToCart($key, $name, $price)
     {
-        if (isset($this->cart[$key])) {
-            $this->cart[$key]['qty']++;
-        } else {
-            $this->cart[$key] = [
-                'id' => $key,
+        $isEdit = $this->editMode;
+        if ($isEdit && in_array($key, $this->originalKotItemKeys)) {
+            $suffix = 1;
+            $newKey = $key . '-new';
+
+            while (isset($this->cart[$newKey])) {
+                $suffix++;
+                $newKey = $key . "-new$suffix";
+            }
+
+            $this->cart[$newKey] = [
+                'id' => $newKey,
+                'item_id' => str_starts_with($key, 'v') ? null : $key,
                 'name' => $name,
                 'price' => $price,
                 'qty' => 1,
                 'note' => '',
             ];
+        } elseif ($isEdit) {
+            $existingKey = collect(array_keys($this->cart))->first(fn($k) => $k === $key || str_starts_with($k, "$key-new"));
+
+            if ($existingKey) {
+                $this->cart[$existingKey]['qty']++;
+            } else {
+
+                $this->cart[$key] = [
+                    'id' => $key,
+                    'name' => $name,
+                    'price' => $price,
+                    'qty' => 1,
+                    'note' => '',
+                ];
+            }
+        } else {
+
+            if (isset($this->cart[$key])) {
+                $this->cart[$key]['qty']++;
+            } else {
+                $this->cart[$key] = [
+                    'id' => $key,
+                    'name' => $name,
+                    'price' => $price,
+                    'qty' => 1,
+                    'note' => '',
+                ];
+            }
         }
     }
 
@@ -265,21 +297,21 @@ class Item extends Component
             $taxAmount = 0;
             $totalAmount = $subTotal + $taxAmount - $discountAmount;
 
-            // $order = Order::create([
-            //     'restaurant_id' => $restaurantId,
-            //     'table_id' => $this->table_id,
-            //     'user_id' => Auth::id(),
-            //     'order_type' => $this->order_type,
-            //     'status' => 'pending',
-            //     'sub_total' => $subTotal,
-            //     'discount_amount' => $discountAmount,
-            //     'tax_amount' => $taxAmount,
-            //     'total_amount' => $totalAmount,
-            // ]);
+            $order = Order::create([
+                'restaurant_id' => $restaurantId,
+                'table_id' => $this->table_id,
+                'user_id' => Auth::id(),
+                'order_type' => $this->order_type,
+                'status' => 'pending',
+                'sub_total' => $subTotal,
+                'discount_amount' => $discountAmount,
+                'tax_amount' => $taxAmount,
+                'total_amount' => $totalAmount,
+            ]);
 
             $kot = Kot::create([
                 'table_id' => $this->table_id,
-                'order_id' => null,
+                'order_id' => $order->id,
                 'status' => 'pending',
                 'printed_at' => null,
             ]);
@@ -294,17 +326,17 @@ class Item extends Component
 
                 $baseItemId = $variantId ? $row['item_id'] : $row['id'];
 
-                // OrderItem::create([
-                //     'order_id' => $order->id,
-                //     'item_id' => $baseItemId,
-                //     'variant_id' => $variantId,
-                //     'quantity' => $row['qty'],
-                //     'base_price' => $row['price'],
-                //     'discount_amount' => 0,
-                //     'total_price' => $row['qty'] * $row['price'],
-                //     'special_notes' => $row['note'] ?? null,
-                //     'status' => 'pending',
-                // ]);
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'item_id' => $baseItemId,
+                    'variant_id' => $variantId,
+                    'quantity' => $row['qty'],
+                    'base_price' => $row['price'],
+                    'discount_amount' => 0,
+                    'total_price' => $row['qty'] * $row['price'],
+                    'special_notes' => $row['note'] ?? null,
+                    'status' => 'pending',
+                ]);
 
                 KOTItem::create([
                     'kot_id' => $kot->id,
@@ -334,9 +366,7 @@ class Item extends Component
             'order_type' => 'required|in:' . implode(',', array_keys($this->orderTypes)),
         ]);
 
-        $kotId = null;
-
-        DB::transaction(function () use (&$kotId) {
+        DB::transaction(function () {
             $restaurantId = auth()->user()?->restaurant_id;
 
             $subTotal = $this->getCartTotal();
@@ -344,21 +374,46 @@ class Item extends Component
             $taxAmount = 0;
             $totalAmount = $subTotal + $taxAmount - $discountAmount;
 
+            $order = Order::create([
+                'restaurant_id' => $restaurantId,
+                'table_id' => $this->table_id,
+                'user_id' => Auth::id(),
+                'order_type' => $this->order_type,
+                'status' => 'pending',
+                'sub_total' => $subTotal,
+                'discount_amount' => $discountAmount,
+                'tax_amount' => $taxAmount,
+                'total_amount' => $totalAmount,
+            ]);
+
             $kot = Kot::create([
                 'table_id' => $this->table_id,
-                'order_id' => null,
+                'order_id' => $order->id,
                 'status' => 'pending',
                 'printed_at' => now(),
             ]);
 
-            $kotId = $kot->id;
-
-            Table::findOrFail($this->table_id)->update(['status' => 'occupied']);
+            $table = Table::findOrFail($this->table_id);
+            $table->update([
+                'status' => 'occupied',
+            ]);
 
             foreach ($this->cart as $row) {
                 $variantId = str_starts_with($row['id'], 'v') ? (int) substr($row['id'], 1) : null;
 
                 $baseItemId = $variantId ? $row['item_id'] : $row['id'];
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'item_id' => $baseItemId,
+                    'variant_id' => $variantId,
+                    'quantity' => $row['qty'],
+                    'base_price' => $row['price'],
+                    'discount_amount' => 0,
+                    'total_price' => $row['qty'] * $row['price'],
+                    'special_notes' => $row['note'] ?? null,
+                    'status' => 'pending',
+                ]);
 
                 KOTItem::create([
                     'kot_id' => $kot->id,
@@ -371,25 +426,74 @@ class Item extends Component
             }
         });
 
-        $this->cart = [];
-        $this->orderTypes = [];
-        $this->showVariantModal = false;
-
-        $this->dispatch('printKot', kotId: $kotId);
+        $this->reset(['cart', 'showVariantModal', 'noteInput', 'currentNoteKey']);
+        $this->dispatch('printKot', kotId: $kot0->id);
+        return redirect()->route('waiter.dashboard')->with('success', 'Order placed!');
     }
 
-    public function showTables()
+    public function updateOrder()
     {
-        $this->occupiedTables = Table::where('restaurant_id', auth()->user()->restaurant_id)
-            ->where('status', 'occupied')
-            ->get();
-        $this->showTableList = true;
-    }
+        if (empty($this->cart)) {
+            $this->addError('cart', 'Cart is empty!');
+            return;
+        }
 
-    public function selectTable($tableId)
-    {
-        $this->selectedTable = Table::with('orders')->findOrFail($tableId);
-        $this->ordersForTable = $this->selectedTable->orders()->latest()->get();
-        $this->showTableList = false;
+        $this->validate([
+            'order_type' => 'required|in:' . implode(',', array_keys($this->orderTypes)),
+        ]);
+
+        DB::transaction(function () {
+            $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
+
+            $kot = KOT::create([
+                'table_id' => $this->table_id,
+                'order_id' => $order->id,
+                'status' => 'pending',
+                'printed_at' => null,
+            ]);
+
+            $addToSubTotal = 0;
+
+            foreach ($this->cart as $key => $row) {
+                $variantId = str_starts_with($key, 'v') ? (int) substr($key, 1) : null;
+                $baseItemId = $variantId ? $row['item_id'] : $row['id'];
+                $lineTotal = $row['qty'] * $row['price'];
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'item_id' => $baseItemId,
+                    'variant_id' => $variantId,
+                    'quantity' => $row['qty'],
+                    'base_price' => $row['price'],
+                    'discount_amount' => 0,
+                    'total_price' => $lineTotal,
+                    'special_notes' => $row['note'] ?? null,
+                    'status' => 'pending',
+                ]);
+
+                KOTItem::create([
+                    'kot_id' => $kot->id,
+                    'order_id' => $order->id,
+                    'item_id' => $baseItemId,
+                    'variant_id' => $variantId,
+                    'quantity' => $row['qty'],
+                    'status' => 'pending',
+                    'special_notes' => $row['note'] ?? null,
+                ]);
+
+                $addToSubTotal += $lineTotal;
+            }
+
+
+            if ($addToSubTotal > 0) {
+                $order->sub_total += $addToSubTotal;
+                $order->total_amount = $order->sub_total + $order->tax_amount - $order->discount_amount;
+                $order->save();
+            }
+        });
+
+        $this->reset(['cart', 'showVariantModal', 'noteInput', 'currentNoteKey']);
+
+        session()->flash('success', 'KOT updated & sent to kitchen!');
     }
 }

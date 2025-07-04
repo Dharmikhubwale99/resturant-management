@@ -146,7 +146,6 @@
     </div>
 
     <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
-
     @if (count($cartItems))
         <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
             @foreach ($cartItems as $key => $row)
@@ -263,7 +262,7 @@
                         <button class="bg-red-500 text-white px-2 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-xs md:text-sm">
                             Save & eBill
                         </button>
-                        @if (request()->query('mode') === 'edit')
+                         @if ($editMode)
                             <button class="bg-gray-600 text-white px-2 py-1 md:px-4 md:py-2 rounded hover:bg-gray-700 text-xs md:text-sm"
                                 wire:click="updateOrder">
                                 Update KOT
@@ -383,9 +382,7 @@
 
 @push('scripts')
     <script>
-        // Add basic interactivity
         document.addEventListener('DOMContentLoaded', function() {
-            // Menu item clicks
             const menuItems = document.querySelectorAll('.grid > div');
             menuItems.forEach(item => {
                 item.addEventListener('click', function() {
@@ -396,7 +393,27 @@
                 });
             });
 
-            // Order type buttons
+            const minusButtons = document.querySelectorAll('.fa-minus');
+            const plusButtons = document.querySelectorAll('.fa-plus');
+
+            minusButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const qtySpan = this.parentElement.querySelector('span');
+                    let qty = parseInt(qtySpan.textContent);
+                    if (qty > 1) {
+                        qtySpan.textContent = qty - 1;
+                    }
+                });
+            });
+
+            plusButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const qtySpan = this.parentElement.querySelector('span');
+                    let qty = parseInt(qtySpan.textContent);
+                    qtySpan.textContent = qty + 1;
+                });
+            });
+
             const orderTypeButtons = document.querySelectorAll('.bg-red-500, .bg-gray-300');
             orderTypeButtons.forEach(btn => {
                 btn.addEventListener('click', function() {
