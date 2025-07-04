@@ -32,7 +32,7 @@
                       Area
                   </a>
                 @endif
-              
+
                 <a href="{{ route('restaurant.tables.index') }}"
                     class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                     Table
@@ -79,28 +79,37 @@
 
                         <div class="block md:hidden ">
 
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admins</a>
+                            <a href="{{ route('restaurant.users.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">User</a>
 
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Users</a>
+                            @if (setting('category_module'))
+                                <a href="{{ route('restaurant.categories.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Category</a>
+                            @endif
 
-                            <a href="{{ route('superadmin.settings') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                            <a href="{{ route('restaurant.items.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Item</a>
 
+                            @if (setting('area_module'))
+                                <a href="{{ route('restaurant.areas.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Area</a>
+                            @endif
+
+                            <a href="{{ route('restaurant.tables.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Table
+                            </a>
+
+                            @if (setting('expense-type-module'))
+                            <a href="{{ route('restaurant.expense-types.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Expense-Type
+                            </a>
+                            @endif
+
+                            <a href="{{ route('restaurant.expenses.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Expenses
+                            </a>
                         </div>
 
                         <div class="py-1">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View
-                                Profile</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit
-                                Profile</a>
-
-                            {{-- @if (auth()->check() && auth()->user()->refer_code)
-                                <input type="text" id="referralLink"
-                                    value="{{ route('register', ['ref' => auth()->user()->refer_code]) }}"
-                                    class="hidden" readonly>
-                                <button onclick="copyReferralLink()" class="block py-2 px-4 text-sm w-full text-left hover:bg-gray-100">Copy Referral Link</button>
-                            @endif --}}
-
                             <a href="{{ route('logout') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
                         </div>
