@@ -181,6 +181,7 @@
                                     <div class="flex-1 min-w-0">
                                         <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
                                             {{ $row['name'] }}
+
                                         </p>
                                         <div class="flex items-baseline gap-2">
                                             <p class="text-xs text-gray-500 whitespace-nowrap">
