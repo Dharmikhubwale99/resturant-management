@@ -1,36 +1,64 @@
-<div class="p-4 lg:p-6">
-    <h1 class="text-xl font-bold mb-4">Pending KOT Orders</h1>
+<div class="p-4 lg:p-6 space-y-4">
+    @php
+        $tabs = ['pending' => 'Pending', 'preparing' => 'Preparing', 'ready' => 'Ready', 'served' => 'Served'];
+        $statusColors = [
+            'pending' => 'bg-yellow-200 text-yellow-800',
+            'preparing' => 'bg-blue-200 text-blue-800',
+            'ready' => 'bg-green-200 text-green-800',
+            'served' => 'bg-gray-300 text-gray-700',
+        ];
+    @endphp
 
-    @if($orders->isEmpty())
-        <p class="text-gray-500">📭 All clear — no pending orders!</p>
+    <!-- Tabs -->
+    <div class="border-b border-gray-200 flex gap-6 text-sm font-medium">
+        @foreach ($tabs as $key => $label)
+            <button wire:click="setStatus('{{ $key }}')"
+                @class([
+                    'pb-2',
+                    $status === $key ? 'border-b-2 border-red-500 text-red-600' : 'text-gray-600 hover:text-gray-800',
+                ])>
+                {{ $label }}
+            </button>
+        @endforeach
+    </div>
+
+    <!-- Orders List -->
+    @if (empty($orders))
+        <p class="text-gray-500">No {{ ucfirst($status) }} orders 🔍</p>
     @else
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-gray-100 font-semibold text-gray-700">
-                <tr>
-                    <th class="px-3 py-2 text-left">#</th>
-                    <th class="px-3 py-2 text-left">Table / Area</th>
-                    <th class="px-3 py-2 text-left">Items Qty</th>
-                    <th class="px-3 py-2 text-left">Amount</th>
-                    <th class="px-3 py-2 text-left">Created At</th>
-                </tr>
-            </thead>
-
-            <tbody class="divide-y divide-gray-200">
-                @foreach($orders as $order)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-3 py-2">{{ $order->id }}</td>
-                        <td class="px-3 py-2">
-                            {{ $order->table->name ?? '—' }}
-                            <span class="text-xs text-gray-500">
-                                {{ $order->table->area->name ?? '' }}
+        <div class="space-y-3">
+            @foreach ($orders as $order)
+                <div class="bg-white border rounded shadow-sm p-3 text-sm">
+                    <div class="flex items-center justify-between">
+                        <div class="flex flex-wrap gap-x-6">
+                            <span class="font-semibold">#{{ $order['kot_number'] }}</span>
+                            <span>Table: {{ $order['table_name'] }} ({{ $order['area_name'] }})</span>
+                            <span>Date: {{ \Carbon\Carbon::parse($order['created_at'])->format('d-m-Y') }}</span>
+                            <span>Qty: {{ $order['items_count'] }}</span>
+                            <span>Time: {{ \Carbon\Carbon::parse($order['created_at'])->format('h:i A') }}</span>
+                            <span
+                                class="text-xs px-2 py-0.5 rounded-full {{ $statusColors[$order['status']] ?? 'bg-gray-100' }}">
+                                {{ ucfirst($order['status']) }}
                             </span>
-                        </td>
-                        <td class="px-3 py-2">{{ $order->items_count ?? '—' }}</td>
-                        <td class="px-3 py-2">₹{{ number_format($order->total_amount,2) }}</td>
-                        <td class="px-3 py-2">{{ $order->created_at->format('d-M H:i') }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+                        </div>
+
+                        <button wire:click="toggleShow({{ $order['id'] }})"
+                            class="text-blue-600 hover:underline">
+                            {{ isset($openItems[$order['id']]) ? 'Hide' : 'Show' }}
+                        </button>
+                    </div>
+
+                    @isset($openItems[$order['id']])
+                        <div class="mt-3 border-t pt-2 space-y-1">
+                            @foreach ($openItems[$order['id']] as $item)
+                                <div class="flex justify-between">
+                                    <span>{{ $item->item->name }} × {{ $item->quantity }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endisset
+                </div>
+            @endforeach
+        </div>
     @endif
 </div>

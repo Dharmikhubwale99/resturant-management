@@ -172,7 +172,7 @@ class Item extends Component
                 return;
             }
 
-            $key = 'v' . $v['id'];
+            $key = 'v' . $v['id']; // unique key
             $this->addToCart($key, $v['combined_name'], $v['combined_price']);
             $this->cart[$key]['item_id'] = $v['item_id'];
         } elseif ($this->currentItem) {
@@ -250,49 +250,26 @@ class Item extends Component
         if (!isset($this->cart[$key])) {
             return;
         }
-
-        $this->cart[$key]['qty']--;
-
-        if ($this->cart[$key]['qty'] < 1) {
-            if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
-                $this->cart[$key]['qty'] = 0;
-            } else {
-                unset($this->cart[$key]);
-            }
+        if (--$this->cart[$key]['qty'] < 1) {
+            unset($this->cart[$key]);
         }
     }
 
     public function remove($key)
     {
-        if (!isset($this->cart[$key])) {
-            return;
-        }
-
-        if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
-            $this->cart[$key]['qty'] = 0;
-        } else {
-            unset($this->cart[$key]);
-        }
+        unset($this->cart[$key]);
     }
 
     public function updateQty($key, $qty)
     {
         $qty = (int) $qty;
-
-        if (!isset($this->cart[$key])) {
-            return;
-        }
-
         if ($qty < 1) {
-            if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
-                $this->cart[$key]['qty'] = 0;
-            } else {
-                unset($this->cart[$key]);
-            }
+            unset($this->cart[$key]);
             return;
         }
-
-        $this->cart[$key]['qty'] = $qty;
+        if (isset($this->cart[$key])) {
+            $this->cart[$key]['qty'] = $qty;
+        }
     }
 
     public function openNoteModal($key)
