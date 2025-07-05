@@ -175,14 +175,13 @@
                         <p class="text-xs md:text-sm font-semibold text-blue-600">Old - #{{ $kotId ?? '-' }} •
                             {{ \Carbon\Carbon::parse($kotTime)->format('h:i') }}</p>
                         @foreach ($cartItems as $key => $row)
-                            @if (in_array($key, $originalKotItemKeys))
+                            @if (in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
                                 <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"
                                     wire:key="row-{{ $row['id'] }}">
                                     <div class="flex-1 min-w-0">
                                         <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
                                             {{ $row['name'] }}
-                                            @if (in_array($key, $originalKotItemKeys))
-                                            @endif
+
                                         </p>
                                         <div class="flex items-baseline gap-2">
                                             <p class="text-xs text-gray-500 whitespace-nowrap">
@@ -202,7 +201,7 @@
                             <p class="text-xs md:text-sm font-semibold text-blue-600">New -
                                 {{ \Carbon\Carbon::parse(now())->format('h:i:s') }}</p>
                             @foreach ($cartItems as $key => $row)
-                                @if (!in_array($key, $originalKotItemKeys))
+                            @if (!in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
                                     <div class="border rounded p-1 md:p-2 flex items-center justify-between"
                                         wire:key="row-{{ $row['id'] }}">
                                         <div class="flex-1 min-w-0">
