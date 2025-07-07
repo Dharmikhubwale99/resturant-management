@@ -42,9 +42,8 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <!-- Pending KOT  (PDF icon) -->
-                    <a href="{{ route('waiter.kots.pending') }}"
-                    class="text-gray-600 hover:text-gray-800"
-                    title="Pending KOT Orders">
+                    <a href="{{ route('waiter.kots.pending') }}" class="text-gray-600 hover:text-gray-800"
+                        title="Pending KOT Orders">
                         <i class="fas fa-file-pdf text-lg"></i>
                     </a>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-calculator text-lg"></i></button>
@@ -201,7 +200,7 @@
                             <p class="text-xs md:text-sm font-semibold text-blue-600">New -
                                 {{ \Carbon\Carbon::parse(now())->format('h:i:s') }}</p>
                             @foreach ($cartItems as $key => $row)
-                            @if (!in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
+                                @if (!in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
                                     <div class="border rounded p-1 md:p-2 flex items-center justify-between"
                                         wire:key="row-{{ $row['id'] }}">
                                         <div class="flex-1 min-w-0">
@@ -255,7 +254,6 @@
                                 Total: ₹{{ number_format($cartTotal, 2) }}
                             </div>
 
-                            <!-- Custom Radio Group for Payment -->
                             <div class="flex flex-wrap justify-center gap-4 mt-3 mb-3">
                                 @php
                                     $paymentMethods = [
@@ -271,30 +269,31 @@
                                     <label
                                         class="inline-flex items-center space-x-2 text-sm font-medium text-gray-700 cursor-pointer">
                                         <input type="radio" name="payment_method" value="{{ $value }}"
-                                            wire:model="payment_method" class="peer hidden" />
+                                            wire:model="paymentMethod"
+                                        class="peer hidden" />
                                         <div
-                                            class="w-4 h-4 rounded-full border-2 border-gray-400 peer-checked:border-red-500 peer-checked:bg-red-500 transition duration-200">
+                                            class="w-4 h-4 rounded-full border-2 border-gray-400 peer-checked:border-red-500 peer-checked:bg-red-500">
                                         </div>
-                                        <span class="select-none">{{ $label }}</span>
+                                        <span>{{ $label }}</span>
                                     </label>
                                 @endforeach
+                                @error('paymentMethod')
+                                    <p class="text-xs text-red-600">{{ $message }}</p>
+                                @enderror
+
                             </div>
 
 
 
                             <div class="p-2 md:p-4 border-t mt-2">
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-2">
-                                    <button
+                                    <button wire:click="save"
                                         class="bg-red-500 text-white px-2 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-xs md:text-sm">
                                         Save
                                     </button>
-                                    <button
+                                    <button wire:click="saveAndPrint"
                                         class="bg-red-500 text-white px-2 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-xs md:text-sm">
                                         Save & Print
-                                    </button>
-                                    <button
-                                        class="bg-red-500 text-white px-2 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-xs md:text-sm">
-                                        Save & eBill
                                     </button>
                                     @if ($editMode)
                                         <button

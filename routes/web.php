@@ -59,11 +59,7 @@ use \App\Livewire\Resturant\{
 
     User\Index as UserIndex,
     User\Create as UserCreate,
-    User\Edit as UserEdit,
-
-    Discount\Index as DiscountIndex,
-    Discount\Create as DiscountCreate,
-    Discount\Edit as DiscountEdit
+    User\Edit as UserEdit
 };
 
 use App\Livewire\Waiter\{
@@ -157,12 +153,6 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/', UserIndex::class)->name('index');
         Route::get('/create', UserCreate::class)->name('create');
         Route::get('/edit/{id}', UserEdit::class)->name('edit');
-    });
-
-    Route::prefix('discount')->as('discount.')->group(function () {
-        Route::get('/', DiscountIndex::class)->name('index');
-        Route::get('/create', DiscountCreate::class)->name('create');
-        Route::get('/edit/{id}', DiscountEdit::class)->name('edit');
     });
 
 });

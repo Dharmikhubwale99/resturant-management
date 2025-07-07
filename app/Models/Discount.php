@@ -36,16 +36,19 @@ class Discount extends Model
      *
      * @return array<string, string>
      */
-    protected $casts = [
-        'id' => 'integer',
-        'value' => 'decimal:2',
-        'minimum_amount' => 'decimal:2',
-        'maximum_discount' => 'decimal:2',
-        'is_active' => 'boolean',
-        'starts_at' => 'datetime',
-        'ends_at' => 'datetime',
-        'restaurant_id' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'value' => 'decimal:2',
+            'minimum_amount' => 'decimal:2',
+            'maximum_discount' => 'decimal:2',
+            'is_active' => 'boolean',
+            'starts_at' => 'timestamp',
+            'ends_at' => 'timestamp',
+            'restaurant_id' => 'integer',
+        ];
+    }
 
     public function restaurant(): BelongsTo
     {

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->enum('type', ["fixed","percentage"]);
-            $table->decimal('value', 10, 2)->nullable();
+            $table->decimal('value', 10, 2);
             $table->decimal('minimum_amount', 10, 2)->nullable();
             $table->decimal('maximum_discount', 10, 2)->nullable();
             $table->boolean('is_active')->default(true);
