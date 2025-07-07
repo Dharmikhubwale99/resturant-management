@@ -266,12 +266,16 @@ class Item extends Component
     {
         if (!isset($this->cart[$key])) {
             return;
+            logger()->error("Attempted to remove non-existent cart item: $key");
         }
 
         if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
             $this->cart[$key]['qty'] = 0;
+            logger()->info("Set qty to 0 for original KOT item: $key");
         } else {
             unset($this->cart[$key]);
+            // $this->getCartTotal();
+            logger()->info("Removed item from cart: $key");
         }
     }
 

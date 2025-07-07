@@ -41,12 +41,12 @@
                     <span class="text-sm font-medium">9099912483</span>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <!-- Pending KOT  (PDF icon) -->
-                    <a href="{{ route('waiter.kots.pending') }}"
-                    class="text-gray-600 hover:text-gray-800"
-                    title="Pending KOT Orders">
-                        <i class="fas fa-file-pdf text-lg"></i>
-                    </a>
+<!-- Pending KOT  (PDF icon) -->
+<a href="{{ route('waiter.kots.pending') }}"
+   class="text-gray-600 hover:text-gray-800"
+   title="Pending KOT Orders">
+    <i class="fas fa-file-pdf text-lg"></i>
+</a>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-calculator text-lg"></i></button>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-th text-lg"></i></button>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-clock text-lg"></i></button>
