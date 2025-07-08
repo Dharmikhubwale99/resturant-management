@@ -49,6 +49,11 @@
                     class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
                     Expenses
                 </a>
+
+                <a href="{{ route('restaurant.discount.index') }}"
+                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                    Discount
+                </a>
             </div>
 
             <div class="flex items-center space-x-4">
