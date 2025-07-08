@@ -255,23 +255,35 @@
                             </div>
 
                             <div class="flex flex-wrap justify-center gap-4 mt-3 mb-3">
+                                @php
+                                    $paymentMethods = [
+                                        'cash' => 'Cash',
+                                        'card' => 'Card',
+                                        'duo' => 'Due',
+                                        'upi' => 'Upi',
+                                        'part' => 'Part',
+                                    ];
+                                @endphp
+
                                 @foreach ($paymentMethods as $value => $label)
                                     <label
                                         class="inline-flex items-center space-x-2 text-sm font-medium text-gray-700 cursor-pointer">
                                         <input type="radio" name="payment_method" value="{{ $value }}"
                                             wire:model="paymentMethod"
-                                            class="peer hidden" />
+                                        class="peer hidden" />
                                         <div
                                             class="w-4 h-4 rounded-full border-2 border-gray-400 peer-checked:border-red-500 peer-checked:bg-red-500">
                                         </div>
                                         <span>{{ $label }}</span>
                                     </label>
                                 @endforeach
-
                                 @error('paymentMethod')
                                     <p class="text-xs text-red-600">{{ $message }}</p>
                                 @enderror
+
                             </div>
+
+
 
                             <div class="p-2 md:p-4 border-t mt-2">
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-2">
