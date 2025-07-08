@@ -259,8 +259,8 @@
                                     $paymentMethods = [
                                         'cash' => 'Cash',
                                         'card' => 'Card',
-                                        'due' => 'Due',
-                                        'other' => 'Other',
+                                        'duo' => 'Due',
+                                        'upi' => 'Upi',
                                         'part' => 'Part',
                                     ];
                                 @endphp
