@@ -6,7 +6,8 @@ use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
-use App\Enums\OrderType;
+use App\Enums\{OrderType, PaymentMethod};
+use Illuminate\Validation\Rules\Enum;
 
 class Item extends Component
 {
@@ -18,6 +19,7 @@ class Item extends Component
     public array $originalKotItemKeys = [];
     public bool $editMode = false;
     public string $paymentMethod = '';
+    public $paymentMethods = [];
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -35,6 +37,7 @@ class Item extends Component
         $this->items = $table->restaurant->items()->with('variants')->get();
         $this->categories = $this->items->pluck('category')->unique('id')->values();
         $this->orderTypes = collect(OrderType::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
+        $this->paymentMethods = collect(PaymentMethod::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])->toArray();
         $this->editMode = request()->query('mode') === 'edit';
 
         if ($this->editMode) {
@@ -442,10 +445,7 @@ class Item extends Component
         }
 
         $this->validate([
-            'paymentMethod' => 'required|in:cash,card,due,other,part',
-        ], [
-            'paymentMethod.required' => 'Please choose a payment method.',
-            'paymentMethod.in'       => 'Invalid payment method selected.',
+            'paymentMethod' => ['required', new Enum(PaymentMethod::class)],
         ]);
 
         if($order)
