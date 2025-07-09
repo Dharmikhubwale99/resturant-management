@@ -34,6 +34,13 @@
 
             <x-form.input name="ends_at" label="End Date" wireModel="ends_at" type="datetime-local" required />
 
+            <x-form.multiselect
+                name="selected_items"
+                label="Apply to Item(s)"
+                wireModel="selected_items"
+                :options="$items"
+            />
+
             <div class="flex flex-row text-center space-x-3">
                 <x-form.button type="submit" title="Save" wireClick="submit" wireTarget="submit" />
                 <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white" route="restaurant.discount.index" />
