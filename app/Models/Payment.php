@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payment extends Model
 {
@@ -40,5 +41,15 @@ class Payment extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function restaurantPaymentLogs():HasMany
+    {
+        return $this->hasMany(RestaurantPaymentLog::class);
+    }
+
+    public function paymentGroups(): HasMany
+    {
+        return $this->hasMany(RestaurantPaymentLog::class, 'payment_id');
     }
 }
