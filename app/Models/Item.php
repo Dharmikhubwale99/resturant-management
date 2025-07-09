@@ -100,4 +100,9 @@ class Item extends Model implements HasMedia
         };
     }
 
+    public function discounts()
+    {
+        return $this->belongsToMany(Discount::class, 'discount_item');
+    }
+
 }

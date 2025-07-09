@@ -29,6 +29,14 @@ class Create extends Component
 
     #[Layout('components.layouts.resturant.app')]
 
+    public function render()
+    {
+        $this->restaurant = auth()->user()->restaurants()->first();
+        return view('livewire.resturant.item.create', [
+            'itemTypes' => ItemType::cases(),
+        ]);
+    }
+    
     public function mount(): void
     {
         $this->restaurant = auth()->user()->restaurants()->first();
@@ -44,14 +52,6 @@ class Create extends Component
         $this->itemTypes  = collect(ItemType::cases())
                             ->mapWithKeys(fn ($c) => [$c->value => $c->label()])
                             ->toArray();
-    }
-
-    public function render()
-    {
-        $this->restaurant = auth()->user()->restaurants()->first();
-        return view('livewire.resturant.item.create', [
-            'itemTypes' => ItemType::cases(),
-        ]);
     }
 
     public function getRestaurantFolder(): string
