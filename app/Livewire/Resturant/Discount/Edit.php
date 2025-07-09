@@ -18,8 +18,6 @@ class Edit extends Component
     public $starts_at;
     public $ends_at;
     public $resturant;
-    public $items = [];
-    public $selected_items = [];
 
     public function mount($id)
     {
@@ -37,14 +35,6 @@ class Edit extends Component
         // Format for datetime-local input
         $this->starts_at = $this->discount->starts_at ? $this->discount->starts_at->format('Y-m-d\TH:i') : null;
         $this->ends_at = $this->discount->ends_at ? $this->discount->ends_at->format('Y-m-d\TH:i') : null;
-
-        // Load all items for the restaurant
-        $this->items = \App\Models\Item::where('restaurant_id', $this->resturant->id)
-            ->orderBy('name')
-            ->pluck('name', 'id')
-            ->toArray();
-        // Load selected items for this discount
-        $this->selected_items = $this->discount->items()->pluck('items.id')->toArray();
     }
 
     #[Layout('components.layouts.resturant.app')]
@@ -58,8 +48,6 @@ class Edit extends Component
         $rules = [
             'code' => 'required|unique:discounts,code,' . $this->discount->id . ',id,restaurant_id,' . $this->resturant->id,
             'type' => 'required',
-            'selected_items'=> 'required|array|min:1',
-            'selected_items.*' => 'exists:items,id',
             'max_uses' => 'nullable|integer',
             'starts_at' => 'required|date',
             'ends_at' => 'required|date|after:starts_at',
@@ -84,8 +72,6 @@ class Edit extends Component
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at,
         ]);
-
-        $this->discount->items()->sync($this->selected_items);
 
         session()->flash('success', 'Discount updated successfully!');
         return redirect()->route('restaurant.discount.index');

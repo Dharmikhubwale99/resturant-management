@@ -255,35 +255,22 @@
                             </div>
 
                             <div class="flex flex-wrap justify-center gap-4 mt-3 mb-3">
-                                @php
-                                    $paymentMethods = [
-                                        'cash' => 'Cash',
-                                        'card' => 'Card',
-                                        'duo' => 'Due',
-                                        'upi' => 'Upi',
-                                        'part' => 'Part',
-                                    ];
-                                @endphp
-
                                 @foreach ($paymentMethods as $value => $label)
                                     <label
                                         class="inline-flex items-center space-x-2 text-sm font-medium text-gray-700 cursor-pointer">
                                         <input type="radio" name="payment_method" value="{{ $value }}"
-                                            wire:model="paymentMethod"
-                                        class="peer hidden" />
+                                            wire:model="paymentMethod" class="peer hidden" />
                                         <div
                                             class="w-4 h-4 rounded-full border-2 border-gray-400 peer-checked:border-red-500 peer-checked:bg-red-500">
                                         </div>
                                         <span>{{ $label }}</span>
                                     </label>
                                 @endforeach
+
                                 @error('paymentMethod')
                                     <p class="text-xs text-red-600">{{ $message }}</p>
                                 @enderror
-
                             </div>
-
-
 
                             <div class="p-2 md:p-4 border-t mt-2">
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-2">
@@ -410,6 +397,49 @@
             @endif
         </div>
     @endif
+
+    @if ($showSplitModal)
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white rounded shadow p-4 w-full max-w-md">
+                <h3 class="font-bold mb-3">Split Payment</h3>
+
+                @foreach ($splits as $index => $row)
+                    <div class="flex gap-2 mb-2 items-center">
+                        <select wire:model="splits.{{ $index }}.method" class="border rounded p-1 flex-1">
+                            <option value="">-- Method --</option>
+                            @foreach ($paymentMethods as $val => $lbl)
+                                @if ($val !== 'part')
+                                    <option value="{{ $val }}">{{ $lbl }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+
+                        <input type="number" min="1" step="0.01"
+                            wire:model="splits.{{ $index }}.amount" class="border rounded p-1 w-24"
+                            placeholder="Amt" />
+
+                        <button wire:click="removeSplit({{ $index }})"
+                            class="text-red-600 text-lg">&times;</button>
+                    </div>
+                    @error("splits.$index.method")
+                        <p class="text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                    @error("splits.$index.amount")
+                        <p class="text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                @endforeach
+
+                <button wire:click="addSplit" class="bg-gray-200 px-3 py-1 text-sm rounded mb-4">+ Add</button>
+
+                <div class="flex justify-end gap-2">
+                    <button wire:click="$set('showSplitModal', false)"
+                        class="bg-gray-300 px-3 py-1 rounded">Cancel</button>
+                    <button wire:click="confirmSplit" class="bg-red-500 text-white px-3 py-1 rounded">Save</button>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>
 
 @push('scripts')
