@@ -20,6 +20,8 @@ class Item extends Component
     public bool $editMode = false;
     public string $paymentMethod = '';
     public $paymentMethods = [];
+    public bool   $showSplitModal = false;
+    public array  $splits        = [];
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -38,6 +40,9 @@ class Item extends Component
         $this->categories = $this->items->pluck('category')->unique('id')->values();
         $this->orderTypes = collect(OrderType::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
         $this->paymentMethods = collect(PaymentMethod::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])->toArray();
+        $this->splits = [
+            ['method' => '', 'amount' => 0],
+        ];
         $this->editMode = request()->query('mode') === 'edit';
 
         if ($this->editMode) {
