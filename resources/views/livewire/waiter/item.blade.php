@@ -402,6 +402,16 @@
         <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white rounded shadow p-4 w-full max-w-md">
                 <h3 class="font-bold mb-3">Split Payment</h3>
+                <x-form.error />
+                <div class="mb-2">
+                    <label class="block text-sm font-semibold mb-1">Customer Name</label>
+                    <input type="text" wire:model="customerName" class="border rounded p-2 w-full" placeholder="Enter customer name">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-1">Mobile Number</label>
+                    <input type="text" wire:model="mobile" maxlength="20" class="border rounded p-2 w-full" placeholder="9876543210">
+                </div>
 
                 @foreach ($splits as $index => $row)
                     <div class="flex gap-2 mb-2 items-center">
@@ -421,12 +431,6 @@
                         <button wire:click="removeSplit({{ $index }})"
                             class="text-red-600 text-lg">&times;</button>
                     </div>
-                    @error("splits.$index.method")
-                        <p class="text-xs text-red-600">{{ $message }}</p>
-                    @enderror
-                    @error("splits.$index.amount")
-                        <p class="text-xs text-red-600">{{ $message }}</p>
-                    @enderror
                 @endforeach
 
                 <button wire:click="addSplit" class="bg-gray-200 px-3 py-1 text-sm rounded mb-4">+ Add</button>

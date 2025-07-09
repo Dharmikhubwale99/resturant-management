@@ -14,9 +14,6 @@ class Index extends Component
     public $discountToDelete = null;
     public $search = '';
     public $filterDiscountType = '';
-    public $confirmingBlock = false;
-    public $blockId = null;
-
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
@@ -57,30 +54,6 @@ class Index extends Component
         }
 
         $this->cancelDelete();
-    }
-
-    public function confirmBlock($id)
-    {
-        $this->blockId = $id;
-        $this->confirmingBlock = true;
-    }
-
-    public function cancelBlock()
-    {
-        $this->blockId = null;
-        $this->confirmingBlock = false;
-    }
-
-    public function toggleBlock()
-    {
-        $discount = Discount::findOrFail($this->blockId);
-        $discount->is_active = !$discount->is_active;
-        $discount->save();
-
-        $status = $discount->is_active ? 'unblocked' : 'blocked';
-        session()->flash('message', "Discount {$status} successfully.");
-
-        $this->cancelBlock();
     }
 
 }

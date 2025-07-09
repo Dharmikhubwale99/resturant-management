@@ -67,7 +67,7 @@ class Create extends Component
             'max_uses'         => $this->max_uses,
             'starts_at'        => $this->starts_at,
             'ends_at'          => $this->ends_at,
-            'is_active'        => 0,
+            'is_active'        => true,
         ]);
 
         $discount->items()->sync($this->selected_items);   // ⑤ NEW
