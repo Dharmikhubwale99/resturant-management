@@ -6,15 +6,15 @@
                 <x-form.input name="search" placeholder="Search..." wireModelLive="search" wrapperClass="mb-0"
                     inputClass="w-72" />
 
-                    <x-form.select name="filterDiscountType" wireModelLive="filterDiscountType" :options="[
+                <x-form.select name="filterDiscountType" wireModelLive="filterDiscountType" :options="[
                     'fixed' => 'Fixed',
                     'percentage' => 'Percentage',
-                    ]"
+                ]"
                     placeholder="All Types" wrapperClass="mb-0" inputClass="text-sm" />
 
 
-                    <x-form.button title="+ Add" route="restaurant.discount.create"
-                        class="bg-blue-600 hover:bg-blue-700 text-white" />
+                <x-form.button title="+ Add" route="restaurant.discount.create"
+                    class="bg-blue-600 hover:bg-blue-700 text-white" />
             </div>
         </div>
         <x-form.error />
@@ -30,6 +30,7 @@
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Max Amount</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Start Date</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">End Date</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                     </tr>
                 </thead>
@@ -48,8 +49,32 @@
                             <td class="px-6 text-sm text-gray-900">
                                 {{ \Carbon\Carbon::parse($discount->ends_at)->format('d-m-Y H:i') }}
                             </td>
+                            <td class="px-6 text-sm">
+
+                                @if ($discount->is_active)
+                                    <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                                        Inactive
+                                    </span>
+                                @else
+                                    <span
+                                        class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                                        Active
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-2 text-sm text-gray-900">
                                 <div class="flex items-center justify-start space-x-2">
+                                    <x-form.button title=""
+                                        class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                        wireClick="confirmBlock({{ $discount->id }})">
+                                        @if ($discount->is_active)
+                                        <span class="w-5 h-1 flex items-center justify-center">
+                                                {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
+                                        @else
+                                        <span class="w-5 h-1 flex items-center justify-center">
+                                            {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
+                                        @endif
+                                    </x-form.button>
                                     <x-form.button title=""
                                         class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.discount.edit', $discount->id]">
                                         <span class="w-4 h-4">
@@ -71,7 +96,7 @@
                 </tbody>
             </table>
             <div class="mt-4">
-                {{-- {{ $discounts->links() }} --}}
+                {{ $discounts->links() }}
             </div>
 
             @if ($confirmingDelete)
@@ -87,6 +112,30 @@
                                 class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
                             <button wire:click="deleteDiscount"
                                 class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            @if ($confirmingBlock)
+                <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
+                    <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
+                        <h3 class="text-lg font-semibold mb-4 text-yellow-600">
+                            {{ optional(\App\Models\Discount::find($blockId))->is_active ? 'Confirm Block' : 'Confirm Unblock' }}
+                        </h3>
+                        <p class="text-gray-700 mb-6">
+                            Are you sure you want to
+                            {{ optional(\App\Models\Discount::find($blockId))->is_active ? 'block' : 'unblock' }} this
+                            owner?
+                        </p>
+
+                        <div class="flex justify-end space-x-3">
+                            <button wire:click="cancelBlock"
+                                class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
+                            <button wire:click="toggleBlock"
+                                class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                                {{ optional(\App\Models\Discount::find($blockId))->is_active ? 'Block' : 'Unblock' }}
+                            </button>
                         </div>
                     </div>
                 </div>
