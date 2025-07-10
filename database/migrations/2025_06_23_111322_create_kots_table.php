@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('kot_number');
             $table->enum('status', ["pending","preparing","ready","cancelled","served"])->default('pending');
             $table->timestamp('printed_at')->nullable();
-            $table->text('reason')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
