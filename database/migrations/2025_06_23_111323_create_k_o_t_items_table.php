@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->enum('status', ["pending","preparing","ready","served","cancelled"])->default('pending');
             $table->text('special_notes')->nullable();
+            $table->text('reason')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
