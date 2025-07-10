@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('order_id')->nullable();
             $table->foreignId('table_id')->nullable();
             $table->string('kot_number');
-            $table->enum('status', ["pending","preparing","ready","cancelled"])->default('pending');
+            $table->enum('status', ["pending","preparing","ready","cancelled","served"])->default('pending');
             $table->timestamp('printed_at')->nullable();
             $table->timestamps();
             $table->softDeletes();

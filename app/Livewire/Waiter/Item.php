@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment};
+use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -22,6 +22,9 @@ class Item extends Component
     public $paymentMethods = [];
     public bool   $showSplitModal = false;
     public array  $splits        = [];
+    public string $customerName = '';
+    public string $mobile = '';
+
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -395,44 +398,58 @@ class Item extends Component
 
     public function save()
     {
-        $order = Order::where('table_id', $this->table_id)
-        ->where('status', 'pending')
-        ->latest()
-        ->first();
-
-        if(!$order){
-            $this->createOrderAndKot();
-        }
-
         $this->validate([
-            'paymentMethod' => 'required|in:cash,card,due,other,part',
+            'paymentMethod' => 'required|in:cash,card,duo,other,part',
         ], [
             'paymentMethod.required' => 'Please choose a payment method.',
             'paymentMethod.in'       => 'Invalid payment method selected.',
         ]);
 
-        if($order)
-        {
-            $table = Table::findOrFail($this->table_id);
+        $order = Order::where('table_id', $this->table_id)
+                      ->where('status', 'pending')
+                      ->latest()
+                      ->first();
 
-            $table->update([
-                'status' => 'available'
-            ]);
+        if (! $order) {
+            $order = $this->createOrderAndKot();
+        }
 
-            $order->update([
-                'status' => 'served',
-            ]);
+        if ($this->paymentMethod === 'part') {
+            $this->showSplitModal = true;
+            return;
+        }
+        if ($order) {
+            $kot = KOT::where('table_id', $this->table_id)
+                      ->where('status', 'pending')
+                      ->latest()
+                      ->first();
 
-            $payment = Payment::create([
+            if ($kot) {
+                $kotItems = KOTItem::where('kot_id', $kot->id)->get();
+                $kot->update(['status' => 'ready']);
+                $kotItems->each(fn ($item) => $item->update(['status' => 'served']));
+            }
+
+            $orderItems = OrderItem::where('order_id', $order->id)->get();
+            $table      = Table::findOrFail($this->table_id);
+
+            $order->update(['status' => 'served']);
+            $orderItems->each(fn ($item) => $item->update(['status' => 'served']));
+            $table->update(['status' => 'available']);
+            $amount = $this->getCartTotal();
+
+            Payment::create([
                 'order_id' => $order->id,
-                'amount' => $order->total_amount,
-                'status' => 'paid',
-                'method' => $this->paymentMethod,
+                'amount'   => $amount,
+                'method'   => $this->paymentMethod,
             ]);
         }
 
-        return redirect()->route('waiter.dashboard')->with('success', 'Order Payment Complete!');
+        return redirect()
+            ->route('waiter.dashboard')
+            ->with('success', 'Order Payment Complete!');
     }
+
 
     public function saveAndPrint()
     {
@@ -475,5 +492,100 @@ class Item extends Component
         $this->dispatch('printKot', kotId: $kot->id);
         return redirect()->route('waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
+
+    public function addSplit()
+    {
+        $this->splits[] = ['method' => '', 'amount' => null];
+    }
+
+    public function removeSplit($index)
+    {
+        unset($this->splits[$index]);
+        $this->splits = array_values($this->splits);
+    }
+
+    public function confirmSplit()
+{
+    $order = Order::where('table_id', $this->table_id)
+                  ->where('status', 'pending')
+                  ->latest()
+                  ->firstOrFail();
+
+    $kot = KOT::where('order_id', $order->id)
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->firstOrFail();
+
+    $restaurantId = Auth::user()->restaurant_id;
+
+    $orderItems = OrderItem::where('order_id', $order->id)->get();
+
+    $kotItems = KOTItem::where('kot_id', $kot->id)->get();
+
+    $this->validate([
+        'customerName' => 'nullable|string|max:100',
+        'mobile'       => 'nullable|string|max:20',
+        'splits.*.method' => ['required', new Enum(PaymentMethod::class)],
+        'splits.*.amount' => 'required|numeric|min:0.01',
+    ]);
+
+
+    $total = collect($this->splits)->sum('amount');
+
+    if (bccomp($total, $order->total_amount, 2) !== 0) {
+        session()->flash('error', 'Split amounts must equal the order total (₹' . number_format($order->total_amount, 2) . ').');
+        return;
+    }
+    $payment = Payment::create([
+        'order_id' => $order->id,
+        'amount'   => $order->total_amount,
+        'method'   => $this->paymentMethod,
+    ]);
+
+    foreach ($this->splits as $split) {
+        PaymentGroup::create([
+            'restaurant_id' => $restaurantId,
+            'payment_id'    => $payment->id,
+            'order_id'      => $order->id,
+            'customer_name' => $this->customerName,
+            'mobile'        => $this->mobile,
+            'amount'        => $split['amount'],
+            'method'        => $split['method'],
+        ]);
+    }
+
+    if($order)
+    {
+        $table = Table::findOrFail($this->table_id);
+
+        $table->update([
+            'status' => 'available'
+        ]);
+
+        $order->update([
+            'status' => 'served',
+        ]);
+
+        $orderItems->each(function ($item) use ($order) {
+            $item->update(['status' => 'served']);
+        });
+
+        $kot->update([
+            'status' => 'ready',
+        ]);
+
+        $kotItems->each(function ($item) use ($kot) {
+            $item->update(['status' => 'served']);
+        });
+
+    }
+
+    $this->reset(['splits', 'paymentMethod', 'showSplitModal', 'customerName', 'mobile']);
+
+    return redirect()
+            ->route('waiter.dashboard')
+            ->with('success', 'Order split payment recorded!');
+}
+
 }
 
