@@ -66,6 +66,10 @@ use \App\Livewire\Resturant\{
     Discount\Edit as DiscountEdit
 };
 
+use \App\Livewire\Kitchen\{
+    Dashboard as KitchenDashboard,
+};
+
 use App\Livewire\Waiter\{
     Dashboard as WaiterDashboard,
 
@@ -175,6 +179,8 @@ Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|w
     Route::get('/kot-print/{kot_id}', KotPrint::class)->name('kot.print');
     Route::get('/kots/pending', PendingKotOrders::class)->name('kots.pending');
 });
-// Route::get('/table/{qr_token}/menu', function($qr_token) {
-//     return "Menu for table token: " . $qr_token;
-// })->name('table.menu');
+
+Route::prefix('kitchen')->as('kitchen.')->middleware(['web', 'auth', 'role:admin|kitchen'])->group(function () {
+    Route::get('/', KitchenDashboard::class)->name('dashboard');
+});
+
