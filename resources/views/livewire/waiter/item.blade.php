@@ -316,19 +316,21 @@
     @if ($showVariantModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div class="bg-white w-full max-w-sm rounded shadow-lg p-6 mx-2">
-                <h3 class="text-lg font-bold mb-4">Select Variant <span class="text-sm font-normal">(optional)</span>
-                </h3>
+                @if ($variantOptions)
+                    <h3 class="text-lg font-bold mb-4">Select Variant <span class="text-sm font-normal">(optional)</span>
+                    </h3>
 
-                <div class="space-y-2 mb-6">
-                    @foreach ($variantOptions as $opt)
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" wire:model="selectedVariantId" value="{{ $opt['id'] }}">
-                            <span>
-                                {{ $opt['variant_name'] }} — ₹{{ number_format($opt['combined_price'], 2) }}
-                            </span>
-                        </label>
-                    @endforeach
-                </div>
+                    <div class="space-y-2 mb-6">
+                        @foreach ($variantOptions as $opt)
+                            <label class="flex items-center gap-2">
+                                <input type="radio" wire:model="selectedVariantId" value="{{ $opt['id'] }}">
+                                <span>
+                                    {{ $opt['variant_name'] }} — ₹{{ number_format($opt['variant_price'], 2) }}
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
 
                 @if (count($addonOptions))
                 <div class="mb-4">
