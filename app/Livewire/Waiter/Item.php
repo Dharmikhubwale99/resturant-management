@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
+use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -11,42 +11,19 @@ use Illuminate\Validation\Rules\Enum;
 
 class Item extends Component
 {
-    public $items,
-        $categories,
-        $selectedCategory = null,
-        $table_id,
-        $search = '';
-    public $cart = [],
-        $showVariantModal = false,
-        $currentItem = null,
-        $variantOptions = [];
-    public $selectedVariantId = null,
-        $showNoteModal = false,
-        $noteInput = '',
-        $currentNoteKey = null;
-    public $orderTypes = [],
-        $order_type,
-        $kotId,
-        $kotTime;
-    public $occupiedTables = [],
-        $ordersForTable = [];
+    public $items, $categories, $selectedCategory = null, $table_id, $search = '';
+    public $cart = [], $showVariantModal = false, $currentItem = null, $variantOptions = [];
+    public $selectedVariantId = null, $showNoteModal = false, $noteInput = '', $currentNoteKey = null;
+    public $orderTypes = [], $order_type, $kotId, $kotTime, $showTableList = false;
+    public $occupiedTables = [], $selectedTable = null, $ordersForTable = [];
     public array $originalKotItemKeys = [];
     public bool $editMode = false;
     public string $paymentMethod = '';
     public $paymentMethods = [];
-    public bool $showSplitModal = false;
-    public array $splits = [];
+    public bool   $showSplitModal = false;
+    public array  $splits        = [];
     public string $customerName = '';
     public string $mobile = '';
-    public bool $showDuoPaymentModal = false;
-    public string $duoCustomerName = '';
-    public string $duoMobile = '';
-    public float $duoAmount = 0;
-    public string $duoIssue = '';
-    public string $duoMethod = '';
-    public $addonOptions = [];
-    public $selectedAddons = [];
-
 
 
     #[Layout('components.layouts.waiter.app')]
@@ -66,7 +43,9 @@ class Item extends Component
         $this->categories = $this->items->pluck('category')->unique('id')->values();
         $this->orderTypes = collect(OrderType::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
         $this->paymentMethods = collect(PaymentMethod::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])->toArray();
-        $this->splits = [['method' => '', 'amount' => 0]];
+        $this->splits = [
+            ['method' => '', 'amount' => 0],
+        ];
         $this->editMode = request()->query('mode') === 'edit';
 
         if ($this->editMode) {
@@ -85,13 +64,17 @@ class Item extends Component
                 $key = $kotItem->variant_id ? 'v' . $kotItem->variant_id : $kotItem->item_id;
                 $this->originalKotItemKeys[] = $key;
 
-                $name = $kotItem->variant_id ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')' : $kotItem->item->name;
+                $name = $kotItem->variant_id
+                    ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')'
+                    : $kotItem->item->name;
 
                 $this->cart[$key] = [
                     'id' => $key,
                     'item_id' => $kotItem->item_id,
                     'name' => $name,
-                    'price' => $kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price,
+                    'price' => $kotItem->variant_id
+                        ? $kotItem->item->price + $kotItem->variant->price
+                        : $kotItem->item->price,
                     'qty' => $kotItem->quantity,
                     'note' => $kotItem->special_notes ?? '',
                 ];
@@ -101,112 +84,80 @@ class Item extends Component
 
     public function getFilteredItems()
     {
-        $collection = $this->selectedCategory ? $this->items->where('category_id', $this->selectedCategory) : $this->items;
+        $collection = $this->selectedCategory
+            ? $this->items->where('category_id', $this->selectedCategory)
+            : $this->items;
 
         if ($this->search !== '') {
             $collection = $collection->filter(
-                fn($i) => str($i->name)
-                    ->lower()
-                    ->contains(str($this->search)->lower()),
+                fn($i) => str($i->name)->lower()->contains(str($this->search)->lower())
             );
         }
 
         return $collection;
     }
 
-    public function selectCategory($categoryId)
-    {
-        $this->selectedCategory = $categoryId;
-    }
-    public function clearCategory()
-    {
-        $this->selectedCategory = null;
-    }
-    private function getCartTotal()
-    {
-        return collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
-    }
+
+    public function selectCategory($categoryId) { $this->selectedCategory = $categoryId; }
+    public function clearCategory() { $this->selectedCategory = null; }
+    private function getCartTotal() { return collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']); }
 
     public function itemClicked($itemId)
     {
-        if (!($item = $this->items->find($itemId))) {
-            return;
-        }
+        if (!$item = $this->items->find($itemId)) return;
 
         $this->currentItem = ['id' => $item->id, 'name' => $item->name, 'price' => $item->price];
 
-        $this->addonOptions = $item->addons->map(function ($addon) {
-            return [
-                'id' => $addon->id,
-                'name' => $addon->name,
-                'price' => $addon->price,
-            ];
-        })->toArray();
-
         if ($item->variants->isNotEmpty()) {
-            $this->variantOptions = $item->variants->map(function ($v) use ($item) {
-                return [
-                    'id' => $v->id,
-                    'item_id' => $item->id,
-                    'combined_name' => $item->name . ' (' . $v->name . ')',
-                    'combined_price' => $item->price + $v->price,
-                    'variant_name' => $v->name,
-                ];
-            })->toArray();
+            $this->variantOptions = $item->variants->map(fn($v) => [
+                'id' => $v->id,
+                'item_id' => $item->id,
+                'combined_name' => $item->name . ' (' . $v->name . ')',
+                'combined_price' => $item->price + $v->price,
+                'variant_name' => $v->name,
+            ])->toArray();
 
             $this->selectedVariantId = null;
             $this->showVariantModal = true;
         } else {
-            if (count($this->addonOptions)) {
-                $this->showVariantModal = true;
-            } else {
-                $this->addToCart($item->id, $item->name, $item->price);
-            }
+            $this->addToCart($item->id, $item->name, $item->price);
         }
     }
-
 
     public function addSelectedVariant()
     {
-        $addonsPrice = collect($this->selectedAddons)->sum(fn($id) => collect($this->addonOptions)->firstWhere('id', $id)['price']);
-
         if ($this->selectedVariantId) {
-            $v = collect($this->variantOptions)->firstWhere('id', $this->selectedVariantId);
-            $key = 'v' . $v['id'];
-            $this->addToCart($key, $v['combined_name'], $v['combined_price'] + $addonsPrice);
-            $this->cart[$key]['item_id'] = $v['item_id'];
-            $this->cart[$key]['addons'] = $this->selectedAddons;
+            if ($v = collect($this->variantOptions)->firstWhere('id', $this->selectedVariantId)) {
+                $key = 'v' . $v['id'];
+                $this->addToCart($key, $v['combined_name'], $v['combined_price']);
+                $this->cart[$key]['item_id'] = $v['item_id'];
+            }
         } elseif ($this->currentItem) {
-            $key = $this->currentItem['id'];
-            $this->addToCart($key, $this->currentItem['name'], $this->currentItem['price'] + $addonsPrice);
-            $this->cart[$key]['addons'] = $this->selectedAddons;
+            $this->addToCart($this->currentItem['id'], $this->currentItem['name'], $this->currentItem['price']);
         }
 
-        $this->reset(['showVariantModal', 'variantOptions', 'selectedVariantId', 'currentItem', 'addonOptions', 'selectedAddons']);
+        $this->reset(['showVariantModal', 'variantOptions', 'selectedVariantId', 'currentItem']);
     }
-
 
     private function addToCart($key, $name, $price)
     {
         if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
-            $existingNewKey = collect(array_keys($this->cart))->first(fn($k) => str_starts_with($k, $key . '-new'));
+            $existingNewKey = collect(array_keys($this->cart))->first(fn ($k) => str_starts_with($k, $key . '-new'));
             if ($existingNewKey) {
                 $this->cart[$existingNewKey]['qty']++;
                 return;
             }
             $newKey = $key . '-new';
             $this->cart[$newKey] = [
-                'id' => $newKey,
-                'item_id' => str_starts_with($key, 'v') ? null : $key,
-                'name' => $name,
-                'price' => $price,
-                'qty' => 1,
-                'note' => '',
+                'id' => $newKey, 'item_id' => str_starts_with($key, 'v') ? null : $key,
+                'name' => $name, 'price' => $price, 'qty' => 1, 'note' => ''
             ];
             return;
         }
 
-        $existingKey = $this->editMode ? collect(array_keys($this->cart))->first(fn($k) => $k === $key || str_starts_with($k, $key . '-new')) : $key;
+        $existingKey = $this->editMode
+            ? collect(array_keys($this->cart))->first(fn ($k) => $k === $key || str_starts_with($k, $key . '-new'))
+            : $key;
 
         if ($existingKey && isset($this->cart[$existingKey])) {
             $this->cart[$existingKey]['qty']++;
@@ -215,16 +166,11 @@ class Item extends Component
         }
     }
 
-    public function increment($key)
-    {
-        $this->cart[$key]['qty']++;
-    }
+    public function increment($key) { $this->cart[$key]['qty']++; }
 
     public function decrement($key)
     {
-        if (!isset($this->cart[$key])) {
-            return;
-        }
+        if (!isset($this->cart[$key])) return;
 
         $this->cart[$key]['qty']--;
 
@@ -237,11 +183,10 @@ class Item extends Component
         }
     }
 
+
     public function remove($key)
     {
-        if (!isset($this->cart[$key])) {
-            return;
-        }
+        if (!isset($this->cart[$key])) return;
 
         if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
             $this->cart[$key]['qty'] = 0;
@@ -250,11 +195,10 @@ class Item extends Component
         }
     }
 
+
     public function updateQty($key, $qty)
     {
-        if (!isset($this->cart[$key])) {
-            return;
-        }
+        if (!isset($this->cart[$key])) return;
 
         $qty = (int) $qty;
 
@@ -269,6 +213,7 @@ class Item extends Component
 
         $this->cart[$key]['qty'] = $qty;
     }
+
 
     public function openNoteModal($key)
     {
@@ -285,10 +230,7 @@ class Item extends Component
         $this->reset(['showNoteModal', 'noteInput', 'currentNoteKey']);
     }
 
-    public function selectOrderType(string $type)
-    {
-        $this->order_type = $type;
-    }
+    public function selectOrderType(string $type) { $this->order_type = $type; }
 
     protected function createOrderAndKot($print = false)
     {
@@ -323,7 +265,7 @@ class Item extends Component
                 $variantId = str_starts_with($row['id'], 'v') ? (int) substr($row['id'], 1) : null;
                 $baseItemId = $variantId ? $row['item_id'] : $row['id'];
 
-                $orderItem = OrderItem::create([
+                OrderItem::create([
                     'order_id' => $order->id,
                     'item_id' => $baseItemId,
                     'variant_id' => $variantId,
@@ -335,7 +277,7 @@ class Item extends Component
                     'status' => 'pending',
                 ]);
 
-                $kotItem = KOTItem::create([
+                KOTItem::create([
                     'kot_id' => $kot->id,
                     'item_id' => $baseItemId,
                     'variant_id' => $variantId,
@@ -343,21 +285,9 @@ class Item extends Component
                     'status' => 'pending',
                     'special_notes' => $row['note'] ?? null,
                 ]);
-
-                if (!empty($row['addons'])) {
-                    foreach ($row['addons'] as $addonId) {
-                        $addon = Addon::find($addonId);
-                        if ($addon) {
-                            $orderItem->addons()->attach($addon->id, ['price' => $addon->price]);
-                            $kotItem->addons()->attach($addon->id, ['price' => $addon->price]);
-                        }
-                    }
-                }
             }
 
-            if ($print) {
-                $this->dispatch('printKot', kotId: $kot->id);
-            }
+            if ($print) $this->dispatch('printKot', kotId: $kot->id);
             return $kot;
         });
     }
@@ -376,31 +306,31 @@ class Item extends Component
 
     public function placeOrderAndPrint()
     {
-        if (empty($this->cart)) {
-            $this->addError('cart', 'Cart is empty!');
-            return;
-        }
+        $order = Order::where('table_id', $this->table_id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
 
-        if ($this->editMode) {
-            $this->updateOrder();
+        $kot = KOT::where('table_id', $this->table_id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
 
-            $kot = KOT::where('table_id', $this->table_id)
-                ->where('status', 'pending')
-                ->latest()
-                ->first();
+        if ($kot) {
+            $kot->update(['printed_at' => now()]);
+            $this->dispatch('printKot', kotId: $kot->id);
 
-            if ($kot) {
-                $kot->update(['printed_at' => now()]);
-                $this->dispatch('printKot', kotId: $kot->id);
+        } else {
+            if (empty($this->cart)) {
+                $this->addError('cart', 'Cart is empty!');
+                return;
             }
 
-            return redirect()->route('waiter.dashboard')->with('success', 'KOT updated & printed!');
+            $this->createOrderAndKot(true);
+            $this->reset(['cart', 'showVariantModal', 'noteInput', 'currentNoteKey']);
         }
 
-        $this->createOrderAndKot(true);
-        $this->reset(['cart', 'showVariantModal', 'noteInput', 'currentNoteKey']);
-
-        return redirect()->route('waiter.dashboard')->with('success', 'Order placed & KOT printed!');
+        return redirect()->route('waiter.dashboard')->with('success', 'Order placed!');
     }
 
 
@@ -425,9 +355,7 @@ class Item extends Component
             $addToSubTotal = 0;
 
             foreach ($this->cart as $key => $row) {
-                if (in_array($key, $this->originalKotItemKeys)) {
-                    continue;
-                }
+                if (in_array($key, $this->originalKotItemKeys)) continue;
 
                 $variantId = str_starts_with($key, 'v') ? (int) substr($key, 1) : null;
                 $baseItemId = $variantId ? $row['item_id'] : (int) preg_replace('/-new\d*/', '', $row['id']);
@@ -470,110 +398,98 @@ class Item extends Component
 
     public function save()
     {
-        $this->validate(
-            [
-                'paymentMethod' => 'required|in:cash,card,duo,other,part',
-            ],
-            [
-                'paymentMethod.required' => 'Please choose a payment method.',
-                'paymentMethod.in' => 'Invalid payment method selected.',
-            ],
-        );
+        $this->validate([
+            'paymentMethod' => 'required|in:cash,card,duo,other,part',
+        ], [
+            'paymentMethod.required' => 'Please choose a payment method.',
+            'paymentMethod.in'       => 'Invalid payment method selected.',
+        ]);
 
-        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+        $order = Order::where('table_id', $this->table_id)
+                      ->where('status', 'pending')
+                      ->latest()
+                      ->first();
 
-        if (!$order) {
+        if (! $order) {
             $order = $this->createOrderAndKot();
         }
 
         if ($this->paymentMethod === 'part') {
             $this->showSplitModal = true;
             return;
-        } elseif ($this->paymentMethod === 'duo') {
-            $this->showDuoPaymentModal = true;
-            $this->duoAmount = $this->getCartTotal();
-            return;
         }
-
         if ($order) {
-            $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+            $kot = KOT::where('table_id', $this->table_id)
+                      ->where('status', 'pending')
+                      ->latest()
+                      ->first();
 
             if ($kot) {
                 $kotItems = KOTItem::where('kot_id', $kot->id)->get();
                 $kot->update(['status' => 'ready']);
-                $kotItems->each(fn($item) => $item->update(['status' => 'served']));
+                $kotItems->each(fn ($item) => $item->update(['status' => 'served']));
             }
 
             $orderItems = OrderItem::where('order_id', $order->id)->get();
-            $table = Table::findOrFail($this->table_id);
+            $table      = Table::findOrFail($this->table_id);
 
             $order->update(['status' => 'served']);
-            $orderItems->each(fn($item) => $item->update(['status' => 'served']));
+            $orderItems->each(fn ($item) => $item->update(['status' => 'served']));
             $table->update(['status' => 'available']);
             $amount = $this->getCartTotal();
 
             Payment::create([
                 'order_id' => $order->id,
-                'amount' => $amount,
-                'method' => $this->paymentMethod,
+                'amount'   => $amount,
+                'method'   => $this->paymentMethod,
             ]);
         }
 
-        return redirect()->route('waiter.dashboard')->with('success', 'Order Payment Complete!');
+        return redirect()
+            ->route('waiter.dashboard')
+            ->with('success', 'Order Payment Complete!');
     }
+
 
     public function saveAndPrint()
     {
-        $this->validate(
-            [
-                'paymentMethod' => 'required|in:cash,card,duo,other,part',
-            ],
-            [
-                'paymentMethod.required' => 'Please choose a payment method.',
-                'paymentMethod.in' => 'Invalid payment method selected.',
-            ],
-        );
+        $order = Order::where('table_id', $this->table_id)
+        ->where('status', 'pending')
+        ->latest()
+        ->first();
 
-        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+        $kot = KOT::where('table_id', $this->table_id)
+            ->where('status', 'pending')
+            ->first();
 
-        if (!$order) {
-            $order = $this->createOrderAndKot();
+        if(!$order){
+            $this->createOrderAndKot();
         }
 
+        $this->validate([
+            'paymentMethod' => ['required', new Enum(PaymentMethod::class)],
+        ]);
 
-        if ($this->paymentMethod === 'part') {
-            $this->showSplitModal = true;
-            return;
-        } elseif ($this->paymentMethod === 'duo') {
-            $this->showDuoPaymentModal = true;
-            $this->duoAmount = $this->getCartTotal();
-            return;
-        }
-
-        if ($order) {
-            $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
-
-            if ($kot) {
-                $kotItems = KOTItem::where('kot_id', $kot->id)->get();
-                $kot->update(['status' => 'ready']);
-                $kotItems->each(fn($item) => $item->update(['status' => 'served']));
-            }
-
-            $orderItems = OrderItem::where('order_id', $order->id)->get();
+        if($order)
+        {
             $table = Table::findOrFail($this->table_id);
 
-            $order->update(['status' => 'served']);
-            $orderItems->each(fn($item) => $item->update(['status' => 'served']));
-            $table->update(['status' => 'available']);
-            $amount = $this->getCartTotal();
+            $table->update([
+                'status' => 'available'
+            ]);
 
-            Payment::create([
+            $order->update([
+                'status' => 'served',
+            ]);
+
+            $payment = Payment::create([
                 'order_id' => $order->id,
-                'amount' => $amount,
+                'amount' => $order->total_amount,
+                'status' => 'paid',
                 'method' => $this->paymentMethod,
             ]);
         }
-        $this->dispatch('printBill', billId: $order->id);
+        $this->dispatch('printKot', kotId: $kot->id);
         return redirect()->route('waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
 
@@ -589,134 +505,87 @@ class Item extends Component
     }
 
     public function confirmSplit()
-    {
-        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
+{
+    $order = Order::where('table_id', $this->table_id)
+                  ->where('status', 'pending')
+                  ->latest()
+                  ->firstOrFail();
 
-        $kot = KOT::where('order_id', $order->id)->where('status', 'pending')->latest()->firstOrFail();
+    $kot = KOT::where('order_id', $order->id)
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->firstOrFail();
 
-        $restaurantId = Auth::user()->restaurant_id;
+    $restaurantId = Auth::user()->restaurant_id;
 
-        $orderItems = OrderItem::where('order_id', $order->id)->get();
+    $orderItems = OrderItem::where('order_id', $order->id)->get();
 
-        $kotItems = KOTItem::where('kot_id', $kot->id)->get();
+    $kotItems = KOTItem::where('kot_id', $kot->id)->get();
 
-        $this->validate([
-            'customerName' => 'nullable|string|max:100',
-            'mobile' => 'nullable|string|max:20',
-            'splits.*.method' => ['required', new Enum(PaymentMethod::class)],
-            'splits.*.amount' => 'required|numeric|min:0.01',
+    $this->validate([
+        'customerName' => 'nullable|string|max:100',
+        'mobile'       => 'nullable|string|max:20',
+        'splits.*.method' => ['required', new Enum(PaymentMethod::class)],
+        'splits.*.amount' => 'required|numeric|min:0.01',
+    ]);
+
+
+    $total = collect($this->splits)->sum('amount');
+
+    if (bccomp($total, $order->total_amount, 2) !== 0) {
+        session()->flash('error', 'Split amounts must equal the order total (₹' . number_format($order->total_amount, 2) . ').');
+        return;
+    }
+    $payment = Payment::create([
+        'order_id' => $order->id,
+        'amount'   => $order->total_amount,
+        'method'   => $this->paymentMethod,
+    ]);
+
+    foreach ($this->splits as $split) {
+        PaymentGroup::create([
+            'restaurant_id' => $restaurantId,
+            'payment_id'    => $payment->id,
+            'order_id'      => $order->id,
+            'customer_name' => $this->customerName,
+            'mobile'        => $this->mobile,
+            'amount'        => $split['amount'],
+            'method'        => $split['method'],
         ]);
-
-        $total = collect($this->splits)->sum('amount');
-
-        if (bccomp($total, $order->total_amount, 2) !== 0) {
-            session()->flash('error', 'Split amounts must equal the order total (₹' . number_format($order->total_amount, 2) . ').');
-            return;
-        }
-        $payment = Payment::create([
-            'order_id' => $order->id,
-            'amount' => $order->total_amount,
-            'method' => $this->paymentMethod,
-        ]);
-
-        foreach ($this->splits as $split) {
-            PaymentGroup::create([
-                'restaurant_id' => $restaurantId,
-                'payment_id' => $payment->id,
-                'order_id' => $order->id,
-                'customer_name' => $this->customerName,
-                'mobile' => $this->mobile,
-                'amount' => $split['amount'],
-                'method' => $split['method'],
-            ]);
-        }
-
-        if ($order) {
-            $table = Table::findOrFail($this->table_id);
-
-            $table->update([
-                'status' => 'available',
-            ]);
-
-            $order->update([
-                'status' => 'served',
-            ]);
-
-            $orderItems->each(function ($item) use ($order) {
-                $item->update(['status' => 'served']);
-            });
-
-            $kot->update([
-                'status' => 'ready',
-            ]);
-
-            $kotItems->each(function ($item) use ($kot) {
-                $item->update(['status' => 'served']);
-            });
-        }
-
-        $this->reset(['splits', 'paymentMethod', 'showSplitModal', 'customerName', 'mobile']);
-
-        return redirect()->route('waiter.dashboard')->with('success', 'Order split payment recorded!');
     }
 
-    public function confirmDuoPayment()
+    if($order)
     {
-        $this->validate([
-            'duoCustomerName' => 'required|string|max:100',
-            'duoMobile' => 'required|string|max:20',
-            'duoAmount' => 'required|numeric|min:0.01',
-            'duoMethod' => ['required', new Enum(PaymentMethod::class)],
-            'duoIssue' => 'nullable|string|max:255',
-        ]);
-
-        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
-
-        if (!$order) {
-            $order = $this->createOrderAndKot();
-        }
-
-        $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
-
-        if ($kot) {
-            $kotItems = KOTItem::where('kot_id', $kot->id)->get();
-            $kot->update(['status' => 'ready']);
-            $kotItems->each(fn($item) => $item->update(['status' => 'served']));
-        }
-
-        $orderItems = OrderItem::where('order_id', $order->id)->get();
         $table = Table::findOrFail($this->table_id);
 
-        $order->update(['status' => 'served']);
-        $orderItems->each(fn($item) => $item->update(['status' => 'served']));
-        $table->update(['status' => 'available']);
-
-        $payment = Payment::create([
-            'order_id' => $order->id,
-            'amount' => $order->total_amount,
-            'method' => 'duo',
+        $table->update([
+            'status' => 'available'
         ]);
 
-        $remainingAmount = $order->total_amount - $this->duoAmount;
-
-        RestaurantPaymentLog::create([
-            'restaurant_id' => Auth::user()->restaurant_id,
-            'payment_id' => $payment->id,
-            'order_id' => $order->id,
-            'customer_name' => $this->duoCustomerName,
-            'mobile' => $this->duoMobile,
-            'paid_amount' => $this->duoAmount,
-            'amount' => $remainingAmount,
-            'method' => $this->duoMethod,
-            'issue' => $this->duoIssue,
+        $order->update([
+            'status' => 'served',
         ]);
 
-        $this->reset([
-            'showDuoPaymentModal', 'duoCustomerName', 'duoMobile',
-            'duoAmount', 'duoMethod', 'duoIssue', 'paymentMethod',
+        $orderItems->each(function ($item) use ($order) {
+            $item->update(['status' => 'served']);
+        });
+
+        $kot->update([
+            'status' => 'ready',
         ]);
 
-        return redirect()->route('waiter.dashboard')->with('success', 'Duo Payment Completed!');
+        $kotItems->each(function ($item) use ($kot) {
+            $item->update(['status' => 'served']);
+        });
+
     }
 
+    $this->reset(['splits', 'paymentMethod', 'showSplitModal', 'customerName', 'mobile']);
+
+    return redirect()
+            ->route('waiter.dashboard')
+            ->with('success', 'Order split payment recorded!');
 }
+
+}
+

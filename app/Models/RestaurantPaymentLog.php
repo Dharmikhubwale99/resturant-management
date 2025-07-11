@@ -18,8 +18,6 @@ class RestaurantPaymentLog extends Model
         'customer_name',
         'mobile',
         'amount',
-        'paid_amount',
-        'method',
         'issue',
     ];
 

@@ -54,12 +54,4 @@ class KOTItem extends Model
     {
         return $this->belongsTo(Variant::class);
     }
-
-    public function addons()
-    {
-        return $this->belongsToMany(Addon::class, 'kot_item_addons', 'kot_item_id', 'addon_id')
-                    ->withPivot('price')
-                    ->withTimestamps();
-    }
-
 }
