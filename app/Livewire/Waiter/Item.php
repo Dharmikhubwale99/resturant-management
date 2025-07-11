@@ -133,6 +133,15 @@ class Item extends Component
             return;
         }
 
+        $this->reset([
+            'variantOptions',
+            'selectedVariantId',
+            'addonOptions',
+            'selectedAddons',
+            'currentItem',
+            'showVariantModal',
+        ]);
+
         $this->currentItem = ['id' => $item->id, 'name' => $item->name, 'price' => $item->price];
 
         $this->addonOptions = $item->addons->map(function ($addon) {
@@ -150,6 +159,7 @@ class Item extends Component
                     'item_id' => $item->id,
                     'combined_name' => $item->name . ' (' . $v->name . ')',
                     'combined_price' => $item->price + $v->price,
+                    'variant_price' => $v->price,
                     'variant_name' => $v->name,
                 ];
             })->toArray();
