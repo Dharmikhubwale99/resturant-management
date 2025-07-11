@@ -322,7 +322,7 @@
                 <div class="space-y-2 mb-6">
                     @foreach ($variantOptions as $opt)
                         <label class="flex items-center gap-2">
-                            <input type="radio" wire:model="selectedVariantId" value="{{ $opt['id'] }}">
+                            <input type="checkbox" wire:model="selectedVariantId" value="{{ $opt['id'] }}">
                             <span>
                                 {{ $opt['variant_name'] }} — ₹{{ number_format($opt['combined_price'], 2) }}
                             </span>
@@ -330,6 +330,17 @@
                     @endforeach
                 </div>
 
+                @if (count($addonOptions))
+                <div class="mb-4">
+                    <h4 class="text-sm font-semibold mb-2">Select Addons</h4>
+                    @foreach ($addonOptions as $addon)
+                        <label class="flex items-center space-x-2 mb-1">
+                            <input type="checkbox" wire:model="selectedAddons" value="{{ $addon['id'] }}">
+                            <span>{{ $addon['name'] }} — ₹{{ number_format($addon['price'], 2) }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            @endif
                 <div class="flex justify-end gap-2">
                     <button class="px-4 py-2 bg-gray-200 rounded"
                         wire:click="$set('showVariantModal', false)">Cancel</button>
@@ -340,6 +351,7 @@
                 </div>
             </div>
         </div>
+
     @endif
 
     @if ($showNoteModal)
@@ -361,43 +373,6 @@
         </div>
     @endif
 
-    @if ($showTableList)
-        <div class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div class="bg-white p-4 md:p-6 rounded shadow-lg max-w-md w-full mx-2">
-                <h2 class="text-lg font-bold mb-4">Occupied Tables</h2>
-                <ul>
-                    @foreach ($occupiedTables as $table)
-                        <li>
-                            <button wire:click="selectTable({{ $table->id }})"
-                                class="block w-full text-left px-4 py-2 hover:bg-blue-100 rounded">
-                                {{ $table->name }} ({{ $table->area->name ?? '' }})
-                            </button>
-                        </li>
-                    @endforeach
-                </ul>
-                <button wire:click="$set('showTableList', false)"
-                    class="mt-4 bg-gray-500 text-white px-4 py-2 rounded">Close</button>
-            </div>
-        </div>
-    @endif
-
-    @if ($selectedTable)
-        <div class="mt-4 md:mt-6 p-2 md:p-4">
-            <h3 class="text-lg font-bold mb-2">Orders for Table: {{ $selectedTable->name }}</h3>
-            @if ($ordersForTable->isEmpty())
-                <p>No orders for this table.</p>
-            @else
-                <ul>
-                    @foreach ($ordersForTable as $order)
-                        <li class="mb-2 border-b pb-2">
-                            Order #{{ $order->id }} - {{ $order->status }} - ₹{{ $order->total_amount }}
-                        </li>
-                    @endforeach
-                </ul>
-            @endif
-        </div>
-    @endif
-
     @if ($showSplitModal)
         <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white rounded shadow p-4 w-full max-w-md">
@@ -405,12 +380,14 @@
                 <x-form.error />
                 <div class="mb-2">
                     <label class="block text-sm font-semibold mb-1">Customer Name</label>
-                    <input type="text" wire:model="customerName" class="border rounded p-2 w-full" placeholder="Enter customer name">
+                    <input type="text" wire:model="customerName" class="border rounded p-2 w-full"
+                        placeholder="Enter customer name">
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-sm font-semibold mb-1">Mobile Number</label>
-                    <input type="text" wire:model="mobile" maxlength="20" class="border rounded p-2 w-full" placeholder="9876543210">
+                    <input type="text" wire:model="mobile" maxlength="20" class="border rounded p-2 w-full"
+                        placeholder="9876543210">
                 </div>
 
                 @foreach ($splits as $index => $row)
@@ -444,6 +421,58 @@
         </div>
     @endif
 
+    @if ($showDuoPaymentModal)
+        <div class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-white rounded shadow p-4 w-full max-w-md">
+                <h3 class="text-lg font-bold mb-4">Duo Payment Details</h3>
+                <x-form.error />
+
+                <div class="mb-2">
+                    <label class="block text-sm font-semibold">Customer Name</label>
+                    <input type="text" wire:model.defer="duoCustomerName" class="border rounded w-full p-2" />
+                </div>
+
+                <div class="mb-2">
+                    <label class="block text-sm font-semibold">Mobile Number</label>
+                    <input type="text" wire:model.defer="duoMobile" maxlength="20"
+                        class="border rounded w-full p-2" />
+                </div>
+
+                <div class="mb-2">
+                    <label class="block text-sm font-semibold">Payment Method</label>
+                    <select wire:model="duoMethod" class="border rounded w-full p-2">
+                        <option value=""> Select Method </option>
+                        @foreach ($paymentMethods as $val => $lbl)
+                            @if ($val !== 'duo' && $val !== 'part')
+                                <option value="{{ $val }}">{{ $lbl }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <label class="block text-sm font-semibold">Amount</label>
+                    <input type="number" min="0" step="0.01" wire:model.live="duoAmount"
+                        class="border rounded w-full p-2" />
+                    <span class="text-sm text-gray-600 mt-1 block">
+                        Amount: ₹{{ number_format($cartTotal - floatval($duoAmount), 2) }}
+                    </span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold">Issue</label>
+                    <textarea wire:model.defer="duoIssue" class="border rounded w-full p-2" rows="3"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button wire:click="$set('showDuoPaymentModal', false)"
+                        class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
+                    <button wire:click="confirmDuoPayment"
+                        class="bg-red-500 text-white px-4 py-2 rounded">Confirm</button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 @push('scripts')
@@ -525,4 +554,13 @@
             });
         });
     </script>
+
+
+<script>
+    Livewire.on('printBill', (event) => {
+        const billId = event.billId;
+        window.open(`/waiter/bill-print/${billId}`, '_blank');
+    });
+</script>
+
 @endpush
