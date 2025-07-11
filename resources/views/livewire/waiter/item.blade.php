@@ -322,7 +322,7 @@
                 <div class="space-y-2 mb-6">
                     @foreach ($variantOptions as $opt)
                         <label class="flex items-center gap-2">
-                            <input type="radio" wire:model="selectedVariantId" value="{{ $opt['id'] }}">
+                            <input type="checkbox" wire:model="selectedVariantId" value="{{ $opt['id'] }}">
                             <span>
                                 {{ $opt['variant_name'] }} — ₹{{ number_format($opt['combined_price'], 2) }}
                             </span>
@@ -330,6 +330,17 @@
                     @endforeach
                 </div>
 
+                @if (count($addonOptions))
+                <div class="mb-4">
+                    <h4 class="text-sm font-semibold mb-2">Select Addons</h4>
+                    @foreach ($addonOptions as $addon)
+                        <label class="flex items-center space-x-2 mb-1">
+                            <input type="checkbox" wire:model="selectedAddons" value="{{ $addon['id'] }}">
+                            <span>{{ $addon['name'] }} — ₹{{ number_format($addon['price'], 2) }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            @endif
                 <div class="flex justify-end gap-2">
                     <button class="px-4 py-2 bg-gray-200 rounded"
                         wire:click="$set('showVariantModal', false)">Cancel</button>
@@ -340,6 +351,7 @@
                 </div>
             </div>
         </div>
+
     @endif
 
     @if ($showNoteModal)
@@ -542,4 +554,13 @@
             });
         });
     </script>
+
+
+<script>
+    Livewire.on('printBill', (event) => {
+        const billId = event.billId;
+        window.open(`/waiter/bill-print/${billId}`, '_blank');
+    });
+</script>
+
 @endpush

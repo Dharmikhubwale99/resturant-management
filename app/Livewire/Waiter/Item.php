@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup};
+use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -44,6 +44,9 @@ class Item extends Component
     public float $duoAmount = 0;
     public string $duoIssue = '';
     public string $duoMethod = '';
+    public $addonOptions = [];
+    public $selectedAddons = [];
+
 
 
     #[Layout('components.layouts.waiter.app')]
@@ -132,40 +135,56 @@ class Item extends Component
 
         $this->currentItem = ['id' => $item->id, 'name' => $item->name, 'price' => $item->price];
 
+        $this->addonOptions = $item->addons->map(function ($addon) {
+            return [
+                'id' => $addon->id,
+                'name' => $addon->name,
+                'price' => $addon->price,
+            ];
+        })->toArray();
+
         if ($item->variants->isNotEmpty()) {
-            $this->variantOptions = $item->variants
-                ->map(
-                    fn($v) => [
-                        'id' => $v->id,
-                        'item_id' => $item->id,
-                        'combined_name' => $item->name . ' (' . $v->name . ')',
-                        'combined_price' => $item->price + $v->price,
-                        'variant_name' => $v->name,
-                    ],
-                )
-                ->toArray();
+            $this->variantOptions = $item->variants->map(function ($v) use ($item) {
+                return [
+                    'id' => $v->id,
+                    'item_id' => $item->id,
+                    'combined_name' => $item->name . ' (' . $v->name . ')',
+                    'combined_price' => $item->price + $v->price,
+                    'variant_name' => $v->name,
+                ];
+            })->toArray();
 
             $this->selectedVariantId = null;
             $this->showVariantModal = true;
         } else {
-            $this->addToCart($item->id, $item->name, $item->price);
+            if (count($this->addonOptions)) {
+                $this->showVariantModal = true;
+            } else {
+                $this->addToCart($item->id, $item->name, $item->price);
+            }
         }
     }
+
 
     public function addSelectedVariant()
     {
+        $addonsPrice = collect($this->selectedAddons)->sum(fn($id) => collect($this->addonOptions)->firstWhere('id', $id)['price']);
+
         if ($this->selectedVariantId) {
-            if ($v = collect($this->variantOptions)->firstWhere('id', $this->selectedVariantId)) {
-                $key = 'v' . $v['id'];
-                $this->addToCart($key, $v['combined_name'], $v['combined_price']);
-                $this->cart[$key]['item_id'] = $v['item_id'];
-            }
+            $v = collect($this->variantOptions)->firstWhere('id', $this->selectedVariantId);
+            $key = 'v' . $v['id'];
+            $this->addToCart($key, $v['combined_name'], $v['combined_price'] + $addonsPrice);
+            $this->cart[$key]['item_id'] = $v['item_id'];
+            $this->cart[$key]['addons'] = $this->selectedAddons;
         } elseif ($this->currentItem) {
-            $this->addToCart($this->currentItem['id'], $this->currentItem['name'], $this->currentItem['price']);
+            $key = $this->currentItem['id'];
+            $this->addToCart($key, $this->currentItem['name'], $this->currentItem['price'] + $addonsPrice);
+            $this->cart[$key]['addons'] = $this->selectedAddons;
         }
 
-        $this->reset(['showVariantModal', 'variantOptions', 'selectedVariantId', 'currentItem']);
+        $this->reset(['showVariantModal', 'variantOptions', 'selectedVariantId', 'currentItem', 'addonOptions', 'selectedAddons']);
     }
+
 
     private function addToCart($key, $name, $price)
     {
@@ -304,7 +323,7 @@ class Item extends Component
                 $variantId = str_starts_with($row['id'], 'v') ? (int) substr($row['id'], 1) : null;
                 $baseItemId = $variantId ? $row['item_id'] : $row['id'];
 
-                OrderItem::create([
+                $orderItem = OrderItem::create([
                     'order_id' => $order->id,
                     'item_id' => $baseItemId,
                     'variant_id' => $variantId,
@@ -316,7 +335,7 @@ class Item extends Component
                     'status' => 'pending',
                 ]);
 
-                KOTItem::create([
+                $kotItem = KOTItem::create([
                     'kot_id' => $kot->id,
                     'item_id' => $baseItemId,
                     'variant_id' => $variantId,
@@ -324,6 +343,16 @@ class Item extends Component
                     'status' => 'pending',
                     'special_notes' => $row['note'] ?? null,
                 ]);
+
+                if (!empty($row['addons'])) {
+                    foreach ($row['addons'] as $addonId) {
+                        $addon = Addon::find($addonId);
+                        if ($addon) {
+                            $orderItem->addons()->attach($addon->id, ['price' => $addon->price]);
+                            $kotItem->addons()->attach($addon->id, ['price' => $addon->price]);
+                        }
+                    }
+                }
             }
 
             if ($print) {
@@ -544,7 +573,7 @@ class Item extends Component
                 'method' => $this->paymentMethod,
             ]);
         }
-        $this->dispatch('printKot', kotId: $kot->id);
+        $this->dispatch('printBill', billId: $order->id);
         return redirect()->route('waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
 
