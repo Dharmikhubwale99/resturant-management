@@ -43,10 +43,10 @@
             @forelse ($kotList as $kot)
                 <div class="border-l-4 border-{{ $borderColor }} bg-white p-4 rounded shadow mb-4">
                     <p class="font-semibold">
+                        {{ $kot->table->area->name ?? 'Area' }} – Table {{ $kot->table->name ?? $kot->table->id }}
+                    </p>
+                    <p class="text-sm text-gray-600">
                         KOT #{{ $kot->kot_number }}
-                        @if ($kot->table)
-                            – Table {{ $kot->table->name ?? $kot->table->id }}
-                        @endif
                     </p>
 
                     <ul class="text-sm text-gray-700 mt-1">
