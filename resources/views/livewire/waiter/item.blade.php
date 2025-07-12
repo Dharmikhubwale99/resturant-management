@@ -150,7 +150,7 @@
                 <!-- Order Type Buttons -->
                 <div class="flex flex-wrap gap-1 md:gap-2 mb-2 md:mb-4">
                     @php
-                        $opts = ['dine_in' => 'Dine In', 'delivery' => 'Delivery', 'takeaway' => 'Pick Up'];
+                        $opts = ['dine_in' => 'Dine In', 'delivery' => 'Delivery', 'pick_up' => 'Pick Up'];
                     @endphp
 
                     @foreach ($opts as $value => $label)
@@ -316,21 +316,19 @@
     @if ($showVariantModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div class="bg-white w-full max-w-sm rounded shadow-lg p-6 mx-2">
-                @if ($variantOptions)
-                    <h3 class="text-lg font-bold mb-4">Select Variant <span class="text-sm font-normal">(optional)</span>
-                    </h3>
+                <h3 class="text-lg font-bold mb-4">Select Variant <span class="text-sm font-normal">(optional)</span>
+                </h3>
 
-                    <div class="space-y-2 mb-6">
-                        @foreach ($variantOptions as $opt)
-                            <label class="flex items-center gap-2">
-                                <input type="radio" wire:model="selectedVariantId" value="{{ $opt['id'] }}">
-                                <span>
-                                    {{ $opt['variant_name'] }} — ₹{{ number_format($opt['variant_price'], 2) }}
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
-                @endif
+                <div class="space-y-2 mb-6">
+                    @foreach ($variantOptions as $opt)
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" wire:model="selectedVariantId" value="{{ $opt['id'] }}">
+                            <span>
+                                {{ $opt['variant_name'] }} — ₹{{ number_format($opt['combined_price'], 2) }}
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
 
                 @if (count($addonOptions))
                 <div class="mb-4">

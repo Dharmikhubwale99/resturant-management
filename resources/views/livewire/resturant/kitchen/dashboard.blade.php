@@ -1,6 +1,5 @@
     <div class="p-4 md:p-6 bg-gray-100 min-h-screen">
-        <div class="max-w-5xl mx-auto">
-
+        <div class="max-w-5xl mx-auto">`1
             {{-- Header --}}
             <div class="flex flex-col md:flex-row md:justify-between mb-6 gap-4">
                 <h1 class="text-2xl font-bold">Kitchen Dashboard</h1>

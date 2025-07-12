@@ -47,6 +47,8 @@ class Item extends Component
     public $addonOptions = [];
     public $selectedAddons = [];
 
+
+
     #[Layout('components.layouts.waiter.app')]
     public function render()
     {
@@ -60,10 +62,7 @@ class Item extends Component
     public function mount($table_id)
     {
         $table = Table::findOrFail($table_id);
-        $this->items = $table->restaurant
-            ->items()
-            ->with(['variants', 'discounts'])
-            ->get();
+        $this->items = $table->restaurant->items()->with('variants')->get();
         $this->categories = $this->items->pluck('category')->unique('id')->values();
         $this->orderTypes = collect(OrderType::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
         $this->paymentMethods = collect(PaymentMethod::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])->toArray();
@@ -77,11 +76,9 @@ class Item extends Component
 
     protected function loadEditModeData($table_id)
     {
-        $latestKot = KOT::where('table_id', $table_id)->where('status', 'pending')->first();
+        $latestKot = KOT::where('table_id', $table_id)->where('status', 'pending')->latest()->first();
         $this->kotId = $latestKot?->kot_number;
         $this->kotTime = $latestKot?->created_at;
-
-        $order = Order::where('table_id', $table_id)->where('status', 'pending')->first();
 
         if ($latestKot) {
             $latestKot->items()->each(function ($kotItem) {
@@ -99,10 +96,6 @@ class Item extends Component
                     'note' => $kotItem->special_notes ?? '',
                 ];
             });
-        }
-
-        if ($order) {
-            $this->order_type = $order->order_type;
         }
     }
 
@@ -134,65 +127,32 @@ class Item extends Component
         return collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
     }
 
-    private function applyDiscount($basePrice, $discount)
-    {
-        if (!$discount) {
-            return $basePrice;
-        }
-
-        if ($discount->type === 'percentage') {
-            return max($basePrice - ($basePrice * $discount->value) / 100, 0);
-        } elseif ($discount->type === 'fixed') {
-            return max($basePrice - $discount->minimum_amount, 0);
-        }
-
-        return $basePrice;
-    }
-
     public function itemClicked($itemId)
     {
         if (!($item = $this->items->find($itemId))) {
             return;
         }
 
-        $this->reset(['variantOptions', 'selectedVariantId', 'addonOptions', 'selectedAddons', 'currentItem', 'showVariantModal']);
+        $this->currentItem = ['id' => $item->id, 'name' => $item->name, 'price' => $item->price];
 
-        $discount = $item->discounts->where('is_active', 0)->first();
-
-        $baseDiscountedPrice = $this->applyDiscount($item->price, $discount);
-
-        $this->currentItem = [
-            'id' => $item->id,
-            'name' => $item->name,
-            'price' => $baseDiscountedPrice,
-        ];
-
-        $this->addonOptions = $item->addons
-            ->map(function ($addon) {
-                return [
-                    'id' => $addon->id,
-                    'name' => $addon->name,
-                    'price' => $addon->price,
-                ];
-            })
-            ->toArray();
+        $this->addonOptions = $item->addons->map(function ($addon) {
+            return [
+                'id' => $addon->id,
+                'name' => $addon->name,
+                'price' => $addon->price,
+            ];
+        })->toArray();
 
         if ($item->variants->isNotEmpty()) {
-            $this->variantOptions = $item->variants
-                ->map(function ($v) use ($item, $discount) {
-                    $combinedBasePrice = $item->price + $v->price;
-                    $combinedDiscountedPrice = $this->applyDiscount($combinedBasePrice, $discount);
-
-                    return [
-                        'id' => $v->id,
-                        'item_id' => $item->id,
-                        'combined_name' => $item->name . ' (' . $v->name . ')',
-                        'combined_price' => $combinedDiscountedPrice,
-                        'variant_price' => $v->price,
-                        'variant_name' => $v->name,
-                    ];
-                })
-                ->toArray();
+            $this->variantOptions = $item->variants->map(function ($v) use ($item) {
+                return [
+                    'id' => $v->id,
+                    'item_id' => $item->id,
+                    'combined_name' => $item->name . ' (' . $v->name . ')',
+                    'combined_price' => $item->price + $v->price,
+                    'variant_name' => $v->name,
+                ];
+            })->toArray();
 
             $this->selectedVariantId = null;
             $this->showVariantModal = true;
@@ -200,10 +160,11 @@ class Item extends Component
             if (count($this->addonOptions)) {
                 $this->showVariantModal = true;
             } else {
-                $this->addToCart($item->id, $item->name, $baseDiscountedPrice);
+                $this->addToCart($item->id, $item->name, $item->price);
             }
         }
     }
+
 
     public function addSelectedVariant()
     {
@@ -223,6 +184,7 @@ class Item extends Component
 
         $this->reset(['showVariantModal', 'variantOptions', 'selectedVariantId', 'currentItem', 'addonOptions', 'selectedAddons']);
     }
+
 
     private function addToCart($key, $name, $price)
     {
@@ -407,11 +369,6 @@ class Item extends Component
             return;
         }
 
-        if ($this->order_type === 'takeaway') {
-            $this->save();
-            return;
-        }
-
         $this->createOrderAndKot();
         $this->reset(['cart', 'showVariantModal']);
         return redirect()->route('waiter.dashboard')->with('success', 'Order placed!');
@@ -427,7 +384,10 @@ class Item extends Component
         if ($this->editMode) {
             $this->updateOrder();
 
-            $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+            $kot = KOT::where('table_id', $this->table_id)
+                ->where('status', 'pending')
+                ->latest()
+                ->first();
 
             if ($kot) {
                 $kot->update(['printed_at' => now()]);
@@ -442,6 +402,7 @@ class Item extends Component
 
         return redirect()->route('waiter.dashboard')->with('success', 'Order placed & KOT printed!');
     }
+
 
     public function updateOrder()
     {
@@ -511,7 +472,7 @@ class Item extends Component
     {
         $this->validate(
             [
-                'paymentMethod' => 'required|in:cash,card,duo,upi,part',
+                'paymentMethod' => 'required|in:cash,card,duo,other,part',
             ],
             [
                 'paymentMethod.required' => 'Please choose a payment method.',
@@ -578,6 +539,7 @@ class Item extends Component
         if (!$order) {
             $order = $this->createOrderAndKot();
         }
+
 
         if ($this->paymentMethod === 'part') {
             $this->showSplitModal = true;
@@ -749,8 +711,12 @@ class Item extends Component
             'issue' => $this->duoIssue,
         ]);
 
-        $this->reset(['showDuoPaymentModal', 'duoCustomerName', 'duoMobile', 'duoAmount', 'duoMethod', 'duoIssue', 'paymentMethod']);
+        $this->reset([
+            'showDuoPaymentModal', 'duoCustomerName', 'duoMobile',
+            'duoAmount', 'duoMethod', 'duoIssue', 'paymentMethod',
+        ]);
 
         return redirect()->route('waiter.dashboard')->with('success', 'Duo Payment Completed!');
     }
+
 }

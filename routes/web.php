@@ -63,7 +63,9 @@ use \App\Livewire\Resturant\{
 
     Discount\Index as DiscountIndex,
     Discount\Create as DiscountCreate,
-    Discount\Edit as DiscountEdit
+    Discount\Edit as DiscountEdit,
+
+    Kitchen\Dashboard as AdminKitchenDashboard
 };
 
 use \App\Livewire\Kitchen\{
@@ -72,8 +74,6 @@ use \App\Livewire\Kitchen\{
 
 use App\Livewire\Waiter\{
     Dashboard as WaiterDashboard,
-    OrderPickUp\Index as OrderPickUpIndex,
-    OrderPickUp\Create as OrderPickUpCreate,
 
     Item,
     KotPrint,
@@ -81,6 +81,7 @@ use App\Livewire\Waiter\{
     BillPrint
     };
 use App\Http\Controllers\PaymentController;
+use App\Models\ExpenseType;
 
 Route::get('superadmin/login', Login::class)->name('superadmin.login');
 Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
@@ -171,6 +172,10 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/edit/{id}', DiscountEdit::class)->name('edit');
     });
 
+    Route::prefix('kitchen')->as('kitchen.')->group(function () {
+        Route::get('/index', AdminKitchenDashboard::class)->name('index');
+    });
+
 });
 
 
@@ -182,14 +187,9 @@ Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|w
     Route::get('/kots/pending', PendingKotOrders::class)->name('kots.pending');
     Route::get('/bill-print/{order}', BillPrint::class)->name('bill.print');
 
-    Route::prefix('order-pickup')->as('order-pickup.')->group(function () {
-        Route::get('/', OrderPickUpIndex::class)->name('index');
-        Route::get('/create', OrderPickUpCreate::class)->name('create');
-    });
-
 });
 
-Route::prefix('kitchen')->as('kitchen.')->middleware(['web', 'auth', 'role:admin|kitchen'])->group(function () {
+Route::prefix('kitchen')->as('kitchen.')->middleware(['web', 'auth', 'role:kitchen'])->group(function () {
     Route::get('/', KitchenDashboard::class)->name('dashboard');
 });
 
