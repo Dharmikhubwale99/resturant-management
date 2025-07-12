@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Kitchen;
+namespace App\Livewire\Resturant\Kitchen;
 
 use App\Models\Kot;
 use Livewire\Component;
@@ -15,8 +15,8 @@ class Dashboard extends Component
     public $cancelReason = '';
     public $dateFilter = 'today';
     
-    #[Layout('components.layouts.kitchen.app')]
-   public function render()
+    #[Layout('components.layouts.resturant.app')]
+    public function render()
     {
         $user = auth()->user();
         $isAdmin = $user->hasRole('admin'); 
@@ -31,7 +31,7 @@ class Dashboard extends Component
             ->latest()
             ->get();
 
-        return view('livewire.kitchen.dashboard', [
+        return view('livewire.resturant.kitchen.dashboard', [
             'pendingKots' => $baseQuery('pending'),
             'preparingKots' => $baseQuery('preparing'),
             'readyKots' => $baseQuery('ready'),
@@ -39,7 +39,6 @@ class Dashboard extends Component
             'isAdmin' => $isAdmin,
         ]);
     }
-
 
     public function updateKotStatus($kotId)
     {
@@ -163,5 +162,5 @@ class Dashboard extends Component
             $kot->save();
             $this->dispatch('kotStatusUpdated');
         }
-        }
+    }
 }
