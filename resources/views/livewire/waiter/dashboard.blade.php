@@ -14,6 +14,7 @@
             <div class="w-4 h-4 bg-yellow-300 rounded"></div>
             <span class="text-sm font-medium text-gray-700">Reserved</span>
         </div>
+        <a href="{{ route('waiter.order-pickup.index')}}" >Pick up Order</a>
     </div>
     @foreach ($tablesByArea as $areaName => $tables)
         <h2 class="text-xl font-bold mb-2 mt-6">{{ $areaName }}</h2>

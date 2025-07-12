@@ -72,6 +72,8 @@ use \App\Livewire\Kitchen\{
 
 use App\Livewire\Waiter\{
     Dashboard as WaiterDashboard,
+    OrderPickUp\Index as OrderPickUpIndex,
+    OrderPickUp\Create as OrderPickUpCreate,
 
     Item,
     KotPrint,
@@ -79,7 +81,6 @@ use App\Livewire\Waiter\{
     BillPrint
     };
 use App\Http\Controllers\PaymentController;
-use App\Models\ExpenseType;
 
 Route::get('superadmin/login', Login::class)->name('superadmin.login');
 Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
@@ -180,6 +181,11 @@ Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|w
     Route::get('/kot-print/{kot_id}', KotPrint::class)->name('kot.print');
     Route::get('/kots/pending', PendingKotOrders::class)->name('kots.pending');
     Route::get('/bill-print/{order}', BillPrint::class)->name('bill.print');
+
+    Route::prefix('order-pickup')->as('order-pickup.')->group(function () {
+        Route::get('/', OrderPickUpIndex::class)->name('index');
+        Route::get('/create', OrderPickUpCreate::class)->name('create');
+    });
 
 });
 
