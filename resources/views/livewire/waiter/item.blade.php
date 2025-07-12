@@ -150,7 +150,7 @@
                 <!-- Order Type Buttons -->
                 <div class="flex flex-wrap gap-1 md:gap-2 mb-2 md:mb-4">
                     @php
-                        $opts = ['dine_in' => 'Dine In', 'delivery' => 'Delivery', 'pick_up' => 'Pick Up'];
+                        $opts = ['dine_in' => 'Dine In', 'delivery' => 'Delivery', 'takeaway' => 'Pick Up'];
                     @endphp
 
                     @foreach ($opts as $value => $label)

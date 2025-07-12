@@ -28,6 +28,8 @@ return new class extends Migration
             $table->decimal('tax_amount', 10, 2)->default(0.00);
             $table->decimal('total_amount', 10, 2)->default(0.00);
             $table->text('notes')->nullable();
+            $table->string('customer_name')->nullable();
+            $table->string('mobile')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

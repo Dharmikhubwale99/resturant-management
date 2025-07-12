@@ -77,9 +77,11 @@ class Item extends Component
 
     protected function loadEditModeData($table_id)
     {
-        $latestKot = KOT::where('table_id', $table_id)->where('status', 'pending')->latest()->first();
+        $latestKot = KOT::where('table_id', $table_id)->where('status', 'pending')->first();
         $this->kotId = $latestKot?->kot_number;
         $this->kotTime = $latestKot?->created_at;
+
+        $order = Order::where('table_id', $table_id)->where('status', 'pending')->first();
 
         if ($latestKot) {
             $latestKot->items()->each(function ($kotItem) {
@@ -97,6 +99,10 @@ class Item extends Component
                     'note' => $kotItem->special_notes ?? '',
                 ];
             });
+        }
+
+        if ($order) {
+            $this->order_type = $order->order_type;
         }
     }
 
@@ -401,6 +407,11 @@ class Item extends Component
             return;
         }
 
+        if ($this->order_type === 'takeaway') {
+            $this->save();
+            return;
+        }
+
         $this->createOrderAndKot();
         $this->reset(['cart', 'showVariantModal']);
         return redirect()->route('waiter.dashboard')->with('success', 'Order placed!');
@@ -500,7 +511,7 @@ class Item extends Component
     {
         $this->validate(
             [
-                'paymentMethod' => 'required|in:cash,card,duo,other,part',
+                'paymentMethod' => 'required|in:cash,card,duo,upi,part',
             ],
             [
                 'paymentMethod.required' => 'Please choose a payment method.',
