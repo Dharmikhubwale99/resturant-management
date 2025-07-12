@@ -63,7 +63,9 @@ use \App\Livewire\Resturant\{
 
     Discount\Index as DiscountIndex,
     Discount\Create as DiscountCreate,
-    Discount\Edit as DiscountEdit
+    Discount\Edit as DiscountEdit,
+
+    Kitchen\Dashboard as AdminKitchenDashboard
 };
 
 use \App\Livewire\Kitchen\{
@@ -170,6 +172,10 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/edit/{id}', DiscountEdit::class)->name('edit');
     });
 
+    Route::prefix('kitchen')->as('kitchen.')->group(function () {
+        Route::get('/index', AdminKitchenDashboard::class)->name('index');
+    });
+
 });
 
 
@@ -183,7 +189,7 @@ Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|w
 
 });
 
-Route::prefix('kitchen')->as('kitchen.')->middleware(['web', 'auth', 'role:admin|kitchen'])->group(function () {
+Route::prefix('kitchen')->as('kitchen.')->middleware(['web', 'auth', 'role:kitchen'])->group(function () {
     Route::get('/', KitchenDashboard::class)->name('dashboard');
 });
 
