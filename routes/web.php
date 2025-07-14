@@ -74,13 +74,13 @@ use \App\Livewire\Kitchen\{
 
 use App\Livewire\Waiter\{
     Dashboard as WaiterDashboard,
-    OrderPickUp\Index as OrderPickUpIndex,
-    OrderPickUp\Create as OrderPickUpCreate,
 
     Item,
     KotPrint,
     PendingKotOrders,
-    BillPrint
+    BillPrint,
+    PickupCreate,
+    PickupItem
     };
 use App\Http\Controllers\PaymentController;
 
@@ -187,12 +187,8 @@ Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|w
     Route::get('/kot-print/{kot_id}', KotPrint::class)->name('kot.print');
     Route::get('/kots/pending', PendingKotOrders::class)->name('kots.pending');
     Route::get('/bill-print/{order}', BillPrint::class)->name('bill.print');
-
-    Route::prefix('order-pickup')->as('order-pickup.')->group(function () {
-        Route::get('/', OrderPickUpIndex::class)->name('index');
-        Route::get('/create', OrderPickUpCreate::class)->name('create');
-    });
-
+    Route::get('/pickup', PickupCreate::class)->name('pickup.create');
+    Route::get('/pickup/item/{id}', PickupItem::class)->name('pickup.item');
 });
 
 Route::prefix('kitchen')->as('kitchen.')->middleware(['web', 'auth', 'role:kitchen'])->group(function () {
