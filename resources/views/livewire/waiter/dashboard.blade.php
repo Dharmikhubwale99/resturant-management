@@ -2,6 +2,12 @@
     <x-form.error />
 
     <div class="flex justify-end gap-6 mb-8">
+         <a href="{{ route('waiter.pickup.create') }}">
+            <button
+                class="bg-red-500 text-white px-3 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-sm md:text-base">
+                Pick Up
+            </button>
+        </a>
         <div class="flex items-center gap-2">
             <div class="w-4 h-4 bg-green-300 rounded"></div>
             <span class="text-sm font-medium text-gray-700">Available</span>
@@ -14,7 +20,7 @@
             <div class="w-4 h-4 bg-yellow-300 rounded"></div>
             <span class="text-sm font-medium text-gray-700">Reserved</span>
         </div>
-        <a href="{{ route('waiter.order-pickup.index')}}" >Pick up Order</a>
+   
     </div>
     @foreach ($tablesByArea as $areaName => $tables)
         <h2 class="text-xl font-bold mb-2 mt-6">{{ $areaName }}</h2>

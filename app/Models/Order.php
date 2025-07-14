@@ -32,6 +32,8 @@ class Order extends Model
         'tax_amount',
         'total_amount',
         'notes',
+        'customer_name',
+        'mobile'
     ];
 
     /**
