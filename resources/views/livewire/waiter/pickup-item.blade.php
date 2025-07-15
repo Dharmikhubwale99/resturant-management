@@ -112,10 +112,18 @@
             <!-- Menu Items - Responsive -->
             <div class="flex-1 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
-                    <input type="text" wire:model.live="search" placeholder="Search product..."
-                        class="border px-3 py-1 rounded w-full md:w-1/3">
-                    <x-form.error />
+                    <div class="flex flex-wrap gap-2">
+                        <input type="text" wire:model.live="search" placeholder="Search product..."
+                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
+
+                        <input type="text" wire:model.live="searchCode" placeholder="Search code..."
+                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
+
+                        <input type="text" wire:model.live="searchShortName" placeholder="Search short name..."
+                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
+                    </div>
                 </div>
+                    <x-form.error />
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
                     @forelse ($filteredItems as $item)
