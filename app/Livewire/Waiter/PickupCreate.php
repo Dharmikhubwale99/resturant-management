@@ -45,7 +45,6 @@ class PickupCreate extends Component
     {
         $this->validate([
             'customer_name' => 'required',
-            'mobile' => 'required',
         ]);
 
         $order = Order::create([

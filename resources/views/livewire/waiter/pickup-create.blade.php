@@ -50,7 +50,7 @@
                 <form wire:submit.prevent="submit" class="space-y-3">
 
                     <x-form.input name="customer_name" label="Name" wireModel="customer_name" required placeholder="Enter name" />
-                    <x-form.input name="mobile" label="Phone" wireModel="mobile" required placeholder="Enter phone number" />
+                    <x-form.input name="mobile" label="Phone" wireModel="mobile" placeholder="Enter phone number" />
 
                     <div class="flex justify-end space-x-2">
                         <x-form.button type="button" wireClick="hideCustomerForm" title="Cancle" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 rounded-lg transition duration-200 shadow-md"/>

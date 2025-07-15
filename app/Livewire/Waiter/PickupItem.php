@@ -15,7 +15,9 @@ class PickupItem extends Component
         $categories,
         $selectedCategory = null,
         $table_id,
-        $search = '';
+        $searchCode = '',
+        $search = '',
+        $searchShortName = '';
     public $cart = [],
         $showVariantModal = false,
         $currentItem = null,
@@ -112,10 +114,20 @@ class PickupItem extends Component
         $collection = $this->selectedCategory ? $this->items->where('category_id', $this->selectedCategory) : $this->items;
 
         if ($this->search !== '') {
-            $collection = $collection->filter(
-                fn($i) => str($i->name)
-                    ->lower()
-                    ->contains(str($this->search)->lower()),
+            $collection = $collection->filter(fn($i) =>
+                str($i->name)->lower()->contains(str($this->search)->lower())
+            );
+        }
+
+        if ($this->searchCode !== '') {
+            $collection = $collection->filter(fn($i) =>
+                str($i->code ?? '')->lower()->contains(str($this->searchCode)->lower())
+            );
+        }
+
+        if ($this->searchShortName !== '') {
+            $collection = $collection->filter(fn($i) =>
+                str($i->short_name ?? '')->lower()->contains(str($this->searchShortName)->lower())
             );
         }
 
