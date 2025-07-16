@@ -20,7 +20,6 @@
             <option value="card">Card</option>
             <option value="upi">UPI</option>
             <option value="part">Part</option>
-            <option value="duo">Duo</option>
         </select>
     </div>
 

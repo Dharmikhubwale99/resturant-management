@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PaymentReportExport;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\RestaurantPaymentLog;
 
 class PaymentReport extends Component
 {
@@ -85,7 +84,6 @@ class PaymentReport extends Component
     {
         $restaurantId = Auth::user()->restaurants()->first()->id;
 
-        // Payments
         $query = Payment::whereHas('order', function ($q) use ($restaurantId) {
             $q->where('restaurant_id', $restaurantId);
         })->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59']);
@@ -93,14 +91,8 @@ class PaymentReport extends Component
         if ($this->paymentMethod !== 'all') {
             $query->where('method', $this->paymentMethod);
         }
-        $paymentSum = $query->sum('amount');
 
-        // RestaurantPaymentLog
-        $logSum = RestaurantPaymentLog::whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
-            ->where('restaurant_id', $restaurantId)
-            ->sum('paid_amount');
-
-        return $paymentSum + $logSum;
+        return $query->sum('amount');
     }
 
     public function exportExcel()
@@ -128,17 +120,12 @@ class PaymentReport extends Component
         if ($this->paymentMethod !== 'all') {
             $query->where('method', $this->paymentMethod);
         }
+
         $payments = $query->get();
-
-        $logs = RestaurantPaymentLog::whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
-            ->where('restaurant_id', $restaurantId)
-            ->get();
-
-        $totalAmount = $payments->sum('amount') + $logs->sum('paid_amount');
+        $totalAmount = $payments->sum('amount');
 
         $pdf = Pdf::loadView('livewire.pdf.payment-report-pdf', [
             'payments' => $payments,
-            'logs' => $logs,
             'totalAmount' => $totalAmount,
         ]);
 
