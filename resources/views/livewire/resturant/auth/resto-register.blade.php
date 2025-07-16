@@ -27,6 +27,14 @@
 
             <x-form.input name="address" label="Address" type="textarea" wireModel="address" />
 
+            <x-form.input name="meta_title" label="Meta Title" type="text" wireModel="meta_title" />
+
+            <x-form.input name="meta_description" label="Meta Description" type="textarea" wireModel="meta_description" />
+
+            <x-form.input name="meta_keywords" label="Meta Keywords" type="text" wireModel="meta_keywords" />
+
+            <x-form.input name="favicon" label="Favicon Image" type="file" wireModel="favicon" />
+
             <div class="flex justify-start space-x-4">
                 <x-form.button type="submit" title="Register" wireTarget="register" />
                 <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white" route="login" />
