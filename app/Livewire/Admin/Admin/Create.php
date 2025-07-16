@@ -26,46 +26,58 @@ class Create extends Component
 
     public function updatedPincode($value)
     {
-        $cached = PinCode::with('district.city.state.country')
-            ->where('code', $value)
-            ->first();
+        $cached = PinCode::with('district.city.state.country')->where('code', $value)->first();
 
-            if ($cached) {
-                $this->pincode_id = $cached->id;
-                $this->setLocationFromModels(
-                    $cached->district->city->state->country,
-                    $cached->district->city->state,
-                    $cached->district->city,
-                    $cached->district
-                );
-                return;
-            }
+        if ($cached) {
+            $this->pincode_id = $cached->id;
+            $this->setLocationFromModels($cached->district->city->state->country, $cached->district->city->state, $cached->district->city, $cached->district);
+            return;
+        }
 
-        $response = Http::get("https://api.postalpincode.in/pincode/{$value}");
+        try {
+            $response = Http::retry(3, 200)
+                ->timeout(10)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36'
+                ])
+                ->withOptions([
+                    'curl' => [
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_FORBID_REUSE => true,
+                        CURLOPT_FRESH_CONNECT => true,
+                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                    ]
+                ])
+                ->get("https://api.postalpincode.in/pincode/{$value}");
 
-        if ($response->successful()) {
-            $data = $response->json()[0];
-            if ($data['Status'] === 'Success' && count($data['PostOffice']) > 0) {
-                $post = $data['PostOffice'][0];
+            if ($response->successful()) {
+                $data = $response->json()[0];
 
-                $country = Country::firstOrCreate(['name' => $post['Country']]);
-                $state = State::firstOrCreate(['name' => $post['State'], 'country_id' => $country->id]);
-                $city = City::firstOrCreate(['name' => $post['Block'] ?? $post['District'], 'state_id' => $state->id]);
-                $district = District::firstOrCreate(['name' => $post['District'], 'city_id' => $city->id]);
+                if ($data['Status'] === 'Success' && count($data['PostOffice']) > 0) {
+                    $post = $data['PostOffice'][0];
 
-                $pincode = PinCode::create([
-                    'code' => $value,
-                    'district_id' => $district->id,
-                ]);
+                    $country = Country::firstOrCreate(['name' => $post['Country']]);
+                    $state = State::firstOrCreate(['name' => $post['State'], 'country_id' => $country->id]);
+                    $city = City::firstOrCreate(['name' => $post['Block'] ?? $post['District'], 'state_id' => $state->id]);
+                    $district = District::firstOrCreate(['name' => $post['District'], 'city_id' => $city->id]);
 
-                $this->pincode_id = $pincode->id;
-                $this->setLocationFromModels($country, $state, $city, $district);
+                    $pincode = PinCode::create([
+                        'code' => $value,
+                        'district_id' => $district->id,
+                    ]);
 
+                    $this->pincode_id = $pincode->id;
+                    $this->setLocationFromModels($country, $state, $city, $district);
+
+                } else {
+                    session()->flash('message', 'Invalid pincode or no result found.');
+                }
             } else {
-
+                session()->flash('message', 'API request failed. Status: ' . $response->status());
             }
-        } else {
-
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            logger()->error("Pincode API error: " . $e->getMessage());
+            session()->flash('message', 'Pincode service temporarily unavailable. Please try again later.');
         }
     }
 
