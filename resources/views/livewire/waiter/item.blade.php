@@ -9,9 +9,9 @@
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <div class="flex items-center space-x-2">
-                        <img src="https://via.placeholder.com/40x40/FF6B6B/FFFFFF?text=P" alt="PetPooja"
+                        <img src="{{ asset('assets/images/logo.jpeg')}}" alt="PetPooja"
                             class="w-8 h-8 md:w-10 md:h-10 rounded">
-                        <span class="text-lg md:text-xl font-semibold text-gray-800">PetPooja</span>
+                        <span class="text-lg md:text-xl font-semibold text-gray-800">Hubwale</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 md:hidden">
@@ -60,7 +60,7 @@
     <div class="flex flex-col md:flex-row h-full">
         <!-- Sidebar - Responsive -->
         @if (setting('category_module'))
-            <div class="w-full md:w-48 bg-gray-800 text-white flex-shrink-0 overflow-y-auto">
+            <div class="w-full md:w-48 bg-gray-800 text-white flex-shrink-0 ">
                 <div class="p-2 md:p-4 flex justify-between items-center">
                     <div class="text-sm text-gray-400">Categories</div>
                     <!-- Mobile expand button (hidden on desktop) -->
@@ -112,17 +112,25 @@
             <!-- Menu Items - Responsive -->
             <div class="flex-1 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
-                    <input type="text" wire:model.live="search" placeholder="Search product..."
-                        class="border px-3 py-1 rounded w-full md:w-1/3">
-                    <x-form.error />
+                    <div class="flex flex-wrap gap-2">
+                        <input type="text" wire:model.live="search" placeholder="Search product..."
+                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
+
+                        <input type="text" wire:model.live="searchCode" placeholder="Search code..."
+                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
+
+                        <input type="text" wire:model.live="searchShortName" placeholder="Search short name..."
+                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
+                    </div>
                 </div>
+
+                <x-form.error />
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
                     @forelse ($filteredItems as $item)
                         <div wire:click="itemClicked({{ $item->id }})"
                             class="relative bg-white p-1 md:p-2 rounded shadow hover:shadow-md transition
                border-2 {{ $item->type_color_class }} cursor-pointer">
-                            <!-- Veg/Non-veg dot/icon -->
                             <span
                                 class="absolute top-1 right-1 w-2 h-2 md:w-3 md:h-3 rounded-full
                      {{ $item->type_dot_class }}"></span>
@@ -132,9 +140,31 @@
                                 alt="{{ $item->name }}">
                             <h3 class="text-xs md:text-sm font-semibold text-center truncate px-1">{{ $item->name }}
                             </h3>
-                            <p class="text-center text-blue-700 font-bold text-xs md:text-sm mt-1">
-                                ₹{{ number_format($item->price, 2) }}
-                            </p>
+                            @php
+                                $discount = $item->discounts->where('is_active', 0)->first();
+                                $hasDiscount = $discount !== null;
+                                $finalPrice = $hasDiscount
+                                    ? max(
+                                        $item->price -
+                                            ($discount->type === 'percentage'
+                                                ? ($item->price * $discount->value) / 100
+                                                : $discount->minimum_amount),
+                                        0,
+                                    )
+                                    : $item->price;
+                            @endphp
+                            @if ($hasDiscount)
+                                <p class="text-gray-500 text-xs md:text-sm line-through">
+                                    ₹{{ number_format($item->price, 2) }}
+                                </p>
+                                <p class="text-blue-700 font-bold text-xs md:text-sm">
+                                    ₹{{ number_format($finalPrice, 2) }}
+                                </p>
+                            @else
+                                <p class="text-blue-700 font-bold text-xs md:text-sm">
+                                    ₹{{ number_format($item->price, 2) }}
+                                </p>
+                            @endif
                         </div>
                     @empty
                         <p class="flex items-center col-span-full text-gray-500 text-center py-4">
@@ -147,26 +177,6 @@
             <!-- Cart Section - Responsive -->
             <div
                 class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200">
-                <!-- Order Type Buttons -->
-                <div class="flex flex-wrap gap-1 md:gap-2 mb-2 md:mb-4">
-                    @php
-                        $opts = ['dine_in' => 'Dine In', 'delivery' => 'Delivery', 'takeaway' => 'Pick Up'];
-                    @endphp
-
-                    @foreach ($opts as $value => $label)
-                        <button wire:click="selectOrderType('{{ $value }}')" @class([
-                            'px-3 py-1 md:px-4 md:py-2 rounded text-xs md:text-sm flex-1 transition',
-                            $order_type === $value
-                                ? 'bg-red-500 text-white hover:bg-red-600'
-                                : 'bg-gray-300 text-gray-700 hover:bg-gray-400',
-                        ])>
-                            {{ $label }}
-                        </button>
-                    @endforeach
-                    @error('order_type')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
 
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
                 @if (count($cartItems))
@@ -317,7 +327,8 @@
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div class="bg-white w-full max-w-sm rounded shadow-lg p-6 mx-2">
                 @if ($variantOptions)
-                    <h3 class="text-lg font-bold mb-4">Select Variant <span class="text-sm font-normal">(optional)</span>
+                    <h3 class="text-lg font-bold mb-4">Select Variant <span
+                            class="text-sm font-normal">(optional)</span>
                     </h3>
 
                     <div class="space-y-2 mb-6">
@@ -333,16 +344,16 @@
                 @endif
 
                 @if (count($addonOptions))
-                <div class="mb-4">
-                    <h4 class="text-sm font-semibold mb-2">Select Addons</h4>
-                    @foreach ($addonOptions as $addon)
-                        <label class="flex items-center space-x-2 mb-1">
-                            <input type="checkbox" wire:model="selectedAddons" value="{{ $addon['id'] }}">
-                            <span>{{ $addon['name'] }} — ₹{{ number_format($addon['price'], 2) }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            @endif
+                    <div class="mb-4">
+                        <h4 class="text-sm font-semibold mb-2">Select Addons</h4>
+                        @foreach ($addonOptions as $addon)
+                            <label class="flex items-center space-x-2 mb-1">
+                                <input type="checkbox" wire:model="selectedAddons" value="{{ $addon['id'] }}">
+                                <span>{{ $addon['name'] }} — ₹{{ number_format($addon['price'], 2) }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
                 <div class="flex justify-end gap-2">
                     <button class="px-4 py-2 bg-gray-200 rounded"
                         wire:click="$set('showVariantModal', false)">Cancel</button>
@@ -558,11 +569,10 @@
     </script>
 
 
-<script>
-    Livewire.on('printBill', (event) => {
-        const billId = event.billId;
-        window.open(`/waiter/bill-print/${billId}`, '_blank');
-    });
-</script>
-
+    <script>
+        Livewire.on('printBill', (event) => {
+            const billId = event.billId;
+            window.open(`/waiter/bill-print/${billId}`, '_blank');
+        });
+    </script>
 @endpush
