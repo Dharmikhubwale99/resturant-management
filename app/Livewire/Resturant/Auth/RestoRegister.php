@@ -15,7 +15,7 @@ class RestoRegister extends Component
 
     public $name;
     public $email;
-    public $mobile;
+    public $mobile, $resto_mobile;
     public $restaurant_name, $address, $gst;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
@@ -30,11 +30,19 @@ class RestoRegister extends Component
     public function mount()
     {
         $user = Auth::user();
-        if ($user) {
+        $restaurant = Restaurant::firstWhere('user_id', $user->id);
+        $settings = Setting::firstWhere('user_id', $user->id);
+
+        if($user) {
             $this->name = $user->name;
-            $this->email = $user->email;
             $this->mobile = $user->mobile;
-            $this->gst = $user->gstin;
+            $this->email = $user->email;
+        }
+
+        if ($restaurant) {
+            $this->restaurant_name = $restaurant->name;
+            $this->address = $restaurant->address;
+            $this->gst = $restaurant->gstin;
             $this->pincode = $user->pin_code_id;
 
             if ($user->pin_code_id) {
@@ -54,6 +62,14 @@ class RestoRegister extends Component
                     $this->district_id = $pincode->district->id ?? null;
                 }
             }
+        }
+
+        if ($settings) {
+            $this->meta_title = $settings->meta_title;
+            $this->meta_description = $settings->meta_description;
+            $this->meta_keywords = $settings->meta_keywords;
+            $this->favicon = $settings->favicon;
+            $this->oldFavicon = $settings->favicon;
         }
     }
     public function updatedPincode($value)
@@ -131,7 +147,7 @@ class RestoRegister extends Component
         $validated = $this->validate(
             [
                 'restaurant_name' => 'required|string|max:255',
-                'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
+                'mobile' => ['regex:/^[0-9]{10}$/'],
                 'address' => 'required|string|max:255',
                 'gst' => 'nullable|string|max:15',
                 'pincode' => 'required|digits:6',
@@ -139,7 +155,7 @@ class RestoRegister extends Component
                 'meta_description' => 'nullable|string',
                 'meta_keywords' => 'nullable|string',
                 'favicon' => 'nullable|file|max:1024',
-                'email' => ['required', 'email', 'unique:users,email,' . Auth::id(), 'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i'],
+                'email' => ['email', 'unique:users,email,' . Auth::id(), 'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i'],
             ],
             [
                 'email.regex' => 'Only .com email addresses are allowed.',
@@ -165,7 +181,7 @@ class RestoRegister extends Component
             ],
         );
 
-        Setting::create([
+        Setting::updateOrCreate([
             'user_id' => $user->id,
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
