@@ -140,9 +140,31 @@
                                 alt="{{ $item->name }}">
                             <h3 class="text-xs md:text-sm font-semibold text-center truncate px-1">{{ $item->name }}
                             </h3>
-                            <p class="text-center text-blue-700 font-bold text-xs md:text-sm mt-1">
-                                ₹{{ number_format($item->price, 2) }}
-                            </p>
+                            @php
+                                $discount = $item->discounts->where('is_active', 0)->first();
+                                $hasDiscount = $discount !== null;
+                                $finalPrice = $hasDiscount
+                                    ? max(
+                                        $item->price -
+                                            ($discount->type === 'percentage'
+                                                ? ($item->price * $discount->value) / 100
+                                                : $discount->minimum_amount),
+                                        0,
+                                    )
+                                    : $item->price;
+                            @endphp
+                            @if ($hasDiscount)
+                                <p class="text-gray-500 text-xs md:text-sm line-through">
+                                    ₹{{ number_format($item->price, 2) }}
+                                </p>
+                                <p class="text-blue-700 font-bold text-xs md:text-sm">
+                                    ₹{{ number_format($finalPrice, 2) }}
+                                </p>
+                            @else
+                                <p class="text-blue-700 font-bold text-xs md:text-sm">
+                                    ₹{{ number_format($item->price, 2) }}
+                                </p>
+                            @endif
                         </div>
                     @empty
                         <p class="flex items-center col-span-full text-gray-500 text-center py-4">
