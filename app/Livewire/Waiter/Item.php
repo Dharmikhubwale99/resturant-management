@@ -15,9 +15,7 @@ class Item extends Component
         $categories,
         $selectedCategory = null,
         $table_id,
-        $searchCode = '',
-        $search = '',
-        $searchShortName = '';
+        $search = '';
     public $cart = [],
         $showVariantModal = false,
         $currentItem = null,
@@ -113,26 +111,15 @@ class Item extends Component
         $collection = $this->selectedCategory ? $this->items->where('category_id', $this->selectedCategory) : $this->items;
 
         if ($this->search !== '') {
-            $collection = $collection->filter(fn($i) =>
-                str($i->name)->lower()->contains(str($this->search)->lower())
-            );
-        }
-
-        if ($this->searchCode !== '') {
-            $collection = $collection->filter(fn($i) =>
-                str($i->code ?? '')->lower()->contains(str($this->searchCode)->lower())
-            );
-        }
-
-        if ($this->searchShortName !== '') {
-            $collection = $collection->filter(fn($i) =>
-                str($i->short_name ?? '')->lower()->contains(str($this->searchShortName)->lower())
+            $collection = $collection->filter(
+                fn($i) => str($i->name)
+                    ->lower()
+                    ->contains(str($this->search)->lower()),
             );
         }
 
         return $collection;
     }
-
 
     public function selectCategory($categoryId)
     {
@@ -343,6 +330,8 @@ class Item extends Component
 
     protected function createOrderAndKot($print = false)
     {
+        $this->validate(['order_type' => 'required|in:' . implode(',', array_keys($this->orderTypes))]);
+
         return DB::transaction(function () use ($print) {
             $restaurantId = Auth::user()->restaurant_id;
             $subTotal = $this->getCartTotal();
@@ -351,7 +340,7 @@ class Item extends Component
                 'restaurant_id' => $restaurantId,
                 'table_id' => $this->table_id,
                 'user_id' => Auth::id(),
-                'order_type' => 'dine_in',
+                'order_type' => $this->order_type,
                 'status' => 'pending',
                 'sub_total' => $subTotal,
                 'discount_amount' => 0,
@@ -460,6 +449,8 @@ class Item extends Component
             $this->addError('cart', 'Cart is empty!');
             return;
         }
+
+        $this->validate(['order_type' => 'required|in:' . implode(',', array_keys($this->orderTypes))]);
 
         DB::transaction(function () {
             $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();

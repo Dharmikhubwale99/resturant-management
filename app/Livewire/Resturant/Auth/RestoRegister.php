@@ -4,22 +4,18 @@ namespace App\Livewire\Resturant\Auth;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
-use App\Models\{Restaurant, User, Country, State, City, District, PinCode, Setting};
+use App\Models\{Restaurant, User, Country, State, City, District, PinCode};
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Livewire\WithFileUploads;
 
 class RestoRegister extends Component
 {
-    use WithFileUploads;
-
     public $name;
     public $email;
     public $mobile;
     public $restaurant_name, $address, $gst;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
-    public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
 
     #[Layout('components.layouts.auth.app')]
     public function render()
@@ -38,7 +34,8 @@ class RestoRegister extends Component
             $this->pincode = $user->pin_code_id;
 
             if ($user->pin_code_id) {
-                $pincode = \App\Models\PinCode::with('district.city.state.country')->find($user->pin_code_id);
+                $pincode = \App\Models\PinCode::with('district.city.state.country')
+                    ->find($user->pin_code_id);
 
                 if ($pincode) {
                     $this->pincode_id = $pincode->id;
@@ -62,54 +59,37 @@ class RestoRegister extends Component
 
         if ($cached) {
             $this->pincode_id = $cached->id;
-            $this->setLocationFromModels($cached->district->city->state->country, $cached->district->city->state, $cached->district->city, $cached->district);
+            $this->setLocationFromModels(
+                $cached->district->city->state->country,
+                $cached->district->city->state,
+                $cached->district->city,
+                $cached->district
+            );
             return;
         }
 
-        try {
-            $response = Http::retry(3, 200)
-                ->timeout(10)
-                ->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36'
-                ])
-                ->withOptions([
-                    'curl' => [
-                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                        CURLOPT_FORBID_REUSE => true,
-                        CURLOPT_FRESH_CONNECT => true,
-                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-                    ]
-                ])
-                ->get("https://api.postalpincode.in/pincode/{$value}");
+        $response = Http::get("https://api.postalpincode.in/pincode/{$value}");
 
-            if ($response->successful()) {
-                $data = $response->json()[0];
+        if ($response->successful()) {
+            $data = $response->json()[0];
+            if ($data['Status'] === 'Success' && count($data['PostOffice']) > 0) {
+                $post = $data['PostOffice'][0];
 
-                if ($data['Status'] === 'Success' && count($data['PostOffice']) > 0) {
-                    $post = $data['PostOffice'][0];
+                $country = Country::firstOrCreate(['name' => $post['Country']]);
+                $state = State::firstOrCreate(['name' => $post['State'], 'country_id' => $country->id]);
+                $city = City::firstOrCreate(['name' => $post['Block'] ?? $post['District'], 'state_id' => $state->id]);
+                $district = District::firstOrCreate(['name' => $post['District'], 'city_id' => $city->id]);
 
-                    $country = Country::firstOrCreate(['name' => $post['Country']]);
-                    $state = State::firstOrCreate(['name' => $post['State'], 'country_id' => $country->id]);
-                    $city = City::firstOrCreate(['name' => $post['Block'] ?? $post['District'], 'state_id' => $state->id]);
-                    $district = District::firstOrCreate(['name' => $post['District'], 'city_id' => $city->id]);
+                $pincode = PinCode::create([
+                    'code' => $value,
+                    'district_id' => $district->id,
+                ]);
 
-                    $pincode = PinCode::create([
-                        'code' => $value,
-                        'district_id' => $district->id,
-                    ]);
-
-                    $this->pincode_id = $pincode->id;
-                    $this->setLocationFromModels($country, $state, $city, $district);
-
-                } else {
-                    session()->flash('message', 'Invalid pincode or no result found.');
-                }
+                $this->pincode_id = $pincode->id;
+                $this->setLocationFromModels($country, $state, $city, $district);
             } else {
-                session()->flash('message', 'API request failed. Status: ' . $response->status());
             }
-        } catch (\Illuminate\Http\Client\RequestException $e) {
-            logger()->error("Pincode API error: " . $e->getMessage());
-            session()->flash('message', 'Pincode service temporarily unavailable. Please try again later.');
+        } else {
         }
     }
 
@@ -128,29 +108,21 @@ class RestoRegister extends Component
 
     public function register()
     {
-        $validated = $this->validate(
-            [
-                'restaurant_name' => 'required|string|max:255',
-                'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
-                'address' => 'required|string|max:255',
-                'gst' => 'nullable|string|max:15',
-                'pincode' => 'required|digits:6',
-                'meta_title' => 'nullable|string|max:255',
-                'meta_description' => 'nullable|string',
-                'meta_keywords' => 'nullable|string',
-                'favicon' => 'nullable|file|max:1024',
-                'email' => ['required', 'email', 'unique:users,email,' . Auth::id(), 'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i'],
+        $validated = $this->validate([
+            'restaurant_name' => 'required|string|max:255',
+            'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
+            'address' => 'required|string|max:255',
+            'gst' => 'nullable|string|max:15',
+            'pincode' => 'required|digits:6',
+            'email' => [
+                'required',
+                'email',
+                'unique:users,email,' . Auth::id(),
+                'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
             ],
-            [
-                'email.regex' => 'Only .com email addresses are allowed.',
-            ],
-        );
-
-        $faviconPath = $this->oldFavicon;
-
-        if ($this->favicon) {
-            $faviconPath = $this->favicon->store('icon', 'public');
-        }
+        ], [
+            'email.regex' => 'Only .com email addresses are allowed.',
+        ]);
 
         $user = Auth::user();
         $restaurant = Restaurant::updateOrCreate(
@@ -164,14 +136,6 @@ class RestoRegister extends Component
                 'pin_code_id' => $this->pincode_id,
             ],
         );
-
-        Setting::create([
-            'user_id' => $user->id,
-            'meta_title' => $this->meta_title,
-            'meta_description' => $this->meta_description,
-            'meta_keywords' => $this->meta_keywords,
-            'favicon' => $faviconPath,
-        ]);
 
         Auth::login($user);
         return redirect()->route('restaurant.dashboard')->with('success', 'Restaurant registered successfully.');

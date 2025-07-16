@@ -112,18 +112,10 @@
             <!-- Menu Items - Responsive -->
             <div class="flex-1 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
-                    <div class="flex flex-wrap gap-2">
-                        <input type="text" wire:model.live="search" placeholder="Search product..."
-                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
-
-                        <input type="text" wire:model.live="searchCode" placeholder="Search code..."
-                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
-
-                        <input type="text" wire:model.live="searchShortName" placeholder="Search short name..."
-                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
-                    </div>
-                </div>
+                    <input type="text" wire:model.live="search" placeholder="Search product..."
+                        class="border px-3 py-1 rounded w-full md:w-1/3">
                     <x-form.error />
+                </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
                     @forelse ($filteredItems as $item)
@@ -155,7 +147,7 @@
             <!-- Cart Section - Responsive -->
             <div
                 class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200">
-                {{-- <!-- Order Type Buttons -->
+                <!-- Order Type Buttons -->
                 <div class="flex flex-wrap gap-1 md:gap-2 mb-2 md:mb-4">
                     @php
                         $opts = ['dine_in' => 'Dine In', 'delivery' => 'Delivery', 'takeaway' => 'Pick Up'];
@@ -174,15 +166,13 @@
                     @error('order_type')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
-                </div> --}}
+                </div>
 
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
                 @if (count($cartItems))
                     <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
-                        @if (request()->query('mode') === 'edit')
-                            <p class="text-xs md:text-sm font-semibold text-blue-600">Old - #{{ $kotId ?? '-' }} •
-                                {{ \Carbon\Carbon::parse($kotTime)->format('h:i') }}</p>
-                        @endif
+                        <p class="text-xs md:text-sm font-semibold text-blue-600">Old - #{{ $kotId ?? '-' }} •
+                            {{ \Carbon\Carbon::parse($kotTime)->format('h:i') }}</p>
                         @foreach ($cartItems as $key => $row)
                             @if (in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
                                 <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"

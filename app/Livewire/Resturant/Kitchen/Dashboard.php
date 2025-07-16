@@ -2,7 +2,8 @@
 
 namespace App\Livewire\Resturant\Kitchen;
 
-use App\Models\Kot;
+use App\Models\{Kot, Order};
+use App\Models\Restaurant;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -19,19 +20,26 @@ class Dashboard extends Component
     public function render()
     {
         $user = auth()->user();
-        $isAdmin = $user->hasRole('admin'); 
+        $isAdmin = $user->hasRole('admin');
 
-        $this->resturant = $user->restaurants()->first();
+        $restaurantId = Restaurant::where('user_id', $user->id)->first()->id;
+
+        if (!$restaurantId) {
+            abort(403, 'No restaurant assigned to this user.');
+        }
 
         $date = $this->dateFilter === 'all' && $isAdmin ? null : now()->toDateString();
 
-        $baseQuery = fn($status) => Kot::whereHas('items', fn($q) => $q->where('status', $status))
+        $orders = Order::where('restaurant_id', $restaurantId)->pluck('id')->toArray();
+
+        $baseQuery = fn($status) => Kot::whereIn('order_id', $orders)
+            ->whereHas('items', fn($q) => $q->where('status', $status))
             ->when($date, fn($q) => $q->whereDate('created_at', $date))
             ->with(['items' => fn($q) => $q->where('status', $status), 'table.area'])
             ->latest()
             ->get();
 
-        return view('livewire.resturant.kitchen.dashboard', [
+        return view('livewire.kitchen.dashboard', [
             'pendingKots' => $baseQuery('pending'),
             'preparingKots' => $baseQuery('preparing'),
             'readyKots' => $baseQuery('ready'),
@@ -39,6 +47,9 @@ class Dashboard extends Component
             'isAdmin' => $isAdmin,
         ]);
     }
+
+
+
 
     public function updateKotStatus($kotId)
     {
