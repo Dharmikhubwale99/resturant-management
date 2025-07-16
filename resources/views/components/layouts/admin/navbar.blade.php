@@ -20,9 +20,7 @@
                         Setting
                     </a>
 
-                    <a href="#" class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                        Leads
-                    </a>
+                  
 
             </div>
 
