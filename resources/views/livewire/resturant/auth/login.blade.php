@@ -24,9 +24,9 @@
                         inputClass="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         wrapperClass="flex items-center mt-4 gap-2" wireModel="remember_me" />
 
-                    <a href="#" class="text-sm text-blue-600 hover:text-blue-500 font-medium">
+                    {{-- <a href="#" class="text-sm text-blue-600 hover:text-blue-500 font-medium">
                         Forgot your password?
-                    </a>
+                    </a> --}}
                 </div>
 
                 <x-form.button type="submit"

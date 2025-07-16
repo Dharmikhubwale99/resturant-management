@@ -65,7 +65,9 @@ use \App\Livewire\Resturant\{
     Discount\Create as DiscountCreate,
     Discount\Edit as DiscountEdit,
 
-    Kitchen\Dashboard as AdminKitchenDashboard
+    Kitchen\Dashboard as AdminKitchenDashboard,
+    SalesReport,
+    PaymentReport,
 };
 
 use \App\Livewire\Kitchen\{
@@ -177,8 +179,9 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/index', AdminKitchenDashboard::class)->name('index');
     });
 
+    Route::get('/sales-report', SalesReport::class)->name('sales-report');
+    Route::get('/payment-report', PaymentReport::class)->name('payment-report');
 });
-
 
 Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {
     Route::get('/', WaiterDashboard::class)->name('dashboard');
