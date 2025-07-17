@@ -474,7 +474,7 @@
 
                 <div class="mb-4">
                     <label class="block text-sm font-semibold">Issue</label>
-                    <textarea wire:model="duoIssue" class="border rounded w-full p-2" rows="3"></textarea>
+                    <textarea wire:model.defer="duoIssue" class="border rounded w-full p-2" rows="3"></textarea>
                 </div>
 
                 <div class="flex justify-end gap-2">

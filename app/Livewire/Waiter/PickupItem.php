@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
+use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -82,7 +82,7 @@ class PickupItem extends Component
 
     protected function loadEditModeData($id)
     {
-        $latestKot = Kot::where('order_id', $id)->where('status', 'pending')->first();
+        $latestKot = KOT::where('order_id', $id)->where('status', 'pending')->first();
         $this->kotId = $latestKot?->kot_number;
         $this->kotTime = $latestKot?->created_at;
 
