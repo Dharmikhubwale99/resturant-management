@@ -47,7 +47,7 @@
                 @forelse ($kotList as $kot)
                     <div class="border-l-4 border-{{ $borderColor }} bg-white p-4 rounded shadow mb-4">
                         <p class="font-semibold">
-                            {{ $kot->table->area->name ?? 'Area' }} – Table {{ $kot->table->name ?? $kot->table->id }}
+                            {{ $kot->table->area->name ?? 'Area' }} – Table {{ $kot->table->name ?? $kot->table->id ?? 'Table' }}
                         </p>
                         <p class="text-sm text-gray-600">
                             KOT #{{ $kot->kot_number }}
@@ -140,7 +140,7 @@
                 <p class="mb-2">Please provide a reason for cancellation:</p>
                 <textarea wire:model="cancelReason" class="w-full border rounded p-2 mb-4" rows="3" placeholder="Reason for cancellation..."></textarea>
                 @error('cancelReason') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                
+
                 <div class="flex justify-end gap-2">
                     <button wire:click="$set('showCancelModal', false)" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
                         Cancel
