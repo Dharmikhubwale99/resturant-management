@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
+use App\Models\{Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -79,7 +79,7 @@ class Item extends Component
 
     protected function loadEditModeData($table_id)
     {
-        $latestKot = KOT::where('table_id', $table_id)->where('status', 'pending')->first();
+        $latestKot = Kot::where('table_id', $table_id)->where('status', 'pending')->first();
         $this->kotId = $latestKot?->kot_number;
         $this->kotTime = $latestKot?->created_at;
 
@@ -359,7 +359,7 @@ class Item extends Component
                 'total_amount' => $subTotal,
             ]);
 
-            $kot = KOT::create([
+            $kot = Kot::create([
                 'table_id' => $this->table_id,
                 'order_id' => $order->id,
                 'status' => 'pending',
@@ -438,7 +438,7 @@ class Item extends Component
         if ($this->editMode) {
             $this->updateOrder();
 
-            $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+            $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
             if ($kot) {
                 $kot->update(['printed_at' => now()]);
@@ -463,7 +463,7 @@ class Item extends Component
 
         DB::transaction(function () {
             $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
-            $kot = KOT::create([
+            $kot = Kot::create([
                 'table_id' => $this->table_id,
                 'order_id' => $order->id,
                 'status' => 'pending',
@@ -544,7 +544,7 @@ class Item extends Component
         }
 
         if ($order) {
-            $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+            $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
             if ($kot) {
                 $kotItems = KOTItem::where('kot_id', $kot->id)->get();
@@ -598,7 +598,7 @@ class Item extends Component
         }
 
         if ($order) {
-            $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+            $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
             if ($kot) {
                 $kotItems = KOTItem::where('kot_id', $kot->id)->get();
@@ -639,7 +639,7 @@ class Item extends Component
     {
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
 
-        $kot = KOT::where('order_id', $order->id)->where('status', 'pending')->latest()->firstOrFail();
+        $kot = Kot::where('order_id', $order->id)->where('status', 'pending')->latest()->firstOrFail();
 
         $restaurantId = Auth::user()->restaurant_id;
 
@@ -723,7 +723,7 @@ class Item extends Component
             $order = $this->createOrderAndKot();
         }
 
-        $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+        $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
         if ($kot) {
             $kotItems = KOTItem::where('kot_id', $kot->id)->get();
