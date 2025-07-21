@@ -9,9 +9,11 @@
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <div class="flex items-center space-x-2">
-                        <img src="{{ asset('assets/images/logo.jpeg')}}" alt="PetPooja"
+                    <a href="{{ route('waiter.dashboard') }}" class="text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-arrow-left text-xl"></i>
+                        </a>
+                        <img src="{{ asset('assets/images/logo.jpeg')}}" alt="HubWale"
                             class="w-8 h-8 md:w-10 md:h-10 rounded">
-                        <span class="text-lg md:text-xl font-semibold text-gray-800">Hubwale</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 md:hidden">
@@ -20,26 +22,9 @@
                 </div>
             </div>
 
-            <!-- Middle Row (Mobile) -->
-            <div class="flex items-center w-full md:w-auto mb-2 md:mb-0">
-                <button
-                    class="bg-red-500 text-white px-3 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-sm md:text-base">
-                    New Order
-                </button>
-                <div class="flex items-center space-x-2 ml-2 flex-1 md:flex-none">
-                    <i class="fas fa-search text-gray-400"></i>
-                    <input type="text" placeholder="Bill No"
-                        class="border-none outline-none text-gray-600 bg-transparent w-full md:w-32">
-                </div>
-            </div>
-
             <!-- Bottom Row (Desktop) -->
             <div class="hidden md:flex items-center space-x-4">
-                <div class="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded">
-                    <i class="fas fa-phone text-gray-500"></i>
-                    <span class="text-sm text-gray-600">Support</span>
-                    <span class="text-sm font-medium">9099912483</span>
-                </div>
+              
                 <div class="flex items-center space-x-3">
                     <!-- Pending KOT  (PDF icon) -->
                     <a href="{{ route('waiter.kots.pending') }}" class="text-gray-600 hover:text-gray-800"
@@ -60,7 +45,7 @@
     <div class="flex flex-col md:flex-row h-full">
         <!-- Sidebar - Responsive -->
         @if (setting('category_module'))
-            <div class="w-full md:w-48 bg-gray-800 text-white flex-shrink-0 ">
+            <div class="w-full md:w-64 h-full md:min-h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col">
                 <div class="p-2 md:p-4 flex justify-between items-center">
                     <div class="text-sm text-gray-400">Categories</div>
                     <!-- Mobile expand button (hidden on desktop) -->
@@ -131,6 +116,14 @@
                         <div wire:click="itemClicked({{ $item->id }})"
                             class="relative bg-white p-1 md:p-2 rounded shadow hover:shadow-md transition
                border-2 {{ $item->type_color_class }} cursor-pointer">
+                            @php
+                                $cartQty = isset($cart[$item->id]['qty']) ? $cart[$item->id]['qty'] : 0;
+                            @endphp
+                            @if($cartQty > 0)
+                                <span class="absolute top-1 left-1 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 z-10">
+                                    {{ $cartQty }}
+                                </span>
+                            @endif
                             <span
                                 class="absolute top-1 right-1 w-2 h-2 md:w-3 md:h-3 rounded-full
                      {{ $item->type_dot_class }}"></span>
