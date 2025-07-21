@@ -28,6 +28,12 @@ class Restaurant extends Model
         'address',
         'gstin',
         'plan_expiry_at',
+        'bank_name',
+        'ifsc',
+        'holder_name',
+        'account_type',
+        'upi_id',
+        'account_number',
     ];
 
     /**

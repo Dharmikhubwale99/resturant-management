@@ -48,6 +48,14 @@ class Item extends Component
     public string $duoMethod = '';
     public $addonOptions = [];
     public $selectedAddons = [];
+    public bool $showPriceModal = false;
+    public float|string $priceInput = '';
+    public string|null $currentPriceKey = null;
+    public string|null $priceItemName = null;
+    public float $originalPrice = 0;
+    public string $discountType = 'percentage';
+    public float|string $discountValue = 0;
+
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -336,6 +344,67 @@ class Item extends Component
         $this->reset(['showNoteModal', 'noteInput', 'currentNoteKey']);
     }
 
+    public function openPriceModal($key)
+    {
+        if (!isset($this->cart[$key])) return;
+
+        $this->currentPriceKey = $key;
+        $item = $this->cart[$key];
+
+        $this->priceInput = $item['price'];
+        $this->originalPrice = $item['price'];
+        $this->priceItemName = $item['name'];
+        $this->discountType = 'percentage';
+        $this->discountValue = 0;
+        $this->showPriceModal = true;
+    }
+
+
+    public function updatedDiscountValue()
+    {
+        $this->recalculateDiscountedPrice();
+    }
+
+    public function updatedDiscountType()
+    {
+        $this->recalculateDiscountedPrice();
+    }
+
+    private function recalculateDiscountedPrice()
+    {
+        $original = $this->originalPrice;
+        $discount = floatval($this->discountValue ?? 0);
+
+        if ($this->discountType === 'percentage') {
+            $final = max($original - ($original * $discount / 100), 0);
+        } elseif ($this->discountType === 'fixed') {
+            $final = max($original - $discount, 0);
+        } else {
+            $final = $original;
+        }
+
+        $this->priceInput = number_format($final, 2, '.', '');
+    }
+
+    public function savePrice()
+    {
+        if ($this->currentPriceKey && isset($this->cart[$this->currentPriceKey])) {
+            $price = floatval($this->priceInput);
+            if ($price >= 0) {
+                $this->cart[$this->currentPriceKey]['price'] = $price;
+                $this->cart[$this->currentPriceKey]['discount_type'] = $this->discountType;
+                $this->cart[$this->currentPriceKey]['discount_value'] = floatval($this->discountValue);
+            }
+        }
+
+        $this->reset([
+            'showPriceModal', 'priceInput', 'currentPriceKey',
+            'originalPrice', 'priceItemName', 'discountType', 'discountValue'
+        ]);
+    }
+
+
+
     public function selectOrderType(string $type)
     {
         $this->order_type = $type;
@@ -382,7 +451,11 @@ class Item extends Component
                     'total_price' => $row['qty'] * $row['price'],
                     'special_notes' => $row['note'] ?? null,
                     'status' => 'pending',
+                    'discount_type' => $row['discount_type'] ?? null,
+                    'discount_value' => $row['discount_value'] ?? 0,
+                    'final_price' => $row['price'],
                 ]);
+
 
                 $kotItem = KOTItem::create([
                     'kot_id' => $kot->id,
@@ -481,17 +554,21 @@ class Item extends Component
                 $baseItemId = $variantId ? $row['item_id'] : (int) preg_replace('/-new\d*/', '', $row['id']);
                 $lineTotal = $row['qty'] * $row['price'];
 
-                OrderItem::create([
+                $orderItem = OrderItem::create([
                     'order_id' => $order->id,
                     'item_id' => $baseItemId,
                     'variant_id' => $variantId,
                     'quantity' => $row['qty'],
                     'base_price' => $row['price'],
                     'discount_amount' => 0,
-                    'total_price' => $lineTotal,
+                    'total_price' => $row['qty'] * $row['price'],
                     'special_notes' => $row['note'] ?? null,
                     'status' => 'pending',
+                    'discount_type' => $row['discount_type'] ?? null,
+                    'discount_value' => $row['discount_value'] ?? 0,
+                    'final_price' => $row['price'],
                 ]);
+
 
                 KOTItem::create([
                     'kot_id' => $kot->id,
