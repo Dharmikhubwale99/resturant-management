@@ -39,8 +39,6 @@
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Method</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer Name</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -50,31 +48,16 @@
                         <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">{{ \Carbon\Carbon::parse($row->created_at)->format('d-m-Y') }}</td>
                         <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">₹{{ number_format($row->amount, 2) }}</td>
                         <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">{{ ucfirst($row->method) }}</td>
-                        <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">-</td>
-                        <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">-</td>
                     </tr>
                 @empty
-                @endforelse
-                @forelse($logs as $log)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">{{ $log->id }}</td>
-                        <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">{{ \Carbon\Carbon::parse($log->created_at)->format('d-m-Y') }}</td>
-                        <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">₹{{ number_format($log->amount, 2) }}</td>
-                        <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">{{ ucfirst($log->method) }}</td>
-                        <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">{{ $log->customer_name }}</td>
-                        <td class="px-6 py-2 text-sm text-gray-900 whitespace-nowrap">{{ $log->mobile }}</td>
-                    </tr>
-                @empty
-                @endforelse
-                @if(count($payments) == 0 && count($logs) == 0)
                     <tr>
-                        <td colspan="6" class="px-6 py-3 text-sm text-gray-900 text-center">No records found.</td>
+                        <td colspan="4" class="px-6 py-3 text-sm text-gray-900 text-center">No records found.</td>
                     </tr>
-                @endif
+                @endforelse
             </tbody>
             <tfoot>
                 <tr class="bg-gray-100 font-bold">
-                    <td colspan="5" class="px-6 py-2 text-right">Total</td>
+                    <td colspan="3" class="px-6 py-2 text-right">Total</td>
                     <td class="px-6 py-2">₹{{ number_format($this->totalAmount, 2) }}</td>
                 </tr>
             </tfoot>

@@ -12,12 +12,12 @@ class Index extends Component
     use WithPagination;
     public $confirmingDelete = false;
     public $userToDelete = null;
-    public $search = '';   
+    public $search = '';
 
-    public string $role = 'all';  
+    public string $role = 'all';
      protected $queryString = [
         'search' => ['except' => ''],
-        'role'   => ['except' => ''], 
+        'role'   => ['except' => ''],
         'page'   => ['except' => 1],
     ];
 
@@ -30,7 +30,7 @@ class Index extends Component
             $query->where('name', 'like', '%' . $this->search . '%')
             ->orWhere('email', 'like', '%' . $this->search . '%')
             ->orWhere('mobile', 'like', '%' . $this->search . '%');
-        }) 
+        })
           ->whereHas('roles', function ($q) {
                 $q->whereIn('name', ['manager', 'waiter', 'kitchen'])
                   ->when($this->role !== 'all', fn ($sub) =>
@@ -45,15 +45,15 @@ class Index extends Component
         ]);
     }
 
-    
-    public function updatingSearch() 
-    { 
-        $this->resetPage(); 
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
     }
-    
-    public function updatingRole()   
-    { 
-        $this->resetPage(); 
+
+    public function updatingRole()
+    {
+        $this->resetPage();
     }
 
     public function confirmDelete($id)

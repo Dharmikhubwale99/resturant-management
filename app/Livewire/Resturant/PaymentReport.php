@@ -23,71 +23,12 @@ class PaymentReport extends Component
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
-{
-    $restaurantId = Auth::user()->restaurants()->first()->id;
-
-    $payments = Payment::whereHas('order', function ($q) use ($restaurantId) {
-        $q->where('restaurant_id', $restaurantId);
-    })->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
-    ->latest()
-    ->paginate(10);
-
-    $logs = RestaurantPaymentLog::whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
-        ->where('restaurant_id', $restaurantId)
-        ->get();
-
-    $processedLogs = collect();
-
-    foreach ($logs as $log) {
-    if ($log->method === 'due') {
-        // Directly push as due
-        $processedLogs->push((object)[
-            'id' => $log->id,
-            'created_at' => $log->created_at,
-            'amount' => $log->amount,
-            'method' => 'due',
-            'customer_name' => $log->customer_name,
-            'mobile' => $log->mobile,
-        ]);
-    } elseif ($log->amount > $log->paid_amount) {
-        if ($log->paid_amount > 0) {
-            $processedLogs->push((object)[
-                'id' => $log->id,
-                'created_at' => $log->created_at,
-                'amount' => $log->paid_amount,
-                'method' => $log->method,
-                'customer_name' => $log->customer_name,
-                'mobile' => $log->mobile,
-            ]);
-        }
-        $processedLogs->push((object)[
-            'id' => $log->id,
-            'created_at' => $log->created_at,
-            'amount' => $log->amount - $log->paid_amount,
-            'method' => 'due',
-            'customer_name' => $log->customer_name,
-            'mobile' => $log->mobile,
-        ]);
-    } else {
-        $processedLogs->push((object)[
-            'id' => $log->id,
-            'created_at' => $log->created_at,
-            'amount' => $log->paid_amount,
-            'method' => $log->method,
-            'customer_name' => $log->customer_name,
-            'mobile' => $log->mobile,
+    {
+        return view('livewire.resturant.payment-report', [
+            'payments' => $this->payments,
+            'paymentMethod' => $this->paymentMethod,
         ]);
     }
-}
-
-
-    return view('livewire.resturant.payment-report', [
-        'payments' => $payments,
-        'logs' => $processedLogs,
-        'paymentMethod' => $this->paymentMethod,
-    ]);
-}
-
 
     public function mount()
     {

@@ -63,7 +63,6 @@ class Dashboard extends Component
                 $query->where('restaurant_id', $restaurantId);
             })
             ->sum('amount');
-        dd($paymentAmount);
 
         $logAmount = RestaurantPaymentLog::whereDate('created_at', $today)
             ->where('restaurant_id', $restaurantId)
