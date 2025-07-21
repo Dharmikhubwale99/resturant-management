@@ -56,6 +56,7 @@ class Item extends Component
     public string $discountType = 'percentage';
     public float|string $discountValue = 0;
 
+
     #[Layout('components.layouts.waiter.app')]
     public function render()
     {
@@ -120,31 +121,26 @@ class Item extends Component
         $collection = $this->selectedCategory ? $this->items->where('category_id', $this->selectedCategory) : $this->items;
 
         if ($this->search !== '') {
-            $collection = $collection->filter(
-                fn($i) => str($i->name)
-                    ->lower()
-                    ->contains(str($this->search)->lower()),
+            $collection = $collection->filter(fn($i) =>
+                str($i->name)->lower()->contains(str($this->search)->lower())
             );
         }
 
         if ($this->searchCode !== '') {
-            $collection = $collection->filter(
-                fn($i) => str($i->code ?? '')
-                    ->lower()
-                    ->contains(str($this->searchCode)->lower()),
+            $collection = $collection->filter(fn($i) =>
+                str($i->code ?? '')->lower()->contains(str($this->searchCode)->lower())
             );
         }
 
         if ($this->searchShortName !== '') {
-            $collection = $collection->filter(
-                fn($i) => str($i->short_name ?? '')
-                    ->lower()
-                    ->contains(str($this->searchShortName)->lower()),
+            $collection = $collection->filter(fn($i) =>
+                str($i->short_name ?? '')->lower()->contains(str($this->searchShortName)->lower())
             );
         }
 
         return $collection;
     }
+
 
     public function selectCategory($categoryId)
     {
@@ -190,9 +186,6 @@ class Item extends Component
             'id' => $item->id,
             'name' => $item->name,
             'price' => $baseDiscountedPrice,
-            'base_price' => $item->price,
-            'variant_price' => 0,
-            'addons_price' => 0,
         ];
 
         $this->addonOptions = $item->addons
@@ -228,7 +221,7 @@ class Item extends Component
             if (count($this->addonOptions)) {
                 $this->showVariantModal = true;
             } else {
-                $this->addToCart($item->id, $item->name, $baseDiscountedPrice, $item->price, 0, 0);
+                $this->addToCart($item->id, $item->name, $baseDiscountedPrice);
             }
         }
     }
@@ -240,19 +233,19 @@ class Item extends Component
         if ($this->selectedVariantId) {
             $v = collect($this->variantOptions)->firstWhere('id', $this->selectedVariantId);
             $key = 'v' . $v['id'];
-            $this->addToCart($key, $v['combined_name'], $v['combined_price'] + $addonsPrice, $this->currentItem['base_price'], $v['variant_price'], $addonsPrice);
+            $this->addToCart($key, $v['combined_name'], $v['combined_price'] + $addonsPrice);
             $this->cart[$key]['item_id'] = $v['item_id'];
             $this->cart[$key]['addons'] = $this->selectedAddons;
         } elseif ($this->currentItem) {
             $key = $this->currentItem['id'];
-            $this->addToCart($key, $this->currentItem['name'], $this->currentItem['price'] + $addonsPrice, $this->currentItem['base_price'], 0, $addonsPrice);
+            $this->addToCart($key, $this->currentItem['name'], $this->currentItem['price'] + $addonsPrice);
             $this->cart[$key]['addons'] = $this->selectedAddons;
         }
 
         $this->reset(['showVariantModal', 'variantOptions', 'selectedVariantId', 'currentItem', 'addonOptions', 'selectedAddons']);
     }
 
-    private function addToCart($key, $name, $price, $basePrice = 0, $variantPrice = 0, $addonsPrice = 0)
+    private function addToCart($key, $name, $price)
     {
         if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
             $existingNewKey = collect(array_keys($this->cart))->first(fn($k) => str_starts_with($k, $key . '-new'));
@@ -268,9 +261,6 @@ class Item extends Component
                 'price' => $price,
                 'qty' => 1,
                 'note' => '',
-                'base_price' => $basePrice,
-                'variant_price' => $variantPrice,
-                'addons_price' => $addonsPrice,
             ];
             return;
         }
@@ -280,16 +270,7 @@ class Item extends Component
         if ($existingKey && isset($this->cart[$existingKey])) {
             $this->cart[$existingKey]['qty']++;
         } else {
-            $this->cart[$key] = [
-                'id' => $key,
-                'name' => $name,
-                'price' => $price,
-                'qty' => 1,
-                'note' => '',
-                'base_price' => $basePrice,
-                'variant_price' => $variantPrice,
-                'addons_price' => $addonsPrice,
-            ];
+            $this->cart[$key] = ['id' => $key, 'name' => $name, 'price' => $price, 'qty' => 1, 'note' => ''];
         }
     }
 
@@ -370,11 +351,8 @@ class Item extends Component
         $this->currentPriceKey = $key;
         $item = $this->cart[$key];
 
-        // Only base price is editable, variant & addons excluded
-        $editablePrice = $item['base_price'] ?? $item['price'];
-
-        $this->priceInput = $editablePrice;
-        $this->originalPrice = $editablePrice;
+        $this->priceInput = $item['price'];
+        $this->originalPrice = $item['price'];
         $this->priceItemName = $item['name'];
         $this->discountType = 'percentage';
         $this->discountValue = 0;
@@ -398,7 +376,7 @@ class Item extends Component
         $discount = floatval($this->discountValue ?? 0);
 
         if ($this->discountType === 'percentage') {
-            $final = max($original - ($original * $discount) / 100, 0);
+            $final = max($original - ($original * $discount / 100), 0);
         } elseif ($this->discountType === 'fixed') {
             $final = max($original - $discount, 0);
         } else {
@@ -409,25 +387,21 @@ class Item extends Component
     }
 
     public function savePrice()
-{
-    if ($this->currentPriceKey && isset($this->cart[$this->currentPriceKey])) {
-        $price = floatval($this->priceInput);
-        $addonPrice = $this->cart[$this->currentPriceKey]['addons_price'] ?? 0;
-        $variantPrice = $this->cart[$this->currentPriceKey]['variant_price'] ?? 0;
-
-        if ($price >= 0) {
-            $this->cart[$this->currentPriceKey]['base_price'] = $price;
-            $this->cart[$this->currentPriceKey]['price'] = $price + $variantPrice + $addonPrice;
-            $this->cart[$this->currentPriceKey]['discount_type'] = $this->discountType;
-            $this->cart[$this->currentPriceKey]['discount_value'] = floatval($this->discountValue);
+    {
+        if ($this->currentPriceKey && isset($this->cart[$this->currentPriceKey])) {
+            $price = floatval($this->priceInput);
+            if ($price >= 0) {
+                $this->cart[$this->currentPriceKey]['price'] = $price;
+                $this->cart[$this->currentPriceKey]['discount_type'] = $this->discountType;
+                $this->cart[$this->currentPriceKey]['discount_value'] = floatval($this->discountValue);
+            }
         }
-    }
 
-    $this->reset([
-        'showPriceModal', 'priceInput', 'currentPriceKey',
-        'originalPrice', 'priceItemName', 'discountType', 'discountValue'
-    ]);
-}
+        $this->reset([
+            'showPriceModal', 'priceInput', 'currentPriceKey',
+            'originalPrice', 'priceItemName', 'discountType', 'discountValue'
+        ]);
+    }
 
 
 
@@ -481,6 +455,7 @@ class Item extends Component
                     'discount_value' => $row['discount_value'] ?? 0,
                     'final_price' => $row['price'],
                 ]);
+
 
                 $kotItem = KOTItem::create([
                     'kot_id' => $kot->id,
@@ -593,6 +568,7 @@ class Item extends Component
                     'discount_value' => $row['discount_value'] ?? 0,
                     'final_price' => $row['price'],
                 ]);
+
 
                 KOTItem::create([
                     'kot_id' => $kot->id,
