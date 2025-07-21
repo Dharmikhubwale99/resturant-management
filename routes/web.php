@@ -24,7 +24,6 @@ use \App\Livewire\Admin\{
   };
 use \App\Livewire\Resturant\{
     Dashboard as ResturantDashboard,
-    EditProfile,
 
     Auth\Register,
     Auth\Login as ResturantLogin,
@@ -83,8 +82,8 @@ use App\Livewire\Waiter\{
     PendingKotOrders,
     BillPrint,
     PickupCreate,
-    PickupItem,
-};
+    PickupItem
+    };
 use App\Http\Controllers\PaymentController;
 
 Route::get('superadmin/login', Login::class)->name('superadmin.login');
@@ -124,7 +123,6 @@ Route::get('/plan-purchase', ResturantPlanPurchase::class)->name('plan.purchase'
 Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role:admin', 'check.restaurant.plan'])->group(function () {
     Route::get('/resto-register', RestoRegister::class)->name('resto-register');
     Route::get('/', ResturantDashboard::class)->name('dashboard');
-    Route::get('/edit-profile', EditProfile::class)->name('edit-profile');
 
     Route::prefix('categories')->as('categories.')->group(function () {
         Route::get('/', CategoryIndex::class)->name('index');

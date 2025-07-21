@@ -9,9 +9,11 @@
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <div class="flex items-center space-x-2">
-                        <img src="{{ asset('assets/images/logo.jpeg') }}" alt="PetPooja"
+                    <a href="{{ route('waiter.dashboard') }}" class="text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-arrow-left text-xl"></i>
+                        </a>
+                        <img src="{{ asset('assets/images/logo.jpeg')}}" alt="HubWale"
                             class="w-8 h-8 md:w-10 md:h-10 rounded">
-                        <span class="text-lg md:text-xl font-semibold text-gray-800">Hubwale</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 md:hidden">
@@ -20,26 +22,9 @@
                 </div>
             </div>
 
-            <!-- Middle Row (Mobile) -->
-            <div class="flex items-center w-full md:w-auto mb-2 md:mb-0">
-                <button
-                    class="bg-red-500 text-white px-3 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-sm md:text-base">
-                    New Order
-                </button>
-                <div class="flex items-center space-x-2 ml-2 flex-1 md:flex-none">
-                    <i class="fas fa-search text-gray-400"></i>
-                    <input type="text" placeholder="Bill No"
-                        class="border-none outline-none text-gray-600 bg-transparent w-full md:w-32">
-                </div>
-            </div>
-
             <!-- Bottom Row (Desktop) -->
             <div class="hidden md:flex items-center space-x-4">
-                <div class="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded">
-                    <i class="fas fa-phone text-gray-500"></i>
-                    <span class="text-sm text-gray-600">Support</span>
-                    <span class="text-sm font-medium">9099912483</span>
-                </div>
+              
                 <div class="flex items-center space-x-3">
                     <!-- Pending KOT  (PDF icon) -->
                     <a href="{{ route('waiter.kots.pending') }}" class="text-gray-600 hover:text-gray-800"
@@ -60,7 +45,7 @@
     <div class="flex flex-col md:flex-row h-full">
         <!-- Sidebar - Responsive -->
         @if (setting('category_module'))
-            <div class="w-full md:w-48 bg-gray-800 text-white flex-shrink-0 ">
+            <div class="w-full md:w-64 h-full md:min-h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col">
                 <div class="p-2 md:p-4 flex justify-between items-center">
                     <div class="text-sm text-gray-400">Categories</div>
                     <!-- Mobile expand button (hidden on desktop) -->
@@ -131,6 +116,14 @@
                         <div wire:click="itemClicked({{ $item->id }})"
                             class="relative bg-white p-1 md:p-2 rounded shadow hover:shadow-md transition
                border-2 {{ $item->type_color_class }} cursor-pointer">
+                            @php
+                                $cartQty = isset($cart[$item->id]['qty']) ? $cart[$item->id]['qty'] : 0;
+                            @endphp
+                            @if($cartQty > 0)
+                                <span class="absolute top-1 left-1 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 z-10">
+                                    {{ $cartQty }}
+                                </span>
+                            @endif
                             <span
                                 class="absolute top-1 right-1 w-2 h-2 md:w-3 md:h-3 rounded-full
                      {{ $item->type_dot_class }}"></span>
@@ -207,10 +200,8 @@
 
                         @if (count($cartItems) > count($originalKotItemKeys))
                             <hr class="my-1 md:my-2 border-t">
-                            @if ($editMode)
-                                <p class="text-xs md:text-sm font-semibold text-blue-600">New -
-                                    {{ \Carbon\Carbon::parse(now())->format('h:i:s') }}</p>
-                            @endif
+                            <p class="text-xs md:text-sm font-semibold text-blue-600">New -
+                                {{ \Carbon\Carbon::parse(now())->format('h:i:s') }}</p>
                             @foreach ($cartItems as $key => $row)
                                 @if (!in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
                                     <div class="border rounded p-1 md:p-2 flex items-center justify-between"
@@ -230,10 +221,6 @@
                                             </div>
                                             <button class="text-xs bg-blue-100 text-blue-700 px-1 md:px-2 rounded mt-1"
                                                 wire:click="openNoteModal('{{ $row['id'] }}')">Note</button>
-                                            <button
-                                                class="text-xs bg-yellow-100 text-yellow-700 px-1 md:px-2 rounded mt-1"
-                                                wire:click="openPriceModal('{{ $row['id'] }}')">Edit Price</button>
-
                                         </div>
 
                                         <div class="flex items-center gap-1 md:gap-2 ml-2">
@@ -328,8 +315,9 @@
         </div>
     </div>
 
+    <!-- Modals (unchanged from original) -->
     @if ($showVariantModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-lg">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div class="bg-white w-full max-w-sm rounded shadow-lg p-6 mx-2">
                 @if ($variantOptions)
                     <h3 class="text-lg font-bold mb-4">Select Variant <span
@@ -373,7 +361,7 @@
     @endif
 
     @if ($showNoteModal)
-        <div class="fixed inset-0 bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div class="bg-white p-4 md:p-6 rounded shadow w-full max-w-md mx-2">
                 <h2 class="text-lg font-bold mb-4">Add Note</h2>
                 <textarea wire:model.defer="noteInput" rows="4" class="w-full border rounded p-2"
@@ -392,7 +380,7 @@
     @endif
 
     @if ($showSplitModal)
-        <div class="fixed inset-0 bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white rounded shadow p-4 w-full max-w-md">
                 <h3 class="font-bold mb-3">Split Payment</h3>
                 <x-form.error />
@@ -440,7 +428,7 @@
     @endif
 
     @if ($showDuoPaymentModal)
-        <div class="fixed inset-0 z-50 bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center">
+        <div class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
             <div class="bg-white rounded shadow p-4 w-full max-w-md">
                 <h3 class="text-lg font-bold mb-4">Duo Payment Details</h3>
                 <x-form.error />
@@ -479,7 +467,7 @@
 
                 <div class="mb-4">
                     <label class="block text-sm font-semibold">Issue</label>
-                    <textarea wire:model="duoIssue" class="border rounded w-full p-2" rows="3"></textarea>
+                    <textarea wire:model.defer="duoIssue" class="border rounded w-full p-2" rows="3"></textarea>
                 </div>
 
                 <div class="flex justify-end gap-2">
@@ -491,50 +479,6 @@
             </div>
         </div>
     @endif
-
-    @if ($showPriceModal)
-        <div class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center z-50">
-            <div class="bg-white p-4 md:p-6 rounded shadow w-full max-w-md mx-2">
-                <h2 class="text-lg font-bold mb-4">Edit Item Price</h2>
-
-                <p class="text-sm font-medium mb-1">
-                    <strong>Item:</strong> {{ $priceItemName }}<br>
-                    <strong>Original Price:</strong> ₹{{ number_format($originalPrice, 2) }}
-                </p>
-
-                <div class="mb-2">
-                    <label class="block text-sm font-semibold mb-1">Discount Type</label>
-                    <select wire:model.live="discountType" class="w-full border rounded p-2">
-                        <option value="percentage">Percentage (%)</option>
-                        <option value="fixed">Fixed (₹)</option>
-                    </select>
-                </div>
-
-                <div class="mb-2">
-                    <label class="block text-sm font-semibold mb-1">Discount Value</label>
-                    <input type="number" min="0" wire:model.live="discountValue"
-                        class="w-full border rounded p-2" placeholder="e.g. 10 for 10% " />
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold mb-1">Final Price</label>
-                    <input type="number" step="0.01" min="0" wire:model.defer="priceInput"
-                        class="w-full border rounded p-2" readonly/>
-                </div>
-
-                <div class="flex justify-end gap-2">
-                    <button wire:click="$set('showPriceModal', false)" class="px-4 py-2 bg-gray-200 rounded">
-                        Cancel
-                    </button>
-                    <button wire:click="savePrice" class="px-4 py-2 bg-green-600 text-white rounded">
-                        Save Price
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
-
-
 </div>
 
 @push('scripts')

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
+use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -48,14 +48,6 @@ class Item extends Component
     public string $duoMethod = '';
     public $addonOptions = [];
     public $selectedAddons = [];
-    public bool $showPriceModal = false;
-    public float|string $priceInput = '';
-    public string|null $currentPriceKey = null;
-    public string|null $priceItemName = null;
-    public float $originalPrice = 0;
-    public string $discountType = 'percentage';
-    public float|string $discountValue = 0;
-
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -87,7 +79,7 @@ class Item extends Component
 
     protected function loadEditModeData($table_id)
     {
-        $latestKot = Kot::where('table_id', $table_id)->where('status', 'pending')->first();
+        $latestKot = KOT::where('table_id', $table_id)->where('status', 'pending')->first();
         $this->kotId = $latestKot?->kot_number;
         $this->kotTime = $latestKot?->created_at;
 
@@ -344,67 +336,6 @@ class Item extends Component
         $this->reset(['showNoteModal', 'noteInput', 'currentNoteKey']);
     }
 
-    public function openPriceModal($key)
-    {
-        if (!isset($this->cart[$key])) return;
-
-        $this->currentPriceKey = $key;
-        $item = $this->cart[$key];
-
-        $this->priceInput = $item['price'];
-        $this->originalPrice = $item['price'];
-        $this->priceItemName = $item['name'];
-        $this->discountType = 'percentage';
-        $this->discountValue = 0;
-        $this->showPriceModal = true;
-    }
-
-
-    public function updatedDiscountValue()
-    {
-        $this->recalculateDiscountedPrice();
-    }
-
-    public function updatedDiscountType()
-    {
-        $this->recalculateDiscountedPrice();
-    }
-
-    private function recalculateDiscountedPrice()
-    {
-        $original = $this->originalPrice;
-        $discount = floatval($this->discountValue ?? 0);
-
-        if ($this->discountType === 'percentage') {
-            $final = max($original - ($original * $discount / 100), 0);
-        } elseif ($this->discountType === 'fixed') {
-            $final = max($original - $discount, 0);
-        } else {
-            $final = $original;
-        }
-
-        $this->priceInput = number_format($final, 2, '.', '');
-    }
-
-    public function savePrice()
-    {
-        if ($this->currentPriceKey && isset($this->cart[$this->currentPriceKey])) {
-            $price = floatval($this->priceInput);
-            if ($price >= 0) {
-                $this->cart[$this->currentPriceKey]['price'] = $price;
-                $this->cart[$this->currentPriceKey]['discount_type'] = $this->discountType;
-                $this->cart[$this->currentPriceKey]['discount_value'] = floatval($this->discountValue);
-            }
-        }
-
-        $this->reset([
-            'showPriceModal', 'priceInput', 'currentPriceKey',
-            'originalPrice', 'priceItemName', 'discountType', 'discountValue'
-        ]);
-    }
-
-
-
     public function selectOrderType(string $type)
     {
         $this->order_type = $type;
@@ -428,7 +359,7 @@ class Item extends Component
                 'total_amount' => $subTotal,
             ]);
 
-            $kot = Kot::create([
+            $kot = KOT::create([
                 'table_id' => $this->table_id,
                 'order_id' => $order->id,
                 'status' => 'pending',
@@ -451,11 +382,7 @@ class Item extends Component
                     'total_price' => $row['qty'] * $row['price'],
                     'special_notes' => $row['note'] ?? null,
                     'status' => 'pending',
-                    'discount_type' => $row['discount_type'] ?? null,
-                    'discount_value' => $row['discount_value'] ?? 0,
-                    'final_price' => $row['price'],
                 ]);
-
 
                 $kotItem = KOTItem::create([
                     'kot_id' => $kot->id,
@@ -511,7 +438,7 @@ class Item extends Component
         if ($this->editMode) {
             $this->updateOrder();
 
-            $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+            $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
             if ($kot) {
                 $kot->update(['printed_at' => now()]);
@@ -536,7 +463,7 @@ class Item extends Component
 
         DB::transaction(function () {
             $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
-            $kot = Kot::create([
+            $kot = KOT::create([
                 'table_id' => $this->table_id,
                 'order_id' => $order->id,
                 'status' => 'pending',
@@ -554,21 +481,17 @@ class Item extends Component
                 $baseItemId = $variantId ? $row['item_id'] : (int) preg_replace('/-new\d*/', '', $row['id']);
                 $lineTotal = $row['qty'] * $row['price'];
 
-                $orderItem = OrderItem::create([
+                OrderItem::create([
                     'order_id' => $order->id,
                     'item_id' => $baseItemId,
                     'variant_id' => $variantId,
                     'quantity' => $row['qty'],
                     'base_price' => $row['price'],
                     'discount_amount' => 0,
-                    'total_price' => $row['qty'] * $row['price'],
+                    'total_price' => $lineTotal,
                     'special_notes' => $row['note'] ?? null,
                     'status' => 'pending',
-                    'discount_type' => $row['discount_type'] ?? null,
-                    'discount_value' => $row['discount_value'] ?? 0,
-                    'final_price' => $row['price'],
                 ]);
-
 
                 KOTItem::create([
                     'kot_id' => $kot->id,
@@ -621,7 +544,7 @@ class Item extends Component
         }
 
         if ($order) {
-            $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+            $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
             if ($kot) {
                 $kotItems = KOTItem::where('kot_id', $kot->id)->get();
@@ -675,7 +598,7 @@ class Item extends Component
         }
 
         if ($order) {
-            $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+            $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
             if ($kot) {
                 $kotItems = KOTItem::where('kot_id', $kot->id)->get();
@@ -716,7 +639,7 @@ class Item extends Component
     {
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
 
-        $kot = Kot::where('order_id', $order->id)->where('status', 'pending')->latest()->firstOrFail();
+        $kot = KOT::where('order_id', $order->id)->where('status', 'pending')->latest()->firstOrFail();
 
         $restaurantId = Auth::user()->restaurant_id;
 
@@ -800,7 +723,7 @@ class Item extends Component
             $order = $this->createOrderAndKot();
         }
 
-        $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+        $kot = KOT::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
         if ($kot) {
             $kotItems = KOTItem::where('kot_id', $kot->id)->get();
