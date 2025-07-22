@@ -10,11 +10,10 @@
                     </button>
                     <div class="flex items-center space-x-2">
 
-                    <a href="{{ route('waiter.dashboard') }}" class="text-gray-600 hover:text-gray-800">
+                        <a href="{{ route('waiter.dashboard') }}" class="text-gray-600 hover:text-gray-800">
                             <i class="fas fa-arrow-left text-xl"></i>
                         </a>
-                        <img src="{{ asset('assets/images/logo.jpeg')}}" alt="HubWale"
-
+                        <img src="{{ asset('assets/images/logo.jpeg') }}" alt="HubWale"
                             class="w-8 h-8 md:w-10 md:h-10 rounded">
                     </div>
                 </div>
@@ -119,10 +118,27 @@
                             class="relative bg-white p-1 md:p-2 rounded shadow hover:shadow-md transition
                border-2 {{ $item->type_color_class }} cursor-pointer">
                             @php
-                                $cartQty = isset($cart[$item->id]['qty']) ? $cart[$item->id]['qty'] : 0;
+                                // Get cart quantity for this item (including variants/addons)
+                                $cartQty = 0;
+                                if (isset($cart[$item->id]['qty'])) {
+                                    $cartQty += $cart[$item->id]['qty'];
+                                }
+                                // Check for variants/addons in cart
+                                if (isset($cart)) {
+                                    foreach ($cart as $cartRow) {
+                                        if (
+                                            isset($cartRow['item_id']) &&
+                                            $cartRow['item_id'] == $item->id &&
+                                            (isset($cartRow['variant_id']) || isset($cartRow['addons']))
+                                        ) {
+                                            $cartQty += $cartRow['qty'] ?? 0;
+                                        }
+                                    }
+                                }
                             @endphp
-                            @if($cartQty > 0)
-                                <span class="absolute top-1 left-1 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 z-10">
+                            @if ($cartQty > 0)
+                                <span
+                                    class="absolute top-1 left-1 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 z-10">
                                     {{ $cartQty }}
                                 </span>
                             @endif
@@ -488,7 +504,8 @@
     @endif
 
     @if ($showPriceModal)
-        <div class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center z-50">
+        <div
+            class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center z-50">
             <div class="bg-white p-4 md:p-6 rounded shadow w-full max-w-md mx-2">
                 <h2 class="text-lg font-bold mb-4">Edit Item Price</h2>
 
@@ -514,7 +531,7 @@
                 <div class="mb-4">
                     <label class="block text-sm font-semibold mb-1">Final Price</label>
                     <input type="number" step="0.01" min="0" wire:model.defer="priceInput"
-                        class="w-full border rounded p-2" readonly/>
+                        class="w-full border rounded p-2" readonly />
                 </div>
 
                 <div class="flex justify-end gap-2">
@@ -528,6 +545,8 @@
             </div>
         </div>
     @endif
+
+
 </div>
 
 @push('scripts')

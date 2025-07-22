@@ -43,16 +43,16 @@ class Create extends Component
             'role' => ['required'],
         ]);
 
-        $restaurantSuffix = preg_replace('/[^a-z0-9]/', '', strtolower($this->resturant->name));
-
-        $emailLocalPart = explode('@', $this->email)[0];
-
-        $finalEmail = $emailLocalPart . '@' . $restaurantSuffix . 'gmail.com';
+        User::where(function ($query) {
+            $query->where('email', $this->email)->orWhere('mobile', $this->mobile);
+        })
+            ->where('restaurant_id', '!=', $this->resturant->id)
+            ->delete();
 
         $user = User::create([
             'restaurant_id' => $this->resturant->id,
             'name' => $this->name,
-            'email' => $finalEmail,
+            'email' => $this->email,
             'mobile' => $this->mobile,
             'password' => bcrypt($this->password),
         ]);
@@ -61,5 +61,4 @@ class Create extends Component
 
         $this->redirect(route('restaurant.users.index'));
     }
-
 }
