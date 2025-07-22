@@ -33,7 +33,8 @@ class Order extends Model
         'total_amount',
         'notes',
         'customer_name',
-        'mobile'
+        'mobile',
+        'service_charge'
     ];
 
     /**
