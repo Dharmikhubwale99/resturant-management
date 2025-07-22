@@ -1,0 +1,4 @@
+[Excel file with the following columns and a sample row]
+
+category_id | name | item_type | short_name | code | description | price | image_url | variant_names | variant_prices | addon_names | addon_prices
+1 | Margherita Pizza | veg | Margh | PZ001 | Classic cheese pizza | 250 | https://example.com/pizza.jpg | Small,Medium,Large | 200,250,300 | Cheese,Extra Sauce | 20,30 
