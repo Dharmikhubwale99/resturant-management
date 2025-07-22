@@ -86,7 +86,7 @@ class Index extends Component
         $this->importErrors = [];
 
         try {
-            Excel::import(new ItemImport($restaurantId, $this, setting('category_module')), $this->importFile);
+            Excel::import(new ItemImport($restaurantId, $this), $this->importFile);
             session()->flash('success', 'Items imported successfully!');
             $this->showImportModal = false;
             $this->importFile = null;
