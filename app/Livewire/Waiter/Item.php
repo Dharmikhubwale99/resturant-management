@@ -8,6 +8,7 @@ use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
 use App\Enums\{OrderType, PaymentMethod};
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Support\Facades\Log;
 
 class Item extends Component
 {
@@ -55,6 +56,12 @@ class Item extends Component
     public float $originalPrice = 0;
     public string $discountType = 'percentage';
     public float|string $discountValue = 0;
+    public float $serviceCharge = 0;
+    public float $taxRate = 0;
+    public bool $showCartDetailModal = false;
+    public bool $showRemoveModal = false;
+    public string|null $removeReason = null;
+    public string|null $removeKey = null;
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -155,6 +162,15 @@ class Item extends Component
         $this->selectedCategory = null;
     }
     private function getCartTotal()
+    {
+        $subtotal = collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
+        $service = $this->serviceCharge ?? 0;
+        $taxRate = floatval($this->taxRate ?? 0);
+        $tax = ($subtotal + $service) * ($taxRate / 100);
+        return $subtotal + $service + $tax;
+    }
+
+    public function getSubtotal()
     {
         return collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
     }
@@ -322,10 +338,12 @@ class Item extends Component
         }
 
         if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
-            $this->cart[$key]['qty'] = 0;
-        } else {
-            unset($this->cart[$key]);
+            $this->removeKey = $key;
+            $this->showRemoveModal = true;
+            return;
         }
+
+        unset($this->cart[$key]);
     }
 
     public function updateQty($key, $qty)
@@ -365,7 +383,9 @@ class Item extends Component
 
     public function openPriceModal($key)
     {
-        if (!isset($this->cart[$key])) return;
+        if (!isset($this->cart[$key])) {
+            return;
+        }
 
         $this->currentPriceKey = $key;
         $item = $this->cart[$key];
@@ -380,7 +400,6 @@ class Item extends Component
         $this->discountValue = 0;
         $this->showPriceModal = true;
     }
-
 
     public function updatedDiscountValue()
     {
@@ -409,27 +428,22 @@ class Item extends Component
     }
 
     public function savePrice()
-{
-    if ($this->currentPriceKey && isset($this->cart[$this->currentPriceKey])) {
-        $price = floatval($this->priceInput);
-        $addonPrice = $this->cart[$this->currentPriceKey]['addons_price'] ?? 0;
-        $variantPrice = $this->cart[$this->currentPriceKey]['variant_price'] ?? 0;
+    {
+        if ($this->currentPriceKey && isset($this->cart[$this->currentPriceKey])) {
+            $price = floatval($this->priceInput);
+            $addonPrice = $this->cart[$this->currentPriceKey]['addons_price'] ?? 0;
+            $variantPrice = $this->cart[$this->currentPriceKey]['variant_price'] ?? 0;
 
-        if ($price >= 0) {
-            $this->cart[$this->currentPriceKey]['base_price'] = $price;
-            $this->cart[$this->currentPriceKey]['price'] = $price + $variantPrice + $addonPrice;
-            $this->cart[$this->currentPriceKey]['discount_type'] = $this->discountType;
-            $this->cart[$this->currentPriceKey]['discount_value'] = floatval($this->discountValue);
+            if ($price >= 0) {
+                $this->cart[$this->currentPriceKey]['base_price'] = $price;
+                $this->cart[$this->currentPriceKey]['price'] = $price + $variantPrice + $addonPrice;
+                $this->cart[$this->currentPriceKey]['discount_type'] = $this->discountType;
+                $this->cart[$this->currentPriceKey]['discount_value'] = floatval($this->discountValue);
+            }
         }
+
+        $this->reset(['showPriceModal', 'priceInput', 'currentPriceKey', 'originalPrice', 'priceItemName', 'discountType', 'discountValue']);
     }
-
-    $this->reset([
-        'showPriceModal', 'priceInput', 'currentPriceKey',
-        'originalPrice', 'priceItemName', 'discountType', 'discountValue'
-    ]);
-}
-
-
 
     public function selectOrderType(string $type)
     {
@@ -452,6 +466,7 @@ class Item extends Component
                 'discount_amount' => 0,
                 'tax_amount' => 0,
                 'total_amount' => $subTotal,
+                'tax_amount' => $subTotal * ($this->taxRate / 100),
             ]);
 
             $kot = Kot::create([
@@ -862,5 +877,38 @@ class Item extends Component
         $this->reset(['showDuoPaymentModal', 'duoCustomerName', 'duoMobile', 'duoAmount', 'duoMethod', 'duoIssue', 'paymentMethod']);
 
         return redirect()->route('waiter.dashboard')->with('success', 'Duo Payment Completed!');
+    }
+
+    public function confirmRemove()
+    {
+        if (!$this->removeKey || !isset($this->cart[$this->removeKey])) {
+            return;
+        }
+
+        $key = $this->removeKey;
+        $reason = $this->removeReason;
+
+        DB::transaction(function () use ($key, $reason) {
+            $variantId = str_starts_with($key, 'v') ? (int) substr($key, 1) : null;
+            $itemId = $variantId ? $this->cart[$key]['item_id'] : (int) $this->cart[$key]['item_id'];
+
+            $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+            $kot = Kot::where('order_id', $order->id)->where('status', 'pending')->latest()->first();
+
+            OrderItem::where('order_id', $order->id)
+                ->where('item_id', $itemId)
+                ->when($variantId, fn($q) => $q->where('variant_id', $variantId))
+                ->update([
+                    'delete_reason' => $reason,
+                    'deleted_at' => now(),
+                ]);
+
+            KOTItem::where('kot_id', $kot->id)->where('item_id', $itemId)->when($variantId, fn($q) => $q->where('variant_id', $variantId))->delete();
+
+        });
+
+        unset($this->cart[$key]);
+
+        $this->reset(['showRemoveModal', 'removeKey', 'removeReason']);
     }
 }
