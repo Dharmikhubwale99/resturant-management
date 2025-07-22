@@ -16,9 +16,7 @@ class Item extends Component
         $categories,
         $selectedCategory = null,
         $table_id,
-        $searchCode = '',
-        $search = '',
-        $searchShortName = '';
+        $search = '';
     public $cart = [],
         $showVariantModal = false,
         $currentItem = null,
@@ -93,28 +91,40 @@ class Item extends Component
 
     protected function loadEditModeData($table_id)
     {
-        $latestKot = Kot::where('table_id', $table_id)->where('status', 'pending')->first();
-        $this->kotId = $latestKot?->kot_number;
-        $this->kotTime = $latestKot?->created_at;
-
         $order = Order::where('table_id', $table_id)->where('status', 'pending')->first();
 
-        if ($latestKot) {
-            $latestKot->items()->each(function ($kotItem) {
+        $kots = Kot::where('order_id', $order->id)
+            ->where('status', 'pending')
+            ->orderBy('created_at')
+            ->get();
+
+        foreach ($kots as $kot) {
+            $this->kotId = $kot->kot_number;
+            $this->kotTime = $kot->created_at;
+
+            foreach ($kot->items as $kotItem) {
                 $key = $kotItem->variant_id ? 'v' . $kotItem->variant_id : $kotItem->item_id;
                 $this->originalKotItemKeys[] = $key;
 
-                $name = $kotItem->variant_id ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')' : $kotItem->item->name;
+                $name = $kotItem->variant_id
+                    ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')'
+                    : $kotItem->item->name;
 
-                $this->cart[$key] = [
-                    'id' => $key,
-                    'item_id' => $kotItem->item_id,
-                    'name' => $name,
-                    'price' => $kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price,
-                    'qty' => $kotItem->quantity,
-                    'note' => $kotItem->special_notes ?? '',
-                ];
-            });
+                if (!isset($this->cart[$key])) {
+                    $this->cart[$key] = [
+                        'id' => $key,
+                        'item_id' => $kotItem->item_id,
+                        'name' => $name,
+                        'price' => $kotItem->variant_id
+                            ? $kotItem->item->price + $kotItem->variant->price
+                            : $kotItem->item->price,
+                        'qty' => $kotItem->quantity,
+                        'note' => $kotItem->special_notes ?? '',
+                        'kot_number' => $kot->kot_number,
+                        'kot_time' => $kot->created_at->format('H:i'),
+                    ];
+                }
+            }
         }
 
         if ($order) {
@@ -124,30 +134,17 @@ class Item extends Component
 
     public function getFilteredItems()
     {
-        $collection = $this->selectedCategory ? $this->items->where('category_id', $this->selectedCategory) : $this->items;
+        $collection = $this->selectedCategory
+            ? $this->items->where('category_id', $this->selectedCategory)
+            : $this->items;
 
         if ($this->search !== '') {
-            $collection = $collection->filter(
-                fn($i) => str($i->name)
-                    ->lower()
-                    ->contains(str($this->search)->lower()),
-            );
-        }
-
-        if ($this->searchCode !== '') {
-            $collection = $collection->filter(
-                fn($i) => str($i->code ?? '')
-                    ->lower()
-                    ->contains(str($this->searchCode)->lower()),
-            );
-        }
-
-        if ($this->searchShortName !== '') {
-            $collection = $collection->filter(
-                fn($i) => str($i->short_name ?? '')
-                    ->lower()
-                    ->contains(str($this->searchShortName)->lower()),
-            );
+            $searchLower = str($this->search)->lower();
+            $collection = $collection->filter(function ($i) use ($searchLower) {
+                return str($i->name)->lower()->contains($searchLower)
+                    || str($i->code ?? '')->lower()->contains($searchLower)
+                    || str($i->short_name ?? '')->lower()->contains($searchLower);
+            });
         }
 
         return $collection;
@@ -337,6 +334,13 @@ class Item extends Component
             return;
         }
 
+        $nonZeroItems = collect($this->cart)->filter(fn($item) => $item['qty'] > 0)->count();
+
+        if ($nonZeroItems <= 1) {
+            session()->flash('error', 'Cannot remove the last item from the cart.');
+            return;
+        }
+
         if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
             $this->removeKey = $key;
             $this->showRemoveModal = true;
@@ -464,9 +468,10 @@ class Item extends Component
                 'status' => 'pending',
                 'sub_total' => $subTotal,
                 'discount_amount' => 0,
-                'tax_amount' => 0,
                 'total_amount' => $subTotal,
-                'tax_amount' => $subTotal * ($this->taxRate / 100),
+                // 'tax_amount' => $subTotal * ($this->taxRate / 100),
+                'tax_amount' => $this->taxRate,
+                'service_charge' => $this->serviceCharge,
             ]);
 
             $kot = Kot::create([
@@ -630,6 +635,7 @@ class Item extends Component
         });
 
         session()->flash('success', 'KOT updated & sent to kitchen!');
+        return redirect()->route('waiter.dashboard');
     }
 
     public function save()
@@ -908,7 +914,7 @@ class Item extends Component
         });
 
         unset($this->cart[$key]);
-
+        $this->showRemoveModal = false;
         $this->reset(['showRemoveModal', 'removeKey', 'removeReason']);
     }
 }

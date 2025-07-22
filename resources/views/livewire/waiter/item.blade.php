@@ -99,14 +99,8 @@
             <div class="flex-1 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
                     <div class="flex flex-wrap gap-2">
-                        <input type="text" wire:model.live="search" placeholder="Search product..."
-                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
-
-                        <input type="text" wire:model.live="searchCode" placeholder="Search code..."
-                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
-
-                        <input type="text" wire:model.live="searchShortName" placeholder="Search short name..."
-                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
+                        <input type="text" wire:model.live="search" placeholder="Search by product, code, or short name..."
+                            class="border px-3 py-2 rounded w-50" />
                     </div>
                 </div>
 
@@ -177,32 +171,35 @@
                 @if (count($cartItems))
                     <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
                         @if ($editMode)
-                            <p class="text-xs md:text-sm font-semibold text-blue-600">Old - #{{ $kotId ?? '-' }} •
-                                {{ \Carbon\Carbon::parse($kotTime)->format('h:i') }}</p>
-                        @endif
-                        @foreach ($cartItems as $key => $row)
-                            @if (in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
-                                <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"
-                                    wire:key="row-{{ $row['id'] }}">
-                                    <div class="flex-1 min-w-0">
-                                        <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
-                                            {{ $row['name'] }}
+                        <p class="text-xs md:text-sm font-semibold text-blue-600">Previous KOT Items:</p>
+                    @endif
 
+                    @foreach ($cartItems as $key => $row)
+                        @if (in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
+                            <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"
+                                wire:key="row-{{ $row['id'] }}">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-blue-600 font-semibold mb-0.5">
+                                        KOT: #{{ $row['kot_number'] ?? '-' }} • {{ $row['kot_time'] ?? '-' }}
+                                    </p>
+                                    <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
+                                        {{ $row['name'] }}
+                                    </p>
+                                    <div class="flex flex-row items-baseline gap-2">
+                                        <p class="text-xs text-gray-500 whitespace-nowrap">
+                                            ₹{{ number_format($row['price'], 2) }} × {{ $row['qty'] }}
                                         </p>
-                                        <div class="flex items-baseline gap-2">
-                                            <p class="text-xs text-gray-500 whitespace-nowrap">
-                                                ₹{{ number_format($row['price'], 2) }} × {{ $row['qty'] }}
-                                            </p>
-                                            <p class="text-xs text-green-600 font-semibold whitespace-nowrap">
-                                                = ₹{{ number_format($row['price'] * $row['qty'], 2) }}
-                                            </p>
-                                        </div>
+                                        <p class="text-xs text-green-600 font-semibold whitespace-nowrap">
+                                            = ₹{{ number_format($row['price'] * $row['qty'], 2) }}
+                                        </p>
                                         <button class="text-red-500 text-xs md:text-sm"
                                             wire:click="remove('{{ $row['id'] }}')">✕</button>
                                     </div>
                                 </div>
-                            @endif
-                        @endforeach
+                            </div>
+                        @endif
+                    @endforeach
+
 
                         @if (count($cartItems) > count($originalKotItemKeys))
                             <hr class="my-1 md:my-2 border-t">
@@ -262,12 +259,12 @@
                                 Cart Details
                             </button>
 
-                            <div class="flex flex-wrap items-center gap-1 md:gap-2 mb-1 md:mb-2">
+                            {{-- <div class="flex flex-wrap items-center gap-1 md:gap-2 mb-1 md:mb-2">
                                 <button class="bg-red-500 text-white px-2 py-1 rounded text-xs md:text-sm flex-1">Bogo
                                     Offer</button>
                                 <button
                                     class="bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs md:text-sm flex-1">Split</button>
-                            </div>
+                            </div> --}}
 
                             <div class="text-right text-lg md:text-xl font-bold py-1 md:py-2">
                                 Total: ₹{{ number_format($cartTotal, 2) }}
