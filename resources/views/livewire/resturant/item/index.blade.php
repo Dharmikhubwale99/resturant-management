@@ -14,16 +14,12 @@
                     placeholder="All Types" wrapperClass="mb-0" inputClass="text-sm" />
 
 
-                <x-form.button title="Import Excel"
-                    class="bg-green-600 hover:bg-green-700 text-white"
-                    wire:click="$set('showImportModal', true)" />
                 <x-form.button title="+ Add" route="restaurant.items.create"
                     class="bg-blue-600 hover:bg-blue-700 text-white" />
             </div>
 
         </div>
         <x-form.error />
-        
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
                 <thead class="bg-gray-100">
@@ -108,32 +104,4 @@
             @endif
         </div>
     </div>
-
-    @if($showImportModal)
-    <div class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-            <button class="absolute top-2 right-2 text-gray-500" wire:click="$set('showImportModal', false)">✕</button>
-            <h3 class="text-lg font-bold mb-2">Import Items from Excel</h3>
-            <p class="mb-2 text-sm text-gray-600">Required columns: <b>category_name, name, item_type, price</b></p>
-            <form wire:submit.prevent="importItems" enctype="multipart/form-data" class="space-y-3">
-                <input type="file" wire:model="importFile" accept=".xlsx,.xls" class="border rounded px-2 py-1 w-full" />
-                @error('importFile') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                @if($importErrors)
-                    <div class="bg-red-100 text-red-700 p-2 rounded text-xs">
-                        <ul>
-                            @foreach($importErrors as $err)
-                                <li>Row {{ $err['row'] }}: {{ $err['error'] }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-                <div class="flex justify-end gap-2">
-                    <button type="button" wire:click="$set('showImportModal', false)" class="px-3 py-1 bg-gray-300 rounded">Cancel</button>
-                    <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded">Import</button>
-                </div>
-            </form>
-            <a href="{{ asset('sample_items_import.xlsx') }}" class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
-        </div>
-    </div>
-    @endif
 </div>

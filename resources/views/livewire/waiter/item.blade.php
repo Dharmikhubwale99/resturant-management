@@ -26,7 +26,7 @@
 
             <!-- Bottom Row (Desktop) -->
             <div class="hidden md:flex items-center space-x-4">
-              
+
                 <div class="flex items-center space-x-3">
                     <!-- Pending KOT  (PDF icon) -->
                     <a href="{{ route('waiter.kots.pending') }}" class="text-gray-600 hover:text-gray-800"
@@ -528,8 +528,6 @@
             </div>
         </div>
     @endif
-
-
 </div>
 
 @push('scripts')
