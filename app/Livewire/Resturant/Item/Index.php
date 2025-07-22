@@ -6,21 +6,14 @@ use App\Models\Item;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\ItemImport;
-use Livewire\WithFileUploads;
 
 class Index extends Component
 {
-    use WithFileUploads;
     use WithPagination;
     public $confirmingDelete = false;
     public $itemToDelete = null;
     public $search = '';
     public $filterItemType = '';
-    public $importFile;
-    public $showImportModal = false;
-    public $importErrors = [];
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -74,24 +67,5 @@ class Index extends Component
         }
 
         $this->cancelDelete();
-    }
-
-    public function importItems()
-    {
-        $this->validate([
-            'importFile' => 'required|file|mimes:xlsx,xls',
-        ]);
-
-        $restaurantId = auth()->user()->restaurants()->first()->id;
-        $this->importErrors = [];
-
-        try {
-            Excel::import(new ItemImport($restaurantId, $this, setting('category_module')), $this->importFile);
-            session()->flash('success', 'Items imported successfully!');
-            $this->showImportModal = false;
-            $this->importFile = null;
-        } catch (\Exception $e) {
-            $this->importErrors[] = ['row' => 'N/A', 'error' => $e->getMessage()];
-        }
     }
 }
