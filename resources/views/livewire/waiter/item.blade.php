@@ -18,7 +18,10 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 md:hidden">
-                    <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-user text-lg"></i></button>
+                    <button wire:click="openCustomerModal" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-user text-lg"></i>
+                    </button>
+
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-power-off text-lg"></i></button>
                 </div>
             </div>
@@ -36,7 +39,10 @@
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-th text-lg"></i></button>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-clock text-lg"></i></button>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-bell text-lg"></i></button>
-                    <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-user text-lg"></i></button>
+                    <button wire:click="openCustomerModal" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-user text-lg"></i>
+                    </button>
+
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-power-off text-lg"></i></button>
                 </div>
             </div>
@@ -575,17 +581,10 @@
                         class="w-full border rounded p-2" />
                 </div>
 
-                <div class="mb-3">
-                    <label class="block text-sm font-semibold">Tax (%)</label>
-                    <input type="number" step="0.01" wire:model.live="taxRate"
-                        class="w-full border rounded p-2" />
-                </div>
-
                 <!-- Totals -->
                 <div class="mb-4 text-sm text-gray-700">
                     <p>Subtotal: ₹{{ number_format($this->getSubtotal(), 2) }}</p>
                     <p>Service: ₹{{ number_format($serviceCharge, 2) }}</p>
-                    <p>Tax: ₹{{ number_format((($this->getSubtotal() + $serviceCharge) * $taxRate) / 100, 2) }}</p>
                     <p class="font-bold text-blue-600">Total: ₹{{ number_format($this->getCartTotal(), 2) }}</p>
                 </div>
 
@@ -613,6 +612,41 @@
                     <button wire:click="confirmRemove" class="px-4 py-2 bg-red-600 text-white rounded">
                         Confirm Remove
                     </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($showCustomerModal)
+        <div class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex justify-center items-center z-50">
+            <div class="bg-white p-6 rounded shadow w-full max-w-md">
+                <h2 class="text-lg font-bold mb-4">Customer Details</h2>
+
+                <x-form.error />
+
+                <div class="space-y-3">
+                    <input type="text" wire:model.defer="followupCustomer_name" class="w-full border p-2 rounded"
+                        placeholder="Customer Name">
+
+                    <input type="text" wire:model.defer="followupCustomer_mobile" class="w-full border p-2 rounded"
+                        placeholder="Mobile Number" maxlength="10"
+                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" >
+
+                    <input type="email" wire:model.defer="followupCustomer_email" class="w-full border p-2 rounded"
+                        placeholder="Email (optional)">
+
+                    <input type="date" wire:model.defer="customer_dob" class="w-full border p-2 rounded"
+                        placeholder="DOB (optional)">
+
+                    <input type="date" wire:model.defer="customer_anniversary" class="w-full border p-2 rounded"
+                        placeholder="Anniversary (optional)">
+                </div>
+
+                <div class="mt-4 flex justify-end gap-2">
+                    <button wire:click="$set('showCustomerModal', false)"
+                        class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
+                    <button wire:click="saveCustomer"
+                        class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
                 </div>
             </div>
         </div>

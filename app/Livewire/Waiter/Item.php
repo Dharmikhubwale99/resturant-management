@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
+use App\Models\{Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -55,11 +55,17 @@ class Item extends Component
     public string $discountType = 'percentage';
     public float|string $discountValue = 0;
     public float $serviceCharge = 0;
-    public float $taxRate = 0;
     public bool $showCartDetailModal = false;
     public bool $showRemoveModal = false;
     public string|null $removeReason = null;
     public string|null $removeKey = null;
+    public bool $showCustomerModal = false;
+    public string $followupCustomer_name = '';
+    public string $followupCustomer_mobile = '';
+    public string $followupCustomer_email = '';
+    public string $customer_dob = '';
+    public string $customer_anniversary = '';
+
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -97,6 +103,16 @@ class Item extends Component
             ->where('status', 'pending')
             ->orderBy('created_at')
             ->get();
+
+        $coustomer = Customer::where('order_id', $order->id)->first();
+
+        if($coustomer) {
+            $this->followupCustomer_name = $coustomer->name;
+            $this->followupCustomer_mobile = $coustomer->mobile;
+            $this->followupCustomer_email = $coustomer->email;
+            $this->customer_dob = $coustomer->dob->format('Y-m-d');
+            $this->customer_anniversary = $coustomer->anniversary->format('Y-m-d');
+        }
 
         foreach ($kots as $kot) {
             $this->kotId = $kot->kot_number;
@@ -162,9 +178,7 @@ class Item extends Component
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
         $service = $this->serviceCharge ?? 0;
-        $taxRate = floatval($this->taxRate ?? 0);
-        $tax = ($subtotal + $service) * ($taxRate / 100);
-        return $subtotal + $service + $tax;
+        return $subtotal + $service ;
     }
 
     public function getSubtotal()
@@ -469,8 +483,7 @@ class Item extends Component
                 'sub_total' => $subTotal,
                 'discount_amount' => 0,
                 'total_amount' => $subTotal,
-                // 'tax_amount' => $subTotal * ($this->taxRate / 100),
-                'tax_amount' => $this->taxRate,
+                'tax_amount' => 0,
                 'service_charge' => $this->serviceCharge,
             ]);
 
@@ -916,5 +929,45 @@ class Item extends Component
         unset($this->cart[$key]);
         $this->showRemoveModal = false;
         $this->reset(['showRemoveModal', 'removeKey', 'removeReason']);
+    }
+
+    public function openCustomerModal()
+    {
+        $this->resetValidation();
+        $this->showCustomerModal = true;
+    }
+
+    public function saveCustomer()
+    {
+        $this->validate([
+            'followupCustomer_name' => 'required|string|max:100',
+            'followupCustomer_mobile' => 'required|string|max:20',
+            'followupCustomer_email' => 'nullable|email',
+            'customer_dob' => 'nullable|date',
+            'customer_anniversary' => 'nullable|date',
+        ]);
+
+        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
+        $coustomer = Customer::where('order_id', $order->id)->first();
+        if(!$coustomer) {
+            $coustomer->create([
+                'order_id' => $order->id,
+                'name' => $this->followupCustomer_name,
+                'mobile' => $this->followupCustomer_mobile,
+                'email' => $this->followupCustomer_email,
+                'dob' => $this->customer_dob,
+                'anniversary' => $this->customer_anniversary,
+                'restaurant_id' => auth()->user()->restaurant_id,
+            ]);
+
+            $order->update([
+                'customer_id' => $coustomer->id
+            ]);
+        }
+
+
+        $this->showCustomerModal = false;
+
+        session()->flash('success', 'Customer added and linked to order!');
     }
 }
