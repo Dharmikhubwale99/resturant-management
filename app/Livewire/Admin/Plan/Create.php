@@ -13,6 +13,9 @@ class Create extends Component
     public $name, $price, $duration_days, $description;
     public $images = [];
     public $plan;
+    public $type;
+    public $value;
+    public $amount;
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -20,24 +23,36 @@ class Create extends Component
         return view('livewire.admin.plan.create');
     }
 
-     public function submit()
+    public function submit()
     {
-        $this->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'price' => 'nullable|numeric|min:0',
             'duration_days' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
-        ]);
+            'type' => 'nullable',
+        ];
+
+        if ($this->type === 'percentage') {
+            $rules['value'] = 'nullable|numeric|min:0';
+        } elseif ($this->type === 'fixed') {
+            $rules['amount'] = 'nullable|numeric|min:0';
+        }
+
+        $validated = $this->validate($rules);
 
         $this->plan = Plan::create([
             'name' => $this->name,
             'price' => $this->price,
             'duration_days' => $this->duration_days,
             'description' => $this->description,
+            'type' => $this->type,
+            'value' => $this->value,
+            'amount' => $this->amount,
         ]);
 
         foreach ($this->images as $image) {
-            $this->plan->addMedia($image)->toMediaCollection('images');
+            $this->plan->addMedia($image)->toMediaCollection('planImages');
         }
 
         session()->flash('success', 'Plan created successfully!');
