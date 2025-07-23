@@ -24,6 +24,9 @@ class Plan extends Model implements HasMedia
         'duration_days',
         'description',
         'is_active',
+        'type',
+        'value',
+        'amount',
     ];
 
     /**
@@ -37,6 +40,8 @@ class Plan extends Model implements HasMedia
             'id' => 'integer',
             'price' => 'decimal:2',
             'is_active' => 'boolean',
+            'type' => 'string',
+            'amount' => 'decimal:2',
         ];
     }
 
@@ -47,6 +52,6 @@ class Plan extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('images');
+        $this->addMediaCollection('planImages');
     }
 }
