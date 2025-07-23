@@ -5,10 +5,14 @@ namespace App\Livewire\Admin\Plan;
 use Livewire\Component;
 use App\Models\Plan;
 use Livewire\Attributes\Layout;
+use Livewire\WithFileUploads;
 
 class Create extends Component
 {
+    use WithFileUploads;
     public $name, $price, $duration_days, $description;
+    public $images = [];
+    public $plan;
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -25,12 +29,16 @@ class Create extends Component
             'description' => 'nullable|string',
         ]);
 
-        Plan::create([
+        $this->plan = Plan::create([
             'name' => $this->name,
             'price' => $this->price,
             'duration_days' => $this->duration_days,
             'description' => $this->description,
         ]);
+
+        foreach ($this->images as $image) {
+            $this->plan->addMedia($image)->toMediaCollection('images');
+        }
 
         session()->flash('success', 'Plan created successfully!');
         $this->reset(['name', 'price', 'description']);

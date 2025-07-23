@@ -126,7 +126,7 @@
                         <p class="text-gray-700 mb-6">
                             Are you sure you want to
                             {{ optional(\App\Models\Discount::find($blockId))->is_active ? 'block' : 'unblock' }} this
-                            owner?
+                            discount?
                         </p>
 
                         <div class="flex justify-end space-x-3">
