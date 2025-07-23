@@ -13,15 +13,23 @@
                 ]"
                     placeholder="All Types" wrapperClass="mb-0" inputClass="text-sm" />
 
-
-                <x-form.button title="Import Excel"
+                <x-form.button title="Import"
                     class="bg-green-600 hover:bg-green-700 text-white"
                     wire:click="$set('showImportModal', true)" />
                 <x-form.button title="+ Add" route="restaurant.items.create"
                     class="bg-blue-600 hover:bg-blue-700 text-white" />
             </div>
-
         </div>
+         @if ($importErrors)
+                <div class="mt-4 p-4 bg-red-100 text-red-800 rounded w-full text-sm">
+                    <strong>Import Errors:</strong>
+                    <ul class="list-disc list-inside mt-1">
+                        @foreach ($importErrors as $error)
+                            <li><b>Row {{ $error['row'] }}</b>: {{ $error['error'] }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         <x-form.error />
         
         <div class="overflow-x-auto">
@@ -114,9 +122,24 @@
         <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
             <button class="absolute top-2 right-2 text-gray-500" wire:click="$set('showImportModal', false)">✕</button>
             <h3 class="text-lg font-bold mb-2">Import Items from Excel</h3>
-            <p class="mb-2 text-sm text-gray-600">Required columns: <b>category_name, name, item_type, price</b></p>
+            @if(setting('category_module'))
+                <p class="mb-2 text-sm text-gray-600">Required columns: <b>category_name, name, item_type, price</b></p>
+                <a href="{{ asset('sample_items_import_with_category.xlsx') }}" class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
+            @else
+                <p class="mb-2 text-sm text-gray-600">Required columns: <b>name, item_type, price</b></p>
+                <a href="{{ asset('sample_items_import_without_category.xlsx') }}" class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
+            @endif
             <form wire:submit.prevent="importItems" enctype="multipart/form-data" class="space-y-3">
-                <input type="file" wire:model="importFile" accept=".xlsx,.xls" class="border rounded px-2 py-1 w-full" />
+                <div class="relative">
+                    <input type="file" wire:model="importFile" accept=".xlsx,.xls" class="border rounded px-2 py-1 w-full" />
+                    <div wire:loading wire:target="importFile" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 rounded">
+                        <svg class="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        <span class="ml-2 text-green-700 text-xs">Uploading...</span>
+                    </div>
+                </div>
                 @error('importFile') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 @if($importErrors)
                     <div class="bg-red-100 text-red-700 p-2 rounded text-xs">
@@ -128,11 +151,13 @@
                     </div>
                 @endif
                 <div class="flex justify-end gap-2">
-                    <button type="button" wire:click="$set('showImportModal', false)" class="px-3 py-1 bg-gray-300 rounded">Cancel</button>
-                    <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded">Import</button>
+                    {{-- <button type="button" wire:click="$set('showImportModal', false)" class="px-3 py-1 bg-gray-300 rounded">Cancel</button> --}}
+                    {{-- <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded">Import</button> --}}
+                    <x-form.button type="submit" title="Save" wireTarget="submit" />
+                    <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
+                        route="restaurant.items.index" />
                 </div>
             </form>
-            <a href="{{ asset('sample_items_import.xlsx') }}" class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
         </div>
     </div>
     @endif
