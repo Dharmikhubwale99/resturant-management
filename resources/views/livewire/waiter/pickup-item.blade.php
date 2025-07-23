@@ -199,6 +199,18 @@
                 </div> --}}
 
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
+                <div class="flex items-center justify-between mb-2">
+                    @if (!empty($customerName))
+                        <div class="text-xs md:text-sm font-semibold text-gray-700">
+                            Customer: {{ $customerName }}
+                        </div>
+                    @endif
+                    @if (!empty($mobile))
+                        <div class="text-xs md:text-sm font-semibold text-gray-700">
+                            {{ $mobile }}
+                        </div>
+                    @endif
+                </div>
                 @if (count($cartItems))
                     <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
                         @if (request()->query('mode') === 'edit')
@@ -212,7 +224,6 @@
                                     <div class="flex-1 min-w-0">
                                         <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
                                             {{ $row['name'] }}
-
                                         </p>
                                         <div class="flex items-baseline gap-2">
                                             <p class="text-xs text-gray-500 whitespace-nowrap">
