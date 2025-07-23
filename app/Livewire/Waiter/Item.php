@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
+use App\Models\{Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -16,9 +16,7 @@ class Item extends Component
         $categories,
         $selectedCategory = null,
         $table_id,
-        $searchCode = '',
-        $search = '',
-        $searchShortName = '';
+        $search = '';
     public $cart = [],
         $showVariantModal = false,
         $currentItem = null,
@@ -57,11 +55,17 @@ class Item extends Component
     public string $discountType = 'percentage';
     public float|string $discountValue = 0;
     public float $serviceCharge = 0;
-    public float $taxRate = 0;
     public bool $showCartDetailModal = false;
     public bool $showRemoveModal = false;
     public string|null $removeReason = null;
     public string|null $removeKey = null;
+    public bool $showCustomerModal = false;
+    public string $followupCustomer_name = '';
+    public string $followupCustomer_mobile = '';
+    public string $followupCustomer_email = '';
+    public string $customer_dob = '';
+    public string $customer_anniversary = '';
+
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -93,28 +97,50 @@ class Item extends Component
 
     protected function loadEditModeData($table_id)
     {
-        $latestKot = Kot::where('table_id', $table_id)->where('status', 'pending')->first();
-        $this->kotId = $latestKot?->kot_number;
-        $this->kotTime = $latestKot?->created_at;
-
         $order = Order::where('table_id', $table_id)->where('status', 'pending')->first();
 
-        if ($latestKot) {
-            $latestKot->items()->each(function ($kotItem) {
+        $kots = Kot::where('order_id', $order->id)
+            ->where('status', 'pending')
+            ->orderBy('created_at')
+            ->get();
+
+        $coustomer = Customer::where('order_id', $order->id)->first();
+
+        if($coustomer) {
+            $this->followupCustomer_name = $coustomer->name;
+            $this->followupCustomer_mobile = $coustomer->mobile;
+            $this->followupCustomer_email = $coustomer->email;
+            $this->customer_dob = $coustomer->dob->format('Y-m-d');
+            $this->customer_anniversary = $coustomer->anniversary->format('Y-m-d');
+        }
+
+        foreach ($kots as $kot) {
+            $this->kotId = $kot->kot_number;
+            $this->kotTime = $kot->created_at;
+
+            foreach ($kot->items as $kotItem) {
                 $key = $kotItem->variant_id ? 'v' . $kotItem->variant_id : $kotItem->item_id;
                 $this->originalKotItemKeys[] = $key;
 
-                $name = $kotItem->variant_id ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')' : $kotItem->item->name;
+                $name = $kotItem->variant_id
+                    ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')'
+                    : $kotItem->item->name;
 
-                $this->cart[$key] = [
-                    'id' => $key,
-                    'item_id' => $kotItem->item_id,
-                    'name' => $name,
-                    'price' => $kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price,
-                    'qty' => $kotItem->quantity,
-                    'note' => $kotItem->special_notes ?? '',
-                ];
-            });
+                if (!isset($this->cart[$key])) {
+                    $this->cart[$key] = [
+                        'id' => $key,
+                        'item_id' => $kotItem->item_id,
+                        'name' => $name,
+                        'price' => $kotItem->variant_id
+                            ? $kotItem->item->price + $kotItem->variant->price
+                            : $kotItem->item->price,
+                        'qty' => $kotItem->quantity,
+                        'note' => $kotItem->special_notes ?? '',
+                        'kot_number' => $kot->kot_number,
+                        'kot_time' => $kot->created_at->format('H:i'),
+                    ];
+                }
+            }
         }
 
         if ($order) {
@@ -124,30 +150,17 @@ class Item extends Component
 
     public function getFilteredItems()
     {
-        $collection = $this->selectedCategory ? $this->items->where('category_id', $this->selectedCategory) : $this->items;
+        $collection = $this->selectedCategory
+            ? $this->items->where('category_id', $this->selectedCategory)
+            : $this->items;
 
         if ($this->search !== '') {
-            $collection = $collection->filter(
-                fn($i) => str($i->name)
-                    ->lower()
-                    ->contains(str($this->search)->lower()),
-            );
-        }
-
-        if ($this->searchCode !== '') {
-            $collection = $collection->filter(
-                fn($i) => str($i->code ?? '')
-                    ->lower()
-                    ->contains(str($this->searchCode)->lower()),
-            );
-        }
-
-        if ($this->searchShortName !== '') {
-            $collection = $collection->filter(
-                fn($i) => str($i->short_name ?? '')
-                    ->lower()
-                    ->contains(str($this->searchShortName)->lower()),
-            );
+            $searchLower = str($this->search)->lower();
+            $collection = $collection->filter(function ($i) use ($searchLower) {
+                return str($i->name)->lower()->contains($searchLower)
+                    || str($i->code ?? '')->lower()->contains($searchLower)
+                    || str($i->short_name ?? '')->lower()->contains($searchLower);
+            });
         }
 
         return $collection;
@@ -165,9 +178,7 @@ class Item extends Component
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
         $service = $this->serviceCharge ?? 0;
-        $taxRate = floatval($this->taxRate ?? 0);
-        $tax = ($subtotal + $service) * ($taxRate / 100);
-        return $subtotal + $service + $tax;
+        return $subtotal + $service ;
     }
 
     public function getSubtotal()
@@ -337,6 +348,13 @@ class Item extends Component
             return;
         }
 
+        $nonZeroItems = collect($this->cart)->filter(fn($item) => $item['qty'] > 0)->count();
+
+        if ($nonZeroItems <= 1) {
+            session()->flash('error', 'Cannot remove the last item from the cart.');
+            return;
+        }
+
         if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
             $this->removeKey = $key;
             $this->showRemoveModal = true;
@@ -464,9 +482,9 @@ class Item extends Component
                 'status' => 'pending',
                 'sub_total' => $subTotal,
                 'discount_amount' => 0,
-                'tax_amount' => 0,
                 'total_amount' => $subTotal,
-                'tax_amount' => $subTotal * ($this->taxRate / 100),
+                'tax_amount' => 0,
+                'service_charge' => $this->serviceCharge,
             ]);
 
             $kot = Kot::create([
@@ -630,6 +648,7 @@ class Item extends Component
         });
 
         session()->flash('success', 'KOT updated & sent to kitchen!');
+        return redirect()->route('waiter.dashboard');
     }
 
     public function save()
@@ -908,7 +927,47 @@ class Item extends Component
         });
 
         unset($this->cart[$key]);
-
+        $this->showRemoveModal = false;
         $this->reset(['showRemoveModal', 'removeKey', 'removeReason']);
+    }
+
+    public function openCustomerModal()
+    {
+        $this->resetValidation();
+        $this->showCustomerModal = true;
+    }
+
+    public function saveCustomer()
+    {
+        $this->validate([
+            'followupCustomer_name' => 'required|string|max:100',
+            'followupCustomer_mobile' => 'required|string|max:20',
+            'followupCustomer_email' => 'nullable|email',
+            'customer_dob' => 'nullable|date',
+            'customer_anniversary' => 'nullable|date',
+        ]);
+
+        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
+        $coustomer = Customer::where('order_id', $order->id)->first();
+        if(!$coustomer) {
+            $coustomer->create([
+                'order_id' => $order->id,
+                'name' => $this->followupCustomer_name,
+                'mobile' => $this->followupCustomer_mobile,
+                'email' => $this->followupCustomer_email,
+                'dob' => $this->customer_dob,
+                'anniversary' => $this->customer_anniversary,
+                'restaurant_id' => auth()->user()->restaurant_id,
+            ]);
+
+            $order->update([
+                'customer_id' => $coustomer->id
+            ]);
+        }
+
+
+        $this->showCustomerModal = false;
+
+        session()->flash('success', 'Customer added and linked to order!');
     }
 }

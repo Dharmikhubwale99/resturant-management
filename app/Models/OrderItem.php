@@ -30,7 +30,8 @@ class OrderItem extends Model
         'price_override',
         'discount_value',
         'final_price',
-        'discount_type'
+        'discount_type',
+        'delete_reason'
     ];
 
     /**

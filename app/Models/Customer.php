@@ -24,6 +24,7 @@ class Customer extends Model
         'dob',
         'anniversary',
         'restaurant_id',
+        'order_id',
     ];
 
     /**
@@ -38,6 +39,7 @@ class Customer extends Model
             'dob' => 'date',
             'anniversary' => 'date',
             'restaurant_id' => 'integer',
+            'order_id' => 'integer',
         ];
     }
 
