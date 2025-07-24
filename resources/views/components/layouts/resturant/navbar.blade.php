@@ -5,33 +5,51 @@
         start: 0,
         visible: 5,
         menuLinks: [
-            @if (setting('user'))
-                { text: 'User', href: '{{ route('restaurant.users.index') }}' },
-            @endif
-            @if (setting('category_module'))
-                { text: 'Category', href: '{{ route('restaurant.categories.index') }}' },
-            @endif
-            @if (setting('item'))
-                { text: 'Item', href: '{{ route('restaurant.items.index') }}' },
-            @endif
-            @if (setting('area_module'))
-                { text: 'Area', href: '{{ route('restaurant.areas.index') }}' },
-            @endif
-            @if (setting('table'))
-                { text: 'Table', href: '{{ route('restaurant.tables.index') }}' },
-            @endif
-            @if (setting('expense-type-module'))
-                { text: 'Expense-Type', href: '{{ route('restaurant.expense-types.index') }}' },
-            @endif
-            @if(setting('expense'))
-                { text: 'Expenses', href: '{{ route('restaurant.expenses.index') }}' },
-            @endif
-            @if (setting('discount'))
-                { text: 'Discount', href: '{{ route('restaurant.discount.index') }}' },
-            @endif
-            @if (setting('kitchen'))
-                { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
-            @endif
+            @can('user-index')
+                @if (setting('user'))
+                    { text: 'User', href: '{{ route('restaurant.users.index') }}' },
+                @endif
+            @endcan
+            @can('category-index')
+                @if (setting('category_module'))
+                    { text: 'Category', href: '{{ route('restaurant.categories.index') }}' },
+                @endif
+            @endcan
+            @can('item-index')
+                @if (setting('item'))
+                    { text: 'Item', href: '{{ route('restaurant.items.index') }}' },
+                @endif
+            @endcan
+            @can('area-index')
+                @if (setting('area_module'))
+                    { text: 'Area', href: '{{ route('restaurant.areas.index') }}' },
+                @endif
+            @endcan
+            @can('table-index')
+                @if (setting('table'))
+                    { text: 'Table', href: '{{ route('restaurant.tables.index') }}' },
+                @endif
+            @endcan
+            @can('expense-type-index')
+                @if (setting('expense-type-module'))
+                    { text: 'Expense-Type', href: '{{ route('restaurant.expense-types.index') }}' },
+                @endif
+            @endcan
+            @can('expenses-index')
+                @if(setting('expense'))
+                    { text: 'Expenses', href: '{{ route('restaurant.expenses.index') }}' },
+                @endif
+            @endcan
+            @can('discount-index')
+                @if (setting('discount'))
+                    { text: 'Discount', href: '{{ route('restaurant.discount.index') }}' },
+                @endif
+            @endcan
+            @can('kitchen-dashboard')
+                @if (setting('kitchen'))
+                    { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
+                @endif
+            @endcan
         ]
     }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -12,9 +12,10 @@
                 ]"
                     placeholder="All Types" wrapperClass="mb-0" inputClass="text-sm" />
 
-
-                <x-form.button title="+ Add" route="restaurant.discount.create"
-                    class="bg-blue-600 hover:bg-blue-700 text-white" />
+                @can('discount-create')
+                    <x-form.button title="+ Add" route="restaurant.discount.create"
+                        class="bg-blue-600 hover:bg-blue-700 text-white" />
+                @endcan
             </div>
         </div>
         <x-form.error />
@@ -64,31 +65,36 @@
                             </td>
                             <td class="px-2 text-sm text-gray-900">
                                 <div class="flex items-center justify-start space-x-2">
-                                    <x-form.button title=""
-                                        class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                        wireClick="confirmBlock({{ $discount->id }})">
-                                        @if ($discount->is_active)
-                                        <span class="w-5 h-1 flex items-center justify-center">
-                                                {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
-                                        @else
-                                        <span class="w-5 h-1 flex items-center justify-center">
-                                            {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
-                                        @endif
-                                    </x-form.button>
-                                    <x-form.button title=""
-                                        class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.discount.edit', $discount->id]">
-                                        <span class="w-4 h-4">
-                                            {!! file_get_contents(public_path('icon/edit.svg')) !!}
-                                        </span>
-                                    </x-form.button>
-
-                                    <x-form.button title=""
-                                        class="w-8 h-8 rounded flex items-center justify-center"
-                                        wireClick="confirmDelete({{ $discount->id }})">
-                                        <span class="w-4 h-4">
-                                            {!! file_get_contents(public_path('icon/delete.svg')) !!}
-                                        </span>
-                                    </x-form.button>
+                                    @can('discount-active')
+                                        <x-form.button title=""
+                                            class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                            wireClick="confirmBlock({{ $discount->id }})">
+                                            @if ($discount->is_active)
+                                                <span class="w-5 h-1 flex items-center justify-center">
+                                                    {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
+                                            @else
+                                                <span class="w-5 h-1 flex items-center justify-center">
+                                                    {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
+                                            @endif
+                                        </x-form.button>
+                                    @endcan
+                                    @can('discount-edit')
+                                        <x-form.button title=""
+                                            class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.discount.edit', $discount->id]">
+                                            <span class="w-4 h-4">
+                                                {!! file_get_contents(public_path('icon/edit.svg')) !!}
+                                            </span>
+                                        </x-form.button>
+                                    @endcan
+                                    @can('discount-delete')
+                                        <x-form.button title=""
+                                            class="w-8 h-8 rounded flex items-center justify-center"
+                                            wireClick="confirmDelete({{ $discount->id }})">
+                                            <span class="w-4 h-4">
+                                                {!! file_get_contents(public_path('icon/delete.svg')) !!}
+                                            </span>
+                                        </x-form.button>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
