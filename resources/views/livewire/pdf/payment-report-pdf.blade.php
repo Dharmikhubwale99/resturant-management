@@ -19,6 +19,8 @@
                 <th>Date</th>
                 <th>Amount</th>
                 <th>Method</th>
+                <th>Customer Name</th>
+                <th>Mobile</th>
             </tr>
         </thead>
         <tbody>
@@ -28,12 +30,24 @@
                     <td>{{ \Carbon\Carbon::parse($row->created_at)->format('d-m-Y') }}</td>
                     <td>₹{{ number_format($row->amount, 2) }}</td>
                     <td>{{ ucfirst($row->method) }}</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+            @endforeach
+            @foreach($logs as $log)
+                <tr>
+                    <td>{{ $log->id }}</td>
+                    <td>{{ \Carbon\Carbon::parse($log->created_at)->format('d-m-Y') }}</td>
+                    <td>₹{{ number_format($log->paid_amount, 2) }}</td>
+                    <td>{{ ucfirst($log->method) }}</td>
+                    <td>{{ $log->customer_name }}</td>
+                    <td>{{ $log->mobile }}</td>
                 </tr>
             @endforeach
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3" style="text-align:right;"><strong>Total</strong></td>
+                <td colspan="5" style="text-align:right;"><strong>Total</strong></td>
                 <td><strong>₹{{ number_format($totalAmount, 2) }}</strong></td>
             </tr>
         </tfoot>
