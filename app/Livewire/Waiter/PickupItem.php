@@ -78,6 +78,12 @@ class PickupItem extends Component
         if ($this->editMode) {
             $this->loadEditModeData($id);
         }
+
+        $this->customerName = $this->order->customer_name ?? '';
+        $this->mobile = $this->order->mobile ?? '';
+        $this->duoCustomerName = $this->order->customer_name ?? '';
+        $this->duoMobile = $this->order->mobile ?? '';
+
     }
 
     protected function loadEditModeData($id)
