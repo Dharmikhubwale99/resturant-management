@@ -13,16 +13,15 @@ class ModuleSeeder extends Seeder
      */
     public function run(): void
     {
-       AppConfiguration::firstOrCreate([
-           'key' => 'category_module',
-       ]);
+        $modules = [
+            'category_module',
+            'area_module',
+            'expense-type-module',
+            'user'
+        ];
 
-       AppConfiguration::firstOrCreate([
-            'key' => 'area_module',
-    ]);
-
-        AppConfiguration::firstOrCreate([
-            'key' => 'expense-type-module',
-        ]); 
+        foreach ($modules as $key) {
+            AppConfiguration::firstOrCreate(['key' => $key]);
+        }
     }
 }
