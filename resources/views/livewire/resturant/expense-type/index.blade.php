@@ -5,10 +5,10 @@
             <div class="flex items-center gap-4">
                 <x-form.input name="search" placeholder="Search by name" wireModelLive="search" wrapperClass="mb-0"
                     inputClass="w-72" />
-                {{-- @if (setting('category_module')) --}}
+                @can('expense-type-create')
                     <x-form.button title="+ Add" route="restaurant.expense-types.create"
                         class="bg-blue-600 hover:bg-blue-700 text-white" />
-                {{-- @endif --}}
+                @endcan
             </div>
         </div>
         <x-form.error />
@@ -28,20 +28,23 @@
                             <td class="px-6 text-sm text-gray-900">{{ $expenseType->name }}</td>
                             <td class="px-2 text-sm text-gray-900">
                                 <div class="flex items-center justify-start space-x-2">
-                                    <x-form.button title=""
-                                        class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.expense-types.edit', $expenseType->id]">
-                                        <span class="w-4 h-4">
-                                            {!! file_get_contents(public_path('icon/edit.svg')) !!}
-                                        </span>
-                                    </x-form.button>
-
-                                    <x-form.button title=""
-                                        class="w-8 h-8 rounded flex items-center justify-center"
-                                        wireClick="confirmDelete({{ $expenseType->id }})">
-                                        <span class="w-4 h-4">
-                                            {!! file_get_contents(public_path('icon/delete.svg')) !!}
-                                        </span>
-                                    </x-form.button>
+                                    @can('expense-type-edit')
+                                        <x-form.button title=""
+                                            class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.expense-types.edit', $expenseType->id]">
+                                            <span class="w-4 h-4">
+                                                {!! file_get_contents(public_path('icon/edit.svg')) !!}
+                                            </span>
+                                        </x-form.button>
+                                    @endcan
+                                    @can('expense-type-delete')
+                                        <x-form.button title=""
+                                            class="w-8 h-8 rounded flex items-center justify-center"
+                                            wireClick="confirmDelete({{ $expenseType->id }})">
+                                            <span class="w-4 h-4">
+                                                {!! file_get_contents(public_path('icon/delete.svg')) !!}
+                                            </span>
+                                        </x-form.button>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
@@ -56,7 +59,8 @@
                 <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
                     <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
                         <h3 class="text-lg font-semibold mb-4 text-red-600">Confirm Delete</h3>
-                        <p class="text-gray-700 mb-6">Are you sure you want to delete this expense type? This action cannot
+                        <p class="text-gray-700 mb-6">Are you sure you want to delete this expense type? This action
+                            cannot
                             be
                             undone.</p>
 

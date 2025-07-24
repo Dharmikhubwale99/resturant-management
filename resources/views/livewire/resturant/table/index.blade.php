@@ -10,7 +10,9 @@
                 wrapperClass="mb-0"
                 inputClass="w-72"
             />
-            <x-form.button title="+ Add" route="restaurant.tables.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
+            @can('table-create')
+                <x-form.button title="+ Add" route="restaurant.tables.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
+            @endcan
         </div>
     </div>
     <x-form.error />
@@ -42,20 +44,23 @@
                             <td class="px-6 text-sm text-gray-900">{{ $table->qr_enabled ? 'Yes' : 'No' }}</td>
                             <td class="px-2 text-sm text-gray-900">
                                 <div class="flex items-center justify-start space-x-2">
+                                @can('table-show')
                                     <x-form.button title=""
                                         class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.tables.show', $table->id]">
                                         <span class="w-4 h-4 text-yellow-700">
                                             {!! file_get_contents(public_path('icon/view.svg')) !!}
                                         </span>
                                     </x-form.button>
+                                @endcan
+                                @can('table-edit')
                                     <x-form.button title=""
                                         class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.tables.edit', $table->id]">
                                         <span class="w-4 h-4">
                                             {!! file_get_contents(public_path('icon/edit.svg')) !!}
                                         </span>
                                     </x-form.button>
-
-
+                                @endcan
+                                @can('table-delete')
                                     <x-form.button title=""
                                         class="w-8 h-8 rounded flex items-center justify-center"
                                         wireClick="confirmDelete({{ $table->id }})">
@@ -63,6 +68,8 @@
                                             {!! file_get_contents(public_path('icon/delete.svg')) !!}
                                         </span>
                                     </x-form.button>
+                                @endcan
+
                                 </div>
                             </td>
                         </tr>
