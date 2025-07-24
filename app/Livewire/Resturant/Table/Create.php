@@ -40,7 +40,6 @@ class Create extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'capacity' => 'required|integer|min:1',
-            'status' => 'required|in:available,occupied,reserved',
             'qr_enabled' => 'boolean',
         ]);
 
@@ -49,7 +48,7 @@ class Create extends Component
             'area_id' => $this->area_id,
             'name' => $this->name,
             'capacity' => $this->capacity,
-            'status' => $this->status,
+            'status' => 'available',
             'qr_enabled' => $this->qr_enabled,
             'qr_token' => Str::uuid(),
         ]);
