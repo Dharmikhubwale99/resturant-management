@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin\Plan;
 
-use App\Models\Plan;
+use App\Models\{Plan, AppConfiguration};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\WithFileUploads;
@@ -12,9 +12,8 @@ class Edit extends Component
     use WithFileUploads;
     public $plan, $name, $price, $duration_days, $description;
     public $images;
-    public $type;
-    public $value;
-    public $amount;
+    public $featureAccess = [];
+    public $availableFeatures = [];
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -24,9 +23,14 @@ class Edit extends Component
 
     public function mount($id)
     {
-        $this->plan = Plan::find($id);
-        $this->fill($this->plan->only('name', 'price', 'duration_days', 'description','type','value','amount'));
+        $this->plan = Plan::findOrFail($id);
+        $this->fill($this->plan->only('name', 'price', 'duration_days', 'description'));
+
+        $this->availableFeatures = AppConfiguration::all()->pluck('key')->toArray();
+
+        $this->featureAccess = $this->plan->planFeatures()->where('is_active', true)->pluck('feature')->toArray();
     }
+
 
      public function removeImage($mediaId)
     {
@@ -35,45 +39,42 @@ class Edit extends Component
     }
 
     public function submit()
-    {
-        $rules = [
-            'name' => 'required|string|max:255',
-            'price' => 'nullable|numeric|min:0',
-            'duration_days' => 'nullable|numeric|min:0',
-            'description' => 'nullable|string|max:255',
-            'images' => 'nullable|image|max:2048',
-            'type' => 'nullable',
-        ];
+{
+    $this->validate([
+        'name' => 'required|string|max:255',
+        'price' => 'nullable|numeric|min:0',
+        'duration_days' => 'nullable|numeric|min:0',
+        'description' => 'nullable|string|max:255',
+        'images' => 'nullable|image|max:2048',
+    ]);
 
-        if ($this->type === 'percentage') {
-            $rules['value'] = 'nullable|numeric|min:0';
-        } elseif ($this->type === 'fixed') {
-            $rules['amount'] = 'nullable|numeric|min:0';
-        }
+    $this->plan->update([
+        'name' => $this->name,
+        'price' => $this->price,
+        'duration_days' => $this->duration_days,
+        'description' => $this->description,
+    ]);
 
-        $this->validate($rules);
+    if ($this->images) {
+        $this->plan->clearMediaCollection('planImages');
 
-        $this->plan->update([
-            'name' => $this->name,
-            'price' => $this->price,
-            'duration_days' => $this->duration_days,
-            'description' => $this->description,
-            'type' => $this->type,
-            'value' => $this->value,
-            'amount' => $this->amount,
-        ]);
+        $storedPath = $this->images->store('plans', 'public');
 
-        if ($this->images) {
-            $this->plan->clearMediaCollection('planImages');
-
-            $storedPath = $this->images->store('plans', 'public');
-
-            $this->plan->addMedia(storage_path('app/public/' . $storedPath))
-                    ->usingFileName($this->images->getClientOriginalName())
-                    ->toMediaCollection('planImages');
-        }
-
-        return redirect()->route('superadmin.plans.index')
-            ->with('success', 'Plan updated successfully.');
+        $this->plan->addMedia(storage_path('app/public/' . $storedPath))
+                   ->usingFileName($this->images->getClientOriginalName())
+                   ->toMediaCollection('planImages');
     }
+
+    foreach ($this->featureAccess as $featureKey) {
+        $this->plan->planFeatures()->create([
+            'feature' => $featureKey,
+            'is_active' => true,
+        ]);
+    }
+
+    return redirect()->route('superadmin.plans.index')
+        ->with('success', 'Plan updated successfully.');
+}
+
+
 }
