@@ -42,6 +42,12 @@ class PickupItem extends Component
     public float|string $discountValue = 0;
     public bool $showCartDetailModal = false;
     public string|null $removeReason = null;
+    public string $transport_name = '';
+    public string $transport_address = '';
+    public string $transport_distance = '';
+    public string $vehicle_number = '';
+    public float|string $transport_charge = 0;
+
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -122,6 +128,11 @@ class PickupItem extends Component
         }
         if ($order) {
             $this->order_type = $order->order_type;
+            $this->transport_name = $order->transport_name ?? '';
+            $this->transport_address = $order->transport_address ?? '';
+            $this->transport_distance = $order->transport_distance ?? '';
+            $this->vehicle_number = $order->vehicle_number ?? '';
+            $this->transport_charge = $order->transport_charge ?? 0;
         }
     }
 
@@ -156,7 +167,8 @@ class PickupItem extends Component
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
         $service = $this->serviceCharge ?? 0;
-        return $subtotal + $service ;
+        $transport = floatval($this->transport_charge ?? 0);
+        return $subtotal + $service + $transport;
     }
 
     public function getSubtotal()
@@ -463,6 +475,11 @@ class PickupItem extends Component
                 'total_amount' => $subTotal,
                 'tax_amount' => 0,
                 'service_charge' => $this->serviceCharge,
+                'transport_name' => $this->transport_name,
+                'transport_address' => $this->transport_address,
+                'transport_distance' => $this->transport_distance,
+                'vehicle_number' => $this->vehicle_number,
+                'transport_charge' => $this->transport_charge,
             ]);
 
             $kot = KOT::create([
@@ -525,6 +542,12 @@ class PickupItem extends Component
             return;
         }
 
+        if ($this->editMode) {
+            $this->updateOrder();
+            session()->flash('success', 'KOT updated!');
+            return redirect()->route('waiter.pickup.create')->with('success', 'KOT updated!');
+        }
+
         $this->createOrderAndKot();
         $this->reset(['cart', 'showVariantModal']);
         return redirect()->route('waiter.pickup.create')->with('success', 'Order placed!');
@@ -558,10 +581,23 @@ class PickupItem extends Component
 
     public function updateOrder()
     {
-
-
         DB::transaction(function () {
             $order = Order::where('id', $this->orderId)->first();
+            $subTotal = $this->getCartTotal();
+
+            $order->update([
+                'status' => 'pending',
+                'sub_total' => $subTotal,
+                'discount_amount' => 0,
+                'total_amount' => $subTotal,
+                'tax_amount' => 0,
+                'service_charge' => $this->serviceCharge,
+                'transport_name' => $this->transport_name,
+                'transport_address' => $this->transport_address,
+                'transport_distance' => $this->transport_distance,
+                'vehicle_number' => $this->vehicle_number,
+                'transport_charge' => $this->transport_charge,
+            ]);
 
             $kot = KOT::create([
                 'order_id' => $order->id,
@@ -634,7 +670,16 @@ class PickupItem extends Component
         $order = Order::where('id', $this->order)->where('status', 'pending')->latest()->first();
 
         if (!$order) {
-            $order = $this->createOrderAndKot();
+            $this->createOrderAndKot();
+            $order = Order::where('id', $this->order)->where('status', 'pending')->latest()->first();
+        } else {
+            $newItemsExist = collect($this->cart)->reject(function ($item, $key) {
+                return in_array($key, $this->originalKotItemKeys);
+            })->isNotEmpty();
+
+            if ($newItemsExist) {
+                $this->updateOrder();
+            }
         }
 
         if ($this->paymentMethod === 'part') {
@@ -647,12 +692,11 @@ class PickupItem extends Component
         }
 
         if ($order) {
-            $kot = KOT::where('order_id', $this->order)->where('status', 'pending')->latest()->first();
+            $kots = Kot::where('order_id', $order->id)->where('status', 'pending')->get();
 
-            if ($kot) {
-                $kotItems = KOTItem::where('kot_id', $kot->id)->get();
+            foreach ($kots as $kot) {
                 $kot->update(['status' => 'ready']);
-                $kotItems->each(fn($item) => $item->update(['status' => 'served']));
+                $kot->items()->update(['status' => 'served']);
             }
 
             $orderItems = OrderItem::where('order_id', $order->id)->get();
@@ -686,7 +730,16 @@ class PickupItem extends Component
         $order = Order::where('id', $this->order)->where('status', 'pending')->latest()->first();
 
         if (!$order) {
-            $order = $this->createOrderAndKot();
+            $this->createOrderAndKot();
+            $order = Order::where('id', $this->order)->where('status', 'pending')->latest()->first();
+        } else {
+            $newItemsExist = collect($this->cart)->reject(function ($item, $key) {
+                return in_array($key, $this->originalKotItemKeys);
+            })->isNotEmpty();
+
+            if ($newItemsExist) {
+                $this->updateOrder();
+            }
         }
 
         if ($this->paymentMethod === 'part') {
@@ -699,20 +752,17 @@ class PickupItem extends Component
         }
 
         if ($order) {
-            $kot = KOT::where('order_id', $this->order)->where('status', 'pending')->latest()->first();
+            $kots = Kot::where('order_id', $order->id)->where('status', 'pending')->get();
 
-            if ($kot) {
-                $kotItems = KOTItem::where('kot_id', $kot->id)->get();
+            foreach ($kots as $kot) {
                 $kot->update(['status' => 'ready']);
-                $kotItems->each(fn($item) => $item->update(['status' => 'served']));
+                $kot->items()->update(['status' => 'served']);
             }
 
             $orderItems = OrderItem::where('order_id', $order->id)->get();
-            $table = Table::findOrFail($this->table_id);
 
             $order->update(['status' => 'served']);
             $orderItems->each(fn($item) => $item->update(['status' => 'served']));
-            $table->update(['status' => 'available']);
             $amount = $this->getCartTotal();
 
             Payment::create([
@@ -721,6 +771,7 @@ class PickupItem extends Component
                 'method' => $this->paymentMethod,
             ]);
         }
+
         $this->dispatch('printBill', billId: $order->id);
         return redirect()->route('waiter.pickup.create')->with('success', 'Order Payment Complete!');
     }
@@ -740,13 +791,13 @@ class PickupItem extends Component
     {
         $order = Order::where('id', $this->order)->where('status', 'pending')->latest()->firstOrFail();
 
-        $kot = KOT::where('order_id', $order->id)->where('status', 'pending')->latest()->firstOrFail();
+        $kots = Kot::where('order_id', $order->id)->where('status', 'pending')->get();
 
         $restaurantId = Auth::user()->restaurant_id;
 
         $orderItems = OrderItem::where('order_id', $order->id)->get();
 
-        $kotItems = KOTItem::where('kot_id', $kot->id)->get();
+        $kotItems = KOTItem::whereIn('kot_id', $kots->pluck('id'))->get();
 
         $this->validate([
             'customerName' => 'nullable|string|max:100',
@@ -789,11 +840,11 @@ class PickupItem extends Component
                 $item->update(['status' => 'served']);
             });
 
-            $kot->update([
-                'status' => 'ready',
-            ]);
+            $kots->each(function ($kot) {
+                $kot->update(['status' => 'ready']);
+            });
 
-            $kotItems->each(function ($item) use ($kot) {
+            $kotItems->each(function ($item) {
                 $item->update(['status' => 'served']);
             });
         }
@@ -929,8 +980,6 @@ class PickupItem extends Component
                 'customer_id' => $coustomer->id
             ]);
         }
-
-
         $this->showCustomerModal = false;
 
         session()->flash('success', 'Customer added and linked to order!');
