@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('plan_id');
             $table->string('feature');
             $table->boolean('is_active')->default(0);
+            $table->string('BelongsTo');
             $table->timestamps();
             $table->softDeletes();
         });

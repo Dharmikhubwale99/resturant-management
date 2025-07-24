@@ -5,9 +5,7 @@
         start: 0,
         visible: 5,
         menuLinks: [
-            @if (setting('user'))
-                { text: 'User', href: '{{ route('restaurant.users.index') }}' },
-            @endif
+            { text: 'User', href: '{{ route('restaurant.users.index') }}' },
             @if (setting('category_module'))
                 { text: 'Category', href: '{{ route('restaurant.categories.index') }}' },
             @endif
