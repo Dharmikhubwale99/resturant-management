@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin\Plan;
 
-use App\Models\Plan;
+use App\Models\{Plan, AppConfiguration};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\WithFileUploads;
@@ -12,6 +12,8 @@ class Edit extends Component
     use WithFileUploads;
     public $plan, $name, $price, $duration_days, $description;
     public $images;
+    public $featureAccess = [];
+    public $availableFeatures = [];
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -21,9 +23,14 @@ class Edit extends Component
 
     public function mount($id)
     {
-        $this->plan = Plan::find($id);
+        $this->plan = Plan::findOrFail($id);
         $this->fill($this->plan->only('name', 'price', 'duration_days', 'description'));
+
+        $this->availableFeatures = AppConfiguration::all()->pluck('key')->toArray();
+
+        $this->featureAccess = $this->plan->planFeatures()->where('is_active', true)->pluck('feature')->toArray();
     }
+
 
      public function removeImage($mediaId)
     {
@@ -48,17 +55,21 @@ class Edit extends Component
         'description' => $this->description,
     ]);
 
-    //  If a new image is uploaded, delete the old ones and replace
     if ($this->images) {
-        // Delete existing images in the media collection
         $this->plan->clearMediaCollection('planImages');
 
-        // Store and attach new image
         $storedPath = $this->images->store('plans', 'public');
 
         $this->plan->addMedia(storage_path('app/public/' . $storedPath))
                    ->usingFileName($this->images->getClientOriginalName())
                    ->toMediaCollection('planImages');
+    }
+
+    foreach ($this->featureAccess as $featureKey) {
+        $this->plan->planFeatures()->create([
+            'feature' => $featureKey,
+            'is_active' => true,
+        ]);
     }
 
     return redirect()->route('superadmin.plans.index')
