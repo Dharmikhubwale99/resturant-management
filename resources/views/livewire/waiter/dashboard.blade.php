@@ -20,9 +20,8 @@
             <div class="w-4 h-4 bg-yellow-300 rounded"></div>
             <span class="text-sm font-medium text-gray-700">Reserved</span>
         </div>
-
+   
     </div>
-    <h2>Pendding Pickup Orders :- {{$pickupOrders}}</h2>
     @foreach ($tablesByArea as $areaName => $tables)
         <h2 class="text-xl font-bold mb-2 mt-6">{{ $areaName }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">

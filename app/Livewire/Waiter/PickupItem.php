@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer};
+use App\Models\{Table, Order, OrderItem, KOT, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -11,37 +11,44 @@ use Illuminate\Validation\Rules\Enum;
 
 class PickupItem extends Component
 {
-    public $items, $order, $categories, $selectedCategory = null, $search = '';
-    public $cart = [], $showVariantModal = false, $currentItem = null, $variantOptions = [];
-    public $selectedVariantId = null, $showNoteModal = false, $noteInput = '', $currentNoteKey = null;
-    public $orderTypes = [], $order_type, $kotId, $kotTime;
+    public $items, $order,
+        $categories,
+        $selectedCategory = null,
+        $table_id,
+        $searchCode = '',
+        $search = '',
+        $searchShortName = '';
+    public $cart = [],
+        $showVariantModal = false,
+        $currentItem = null,
+        $variantOptions = [];
+    public $selectedVariantId = null,
+        $showNoteModal = false,
+        $noteInput = '',
+        $currentNoteKey = null;
+    public $orderTypes = [],
+        $order_type,
+        $kotId,
+        $kotTime;
+    public $occupiedTables = [],
+        $ordersForTable = [];
     public array $originalKotItemKeys = [];
     public bool $editMode = false;
     public string $paymentMethod = '';
-    public $paymentMethods = [], $orderId;
-    public bool $showSplitModal = false, $showDuoPaymentModal = false, $showCustomerModal = false;
+    public $paymentMethods = [];
+    public bool $showSplitModal = false;
     public array $splits = [];
-    public string $customerName = '', $mobile = '', $duoCustomerName = '', $duoMobile = '';
+    public string $customerName = '';
+    public string $mobile = '';
+    public bool $showDuoPaymentModal = false;
+    public string $duoCustomerName = '';
+    public string $duoMobile = '';
     public float $duoAmount = 0;
-    public string $duoIssue = '', $duoMethod = '';
-    public $addonOptions = [], $selectedAddons = [];
-    public string $followupCustomer_name = '';
-    public string $followupCustomer_mobile = '';
-    public string $followupCustomer_email = '';
-    public string $customer_dob = '';
-    public string $customer_anniversary = '';
-    public float $serviceCharge = 0;
-    public bool $showRemoveModal = false;
-    public string|null $removeKey = null;
-    public bool $showPriceModal = false;
-    public float|string $priceInput = '';
-    public string|null $currentPriceKey = null;
-    public string|null $priceItemName = null;
-    public float $originalPrice = 0;
-    public string $discountType = 'percentage';
-    public float|string $discountValue = 0;
-    public bool $showCartDetailModal = false;
-    public string|null $removeReason = null;
+    public string $duoIssue = '';
+    public string $duoMethod = '';
+    public $addonOptions = [];
+    public $selectedAddons = [];
+    public $orderId;
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -71,60 +78,31 @@ class PickupItem extends Component
         if ($this->editMode) {
             $this->loadEditModeData($id);
         }
-
-        $this->customerName = $this->order->customer_name ?? '';
-        $this->mobile = $this->order->mobile ?? '';
-        $this->duoCustomerName = $this->order->customer_name ?? '';
-        $this->duoMobile = $this->order->mobile ?? '';
-
     }
 
     protected function loadEditModeData($id)
     {
+        $latestKot = KOT::where('order_id', $id)->where('status', 'pending')->first();
+        $this->kotId = $latestKot?->kot_number;
+        $this->kotTime = $latestKot?->created_at;
+
         $order = Order::where('id', $id)->where('status', 'pending')->first();
-
-        $latestKot = Kot::where('order_id', $order->id)
-                    ->where('status', 'pending')
-                    ->orderBy('created_at')
-                    ->get();
-
-        $coustomer = Customer::where('order_id', $order->id)->first();
-
-        if($coustomer) {
-            $this->followupCustomer_name = $coustomer->name;
-            $this->followupCustomer_mobile = $coustomer->mobile;
-            $this->followupCustomer_email = $coustomer->email;
-            $this->customer_dob = $coustomer->dob->format('Y-m-d');
-            $this->customer_anniversary = $coustomer->anniversary->format('Y-m-d');
-        }
-
-        foreach ($latestKot as $kot) {
-            $this->kotId = $kot->kot_number;
-            $this->kotTime = $kot->created_at;
-
-            foreach ($kot->items as $kotItem) {
+        if ($latestKot) {
+            $latestKot->items()->each(function ($kotItem) {
                 $key = $kotItem->variant_id ? 'v' . $kotItem->variant_id : $kotItem->item_id;
                 $this->originalKotItemKeys[] = $key;
 
-                $name = $kotItem->variant_id
-                    ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')'
-                    : $kotItem->item->name;
+                $name = $kotItem->variant_id ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')' : $kotItem->item->name;
 
-                if (!isset($this->cart[$key])) {
-                    $this->cart[$key] = [
-                        'id' => $key,
-                        'item_id' => $kotItem->item_id,
-                        'name' => $name,
-                        'price' => $kotItem->variant_id
-                            ? $kotItem->item->price + $kotItem->variant->price
-                            : $kotItem->item->price,
-                        'qty' => $kotItem->quantity,
-                        'note' => $kotItem->special_notes ?? '',
-                        'kot_number' => $kot->kot_number,
-                        'kot_time' => $kot->created_at->format('H:i'),
-                    ];
-                }
-            }
+                $this->cart[$key] = [
+                    'id' => $key,
+                    'item_id' => $kotItem->item_id,
+                    'name' => $name,
+                    'price' => $kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price,
+                    'qty' => $kotItem->quantity,
+                    'note' => $kotItem->special_notes ?? '',
+                ];
+            });
         }
         if ($order) {
             $this->order_type = $order->order_type;
@@ -133,17 +111,24 @@ class PickupItem extends Component
 
     public function getFilteredItems()
     {
-        $collection = $this->selectedCategory
-            ? $this->items->where('category_id', $this->selectedCategory)
-            : $this->items;
+        $collection = $this->selectedCategory ? $this->items->where('category_id', $this->selectedCategory) : $this->items;
 
         if ($this->search !== '') {
-            $searchLower = str($this->search)->lower();
-            $collection = $collection->filter(function ($i) use ($searchLower) {
-                return str($i->name)->lower()->contains($searchLower)
-                    || str($i->code ?? '')->lower()->contains($searchLower)
-                    || str($i->short_name ?? '')->lower()->contains($searchLower);
-            });
+            $collection = $collection->filter(fn($i) =>
+                str($i->name)->lower()->contains(str($this->search)->lower())
+            );
+        }
+
+        if ($this->searchCode !== '') {
+            $collection = $collection->filter(fn($i) =>
+                str($i->code ?? '')->lower()->contains(str($this->searchCode)->lower())
+            );
+        }
+
+        if ($this->searchShortName !== '') {
+            $collection = $collection->filter(fn($i) =>
+                str($i->short_name ?? '')->lower()->contains(str($this->searchShortName)->lower())
+            );
         }
 
         return $collection;
@@ -157,15 +142,7 @@ class PickupItem extends Component
     {
         $this->selectedCategory = null;
     }
-
     private function getCartTotal()
-    {
-        $subtotal = collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
-        $service = $this->serviceCharge ?? 0;
-        return $subtotal + $service ;
-    }
-
-    public function getSubtotal()
     {
         return collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
     }
@@ -201,9 +178,6 @@ class PickupItem extends Component
             'id' => $item->id,
             'name' => $item->name,
             'price' => $baseDiscountedPrice,
-            'base_price' => $item->price,
-            'variant_price' => 0,
-            'addons_price' => 0,
         ];
 
         $this->addonOptions = $item->addons
@@ -239,7 +213,7 @@ class PickupItem extends Component
             if (count($this->addonOptions)) {
                 $this->showVariantModal = true;
             } else {
-                $this->addToCart($item->id, $item->name, $baseDiscountedPrice, $item->price, 0, 0);
+                $this->addToCart($item->id, $item->name, $baseDiscountedPrice);
             }
         }
     }
@@ -251,19 +225,19 @@ class PickupItem extends Component
         if ($this->selectedVariantId) {
             $v = collect($this->variantOptions)->firstWhere('id', $this->selectedVariantId);
             $key = 'v' . $v['id'];
-            $this->addToCart($key, $v['combined_name'], $v['combined_price'] + $addonsPrice, $this->currentItem['base_price'], $v['variant_price'], $addonsPrice);
+            $this->addToCart($key, $v['combined_name'], $v['combined_price'] + $addonsPrice);
             $this->cart[$key]['item_id'] = $v['item_id'];
             $this->cart[$key]['addons'] = $this->selectedAddons;
         } elseif ($this->currentItem) {
             $key = $this->currentItem['id'];
-            $this->addToCart($key, $this->currentItem['name'], $this->currentItem['price'] + $addonsPrice, $this->currentItem['base_price'], 0, $addonsPrice);
+            $this->addToCart($key, $this->currentItem['name'], $this->currentItem['price'] + $addonsPrice);
             $this->cart[$key]['addons'] = $this->selectedAddons;
         }
 
         $this->reset(['showVariantModal', 'variantOptions', 'selectedVariantId', 'currentItem', 'addonOptions', 'selectedAddons']);
     }
 
-    private function addToCart($key, $name, $price, $basePrice = 0, $variantPrice = 0, $addonsPrice = 0)
+    private function addToCart($key, $name, $price)
     {
         if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
             $existingNewKey = collect(array_keys($this->cart))->first(fn($k) => str_starts_with($k, $key . '-new'));
@@ -279,9 +253,6 @@ class PickupItem extends Component
                 'price' => $price,
                 'qty' => 1,
                 'note' => '',
-                'base_price' => $basePrice,
-                'variant_price' => $variantPrice,
-                'addons_price' => $addonsPrice,
             ];
             return;
         }
@@ -291,16 +262,7 @@ class PickupItem extends Component
         if ($existingKey && isset($this->cart[$existingKey])) {
             $this->cart[$existingKey]['qty']++;
         } else {
-            $this->cart[$key] = [
-                'id' => $key,
-                'name' => $name,
-                'price' => $price,
-                'qty' => 1,
-                'note' => '',
-                'base_price' => $basePrice,
-                'variant_price' => $variantPrice,
-                'addons_price' => $addonsPrice,
-            ];
+            $this->cart[$key] = ['id' => $key, 'name' => $name, 'price' => $price, 'qty' => 1, 'note' => ''];
         }
     }
 
@@ -332,20 +294,11 @@ class PickupItem extends Component
             return;
         }
 
-        $nonZeroItems = collect($this->cart)->filter(fn($item) => $item['qty'] > 0)->count();
-
-        if ($nonZeroItems <= 1) {
-            session()->flash('error', 'Cannot remove the last item from the cart.');
-            return;
-        }
-
         if ($this->editMode && in_array($key, $this->originalKotItemKeys)) {
-            $this->removeKey = $key;
-            $this->showRemoveModal = true;
-            return;
+            $this->cart[$key]['qty'] = 0;
+        } else {
+            unset($this->cart[$key]);
         }
-
-        unset($this->cart[$key]);
     }
 
     public function updateQty($key, $qty)
@@ -368,7 +321,6 @@ class PickupItem extends Component
         $this->cart[$key]['qty'] = $qty;
     }
 
-
     public function openNoteModal($key)
     {
         $this->currentNoteKey = $key;
@@ -382,70 +334,6 @@ class PickupItem extends Component
             $this->cart[$this->currentNoteKey]['note'] = $this->noteInput;
         }
         $this->reset(['showNoteModal', 'noteInput', 'currentNoteKey']);
-    }
-
-    public function openPriceModal($key)
-    {
-        if (!isset($this->cart[$key])) {
-            return;
-        }
-
-        $this->currentPriceKey = $key;
-        $item = $this->cart[$key];
-
-        // Only base price is editable, variant & addons excluded
-        $editablePrice = $item['base_price'] ?? $item['price'];
-
-        $this->priceInput = $editablePrice;
-        $this->originalPrice = $editablePrice;
-        $this->priceItemName = $item['name'];
-        $this->discountType = 'percentage';
-        $this->discountValue = 0;
-        $this->showPriceModal = true;
-    }
-
-    public function updatedDiscountValue()
-    {
-        $this->recalculateDiscountedPrice();
-    }
-
-    public function updatedDiscountType()
-    {
-        $this->recalculateDiscountedPrice();
-    }
-
-    private function recalculateDiscountedPrice()
-    {
-        $original = $this->originalPrice;
-        $discount = floatval($this->discountValue ?? 0);
-
-        if ($this->discountType === 'percentage') {
-            $final = max($original - ($original * $discount) / 100, 0);
-        } elseif ($this->discountType === 'fixed') {
-            $final = max($original - $discount, 0);
-        } else {
-            $final = $original;
-        }
-
-        $this->priceInput = number_format($final, 2, '.', '');
-    }
-
-    public function savePrice()
-    {
-        if ($this->currentPriceKey && isset($this->cart[$this->currentPriceKey])) {
-            $price = floatval($this->priceInput);
-            $addonPrice = $this->cart[$this->currentPriceKey]['addons_price'] ?? 0;
-            $variantPrice = $this->cart[$this->currentPriceKey]['variant_price'] ?? 0;
-
-            if ($price >= 0) {
-                $this->cart[$this->currentPriceKey]['base_price'] = $price;
-                $this->cart[$this->currentPriceKey]['price'] = $price + $variantPrice + $addonPrice;
-                $this->cart[$this->currentPriceKey]['discount_type'] = $this->discountType;
-                $this->cart[$this->currentPriceKey]['discount_value'] = floatval($this->discountValue);
-            }
-        }
-
-        $this->reset(['showPriceModal', 'priceInput', 'currentPriceKey', 'originalPrice', 'priceItemName', 'discountType', 'discountValue']);
     }
 
     public function selectOrderType(string $type)
@@ -466,9 +354,8 @@ class PickupItem extends Component
                 'status' => 'pending',
                 'sub_total' => $subTotal,
                 'discount_amount' => 0,
-                'total_amount' => $subTotal,
                 'tax_amount' => 0,
-                'service_charge' => $this->serviceCharge,
+                'total_amount' => $subTotal,
             ]);
 
             $kot = KOT::create([
@@ -482,7 +369,7 @@ class PickupItem extends Component
                 $baseItemId = $variantId ? $row['item_id'] : $row['id'];
 
                 $orderItem = OrderItem::create([
-                    'order_id' => $order->id,
+                    'order_id' => $this->order->id,
                     'item_id' => $baseItemId,
                     'variant_id' => $variantId,
                     'quantity' => $row['qty'],
@@ -491,9 +378,6 @@ class PickupItem extends Component
                     'total_price' => $row['qty'] * $row['price'],
                     'special_notes' => $row['note'] ?? null,
                     'status' => 'pending',
-                    'discount_type' => $row['discount_type'] ?? null,
-                    'discount_value' => $row['discount_value'] ?? 0,
-                    'final_price' => $row['price'],
                 ]);
 
                 $kotItem = KOTItem::create([
@@ -515,7 +399,6 @@ class PickupItem extends Component
                     }
                 }
             }
-
 
             if ($print) {
                 $this->dispatch('printKot', kotId: $kot->id);
@@ -586,19 +469,16 @@ class PickupItem extends Component
                 $baseItemId = $variantId ? $row['item_id'] : (int) preg_replace('/-new\d*/', '', $row['id']);
                 $lineTotal = $row['qty'] * $row['price'];
 
-                $orderItem = OrderItem::create([
+                OrderItem::create([
                     'order_id' => $order->id,
                     'item_id' => $baseItemId,
                     'variant_id' => $variantId,
                     'quantity' => $row['qty'],
                     'base_price' => $row['price'],
                     'discount_amount' => 0,
-                    'total_price' => $row['qty'] * $row['price'],
+                    'total_price' => $lineTotal,
                     'special_notes' => $row['note'] ?? null,
                     'status' => 'pending',
-                    'discount_type' => $row['discount_type'] ?? null,
-                    'discount_value' => $row['discount_value'] ?? 0,
-                    'final_price' => $row['price'],
                 ]);
 
                 KOTItem::create([
@@ -863,82 +743,5 @@ class PickupItem extends Component
         $this->reset(['showDuoPaymentModal', 'duoCustomerName', 'duoMobile', 'duoAmount', 'duoMethod', 'duoIssue', 'paymentMethod']);
 
         return redirect()->route('waiter.pickup.create')->with('success', 'Duo Payment Completed!');
-    }
-
-    public function confirmRemove()
-    {
-        if (!$this->removeKey || !isset($this->cart[$this->removeKey])) {
-            return;
-        }
-
-        $key = $this->removeKey;
-        $reason = $this->removeReason;
-
-        DB::transaction(function () use ($key, $reason) {
-            $variantId = str_starts_with($key, 'v') ? (int) substr($key, 1) : null;
-            $itemId = $variantId ? $this->cart[$key]['item_id'] : (int) $this->cart[$key]['item_id'];
-
-            $order = Order::where('id', $this->order->id)->where('status', 'pending')->latest()->firstOrFail();
-            $kot = Kot::where('order_id', $order->id)->where('status', 'pending')->latest()->first();
-
-            OrderItem::where('order_id', $order->id)
-                ->where('item_id', $itemId)
-                ->when($variantId, fn($q) => $q->where('variant_id', $variantId))
-                ->update([
-                    'delete_reason' => $reason,
-                    'deleted_at' => now(),
-                ]);
-
-            if ($kot) {
-                KOTItem::where('kot_id', $kot->id)
-                    ->where('item_id', $itemId)
-                    ->when($variantId, fn($q) => $q->where('variant_id', $variantId))
-                    ->delete();
-            }
-        });
-
-        unset($this->cart[$key]);
-        $this->showRemoveModal = false;
-        $this->reset(['showRemoveModal', 'removeKey', 'removeReason']);
-    }
-
-    public function openCustomerModal()
-    {
-        $this->resetValidation();
-        $this->showCustomerModal = true;
-    }
-
-    public function saveCustomer()
-    {
-        $this->validate([
-            'followupCustomer_name' => 'required|string|max:100',
-            'followupCustomer_mobile' => 'required|string|max:20',
-            'followupCustomer_email' => 'nullable|email',
-            'customer_dob' => 'nullable|date',
-            'customer_anniversary' => 'nullable|date',
-        ]);
-
-        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
-        $coustomer = Customer::where('order_id', $order->id)->first();
-        if(!$coustomer) {
-            $coustomer->create([
-                'order_id' => $order->id,
-                'name' => $this->followupCustomer_name,
-                'mobile' => $this->followupCustomer_mobile,
-                'email' => $this->followupCustomer_email,
-                'dob' => $this->customer_dob,
-                'anniversary' => $this->customer_anniversary,
-                'restaurant_id' => auth()->user()->restaurant_id,
-            ]);
-
-            $order->update([
-                'customer_id' => $coustomer->id
-            ]);
-        }
-
-
-        $this->showCustomerModal = false;
-
-        session()->flash('success', 'Customer added and linked to order!');
     }
 }

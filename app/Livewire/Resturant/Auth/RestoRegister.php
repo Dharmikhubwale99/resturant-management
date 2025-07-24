@@ -15,12 +15,11 @@ class RestoRegister extends Component
 
     public $name;
     public $email;
-    public $mobile, $resto_mobile, $personal_address;
+    public $mobile;
     public $restaurant_name, $address, $gst;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
-    public $bank_name, $ifsc, $holder_name, $account_type, $upi_id, $account_number;
 
     #[Layout('components.layouts.auth.app')]
     public function render()
@@ -31,28 +30,12 @@ class RestoRegister extends Component
     public function mount()
     {
         $user = Auth::user();
-        $restaurant = Restaurant::firstWhere('user_id', $user->id);
-        $settings = Setting::firstWhere('user_id', $user->id);
-
-        if($user) {
+        if ($user) {
             $this->name = $user->name;
-            $this->mobile = $user->mobile;
             $this->email = $user->email;
-            $this->personal_address = $user->address;
-        }
-
-        if ($restaurant) {
-            $this->restaurant_name = $restaurant->name;
-            $this->address = $restaurant->address;
-            $this->gst = $restaurant->gstin;
+            $this->mobile = $user->mobile;
+            $this->gst = $user->gstin;
             $this->pincode = $user->pin_code_id;
-            $this->resto_mobile = $restaurant->mobile;
-            $this->bank_name = $restaurant->bank_name;
-            $this->ifsc = $restaurant->ifsc;
-            $this->holder_name = $restaurant->holder_name;
-            $this->account_type = $restaurant->account_type;
-            $this->upi_id = $restaurant->upi_id;
-            $this->account_number = $restaurant->account_number;
 
             if ($user->pin_code_id) {
                 $pincode = \App\Models\PinCode::with('district.city.state.country')->find($user->pin_code_id);
@@ -71,14 +54,6 @@ class RestoRegister extends Component
                     $this->district_id = $pincode->district->id ?? null;
                 }
             }
-        }
-
-        if ($settings) {
-            $this->meta_title = $settings->meta_title;
-            $this->meta_description = $settings->meta_description;
-            $this->meta_keywords = $settings->meta_keywords;
-            $this->favicon = $settings->favicon;
-            $this->oldFavicon = $settings->favicon;
         }
     }
     public function updatedPincode($value)
@@ -156,7 +131,7 @@ class RestoRegister extends Component
         $validated = $this->validate(
             [
                 'restaurant_name' => 'required|string|max:255',
-                'mobile' => ['regex:/^[0-9]{10}$/'],
+                'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
                 'address' => 'required|string|max:255',
                 'gst' => 'nullable|string|max:15',
                 'pincode' => 'required|digits:6',
@@ -164,13 +139,7 @@ class RestoRegister extends Component
                 'meta_description' => 'nullable|string',
                 'meta_keywords' => 'nullable|string',
                 'favicon' => 'nullable|file|max:1024',
-                'bank_name' => 'nullable|string|max:255',
-                'ifsc' => 'nullable|string|max:20',
-                'holder_name' => 'nullable|string|max:255',
-                'account_type' => 'nullable|string|max:20',
-                'upi_id' => 'nullable|string|max:50',
-                'account_number' => 'nullable|string|max:50',
-                'email' => ['email', 'unique:users,email,' . Auth::id(), 'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i'],
+                'email' => ['required', 'email', 'unique:users,email,' . Auth::id(), 'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i'],
             ],
             [
                 'email.regex' => 'Only .com email addresses are allowed.',
@@ -184,15 +153,6 @@ class RestoRegister extends Component
         }
 
         $user = Auth::user();
-
-        $user->update([
-            'name' => $this->name,
-            'email' => $this->email,
-            'mobile' => $this->mobile,
-            'address' => $this->personal_address,
-            'pin_code_id' => $this->pincode_id,
-        ]);
-
         $restaurant = Restaurant::updateOrCreate(
             ['user_id' => $user->id],
             [
@@ -202,16 +162,10 @@ class RestoRegister extends Component
                 'address' => $this->address,
                 'gstin' => $this->gst,
                 'pin_code_id' => $this->pincode_id,
-                'bank_name' => $this->bank_name,
-                'ifsc' => $this->ifsc,
-                'holder_name' => $this->holder_name,
-                'account_type' => $this->account_type,
-                'upi_id' => $this->upi_id,
-                'account_number' => $this->account_number,
             ],
         );
 
-        Setting::updateOrCreate([
+        Setting::create([
             'user_id' => $user->id,
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,

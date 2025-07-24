@@ -76,7 +76,7 @@
         </div>
     </main>
 
-    <!-- @include('components.layouts.waiter.footer') -->
+    @include('components.layouts.waiter.footer')
 
     @livewireScripts
     @stack('scripts')

@@ -23,6 +23,7 @@ class Edit extends Component
         $this->area_id = $this->table->area_id;
         $this->name = $this->table->name;
         $this->capacity = $this->table->capacity;
+        $this->status = $this->table->status;
         $this->qr_enabled = $this->table->qr_enabled;
 
         $restaurant = auth()->user()->restaurants()->first();
@@ -45,6 +46,7 @@ class Edit extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'capacity' => 'required|integer|min:1',
+            'status' => 'required|in:available,occupied,reserved',
             'qr_enabled' => 'boolean',
         ]);
 
@@ -52,7 +54,7 @@ class Edit extends Component
             'area_id' => $this->area_id,
             'name' => $this->name,
             'capacity' => $this->capacity,
-            'status' => 'available',
+            'status' => $this->status,
             'qr_enabled' => $this->qr_enabled,
         ]);
 

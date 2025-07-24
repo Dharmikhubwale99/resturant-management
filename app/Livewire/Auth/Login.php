@@ -24,16 +24,12 @@ class Login extends Component
 
     public function mount()
     {
-        if (Auth::check()) {
+       if (Auth::check()) {
             $user = Auth::user();
             if (in_array($user->role,['superadmin'])) {
-                return to_route('superadmin.dashboard')->with('success', 'Login successfully.');
-            } elseif ($user->role == 'admin') {
-                return to_route('restaurant.dashboard')->with('success', 'Login successfully.');
-            } elseif ($user->role == 'waiter') {
-                return to_route('waiter.dashboard')->with('success', 'Login successfully.');
-            } elseif ($user->role == 'kitchen') {
-                return to_route('kitchen.dashboard')->with('success', 'Login successfully.');
+                return redirect()->route('superadmin.dashboard');
+            } elseif ($user->role == 'client') {
+                return redirect()->route('home');
             }
         }
     }
