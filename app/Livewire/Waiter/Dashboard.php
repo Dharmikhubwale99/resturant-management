@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\Order;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\Table;
@@ -11,7 +10,7 @@ class Dashboard extends Component
 {
     public $showConfirm = false;
     public $selectedTable = null;
-    public $tables, $pickupOrders;
+    public $tables;
 
     #[Layout('components.layouts.waiter.app')]
     public function render()
@@ -33,11 +32,6 @@ class Dashboard extends Component
         $this->tables = Table::with('area')
             ->where('restaurant_id', $restaurantId)
             ->get();
-
-        $this->pickupOrders = Order::where('restaurant_id', $restaurantId)
-            ->where('order_type', 'takeaway')
-            ->where('status', 'pending')
-            ->count();
 
     }
 

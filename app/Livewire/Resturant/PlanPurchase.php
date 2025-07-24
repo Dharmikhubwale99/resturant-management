@@ -11,11 +11,9 @@ class PlanPurchase extends Component
     #[Layout('components.layouts.auth.app')]
     public function render()
     {
-        $plan = Plan::get();
+        $plan = Plan::where('is_active',0)->get();
         return view('livewire.resturant.plan-purchase',[
             'plans' => $plan
         ]);
     }
-
-
 }

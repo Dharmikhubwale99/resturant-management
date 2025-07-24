@@ -170,12 +170,10 @@ class Item extends Component
     {
         $this->selectedCategory = $categoryId;
     }
-
     public function clearCategory()
     {
         $this->selectedCategory = null;
     }
-
     private function getCartTotal()
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
@@ -668,16 +666,7 @@ class Item extends Component
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
         if (!$order) {
-            $this->createOrderAndKot();
-            $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
-        } else {
-            $newItemsExist = collect($this->cart)->reject(function ($item, $key) {
-                return in_array($key, $this->originalKotItemKeys);
-            })->isNotEmpty();
-
-            if ($newItemsExist) {
-                $this->updateOrder();
-            }
+            $order = $this->createOrderAndKot();
         }
 
         if ($this->paymentMethod === 'part') {
@@ -690,11 +679,12 @@ class Item extends Component
         }
 
         if ($order) {
-            $kots = Kot::where('order_id', $order->id)->where('status', 'pending')->get();
+            $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
-            foreach ($kots as $kot) {
+            if ($kot) {
+                $kotItems = KOTItem::where('kot_id', $kot->id)->get();
                 $kot->update(['status' => 'ready']);
-                $kot->items()->update(['status' => 'served']);
+                $kotItems->each(fn($item) => $item->update(['status' => 'served']));
             }
 
             $orderItems = OrderItem::where('order_id', $order->id)->get();
@@ -715,7 +705,6 @@ class Item extends Component
         return redirect()->route('waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
 
-
     public function saveAndPrint()
     {
         $this->validate(
@@ -731,16 +720,7 @@ class Item extends Component
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
         if (!$order) {
-            $this->createOrderAndKot();
-            $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
-        } else {
-            $newItemsExist = collect($this->cart)->reject(function ($item, $key) {
-                return in_array($key, $this->originalKotItemKeys);
-            })->isNotEmpty();
-
-            if ($newItemsExist) {
-                $this->updateOrder();
-            }
+            $order = $this->createOrderAndKot();
         }
 
         if ($this->paymentMethod === 'part') {
@@ -753,11 +733,12 @@ class Item extends Component
         }
 
         if ($order) {
-            $kots = Kot::where('order_id', $order->id)->where('status', 'pending')->get();
+            $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
 
-            foreach ($kots as $kot) {
+            if ($kot) {
+                $kotItems = KOTItem::where('kot_id', $kot->id)->get();
                 $kot->update(['status' => 'ready']);
-                $kot->items()->update(['status' => 'served']);
+                $kotItems->each(fn($item) => $item->update(['status' => 'served']));
             }
 
             $orderItems = OrderItem::where('order_id', $order->id)->get();
@@ -774,7 +755,6 @@ class Item extends Component
                 'method' => $this->paymentMethod,
             ]);
         }
-
         $this->dispatch('printBill', billId: $order->id);
         return redirect()->route('waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
@@ -848,9 +828,9 @@ class Item extends Component
                 $item->update(['status' => 'served']);
             });
 
-            $kot->each(function ($kot) use ($order) {
-                $kot->update(['status' => 'ready']);
-            });
+            $kot->update([
+                'status' => 'ready',
+            ]);
 
             $kotItems->each(function ($item) use ($kot) {
                 $item->update(['status' => 'served']);
