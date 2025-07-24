@@ -26,14 +26,28 @@ class Create extends Component
         return view('livewire.resturant.discount.create');
     }
 
+    // public function mount(): void
+    // {
+    //     $this->resturant = auth()->user()->restaurants()->first();
+    //     $this->items = Item::where('restaurant_id', $this->resturant->id)
+    //                        ->orderBy('name')
+    //                        ->pluck('name', 'id')
+    //                        ->toArray();
+    // }
     public function mount(): void
     {
         $this->resturant = auth()->user()->restaurants()->first();
-        $this->items = Item::where('restaurant_id', $this->resturant->id)
-                           ->orderBy('name')
-                           ->pluck('name', 'id')
-                           ->toArray();
+
+        $this->items = \App\Models\Item::with('category')
+            ->where('restaurant_id', $this->resturant->id)
+            ->get()
+            ->mapWithKeys(function ($item) {
+                $category = ($item->category && $item->category->name) ? $item->category->name : '';
+                return [$item->id => $item->name . ($category ? ' | ' . $category : '')];
+            })
+            ->toArray();
     }
+
 
     public function submit()
     {
