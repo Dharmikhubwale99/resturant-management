@@ -25,13 +25,13 @@
             </div>
             @if ($images)
                 <div class="flex gap-2 mt-2">
-                        <div class="relative w-20 h-20">
-                            <img src="{{ $images->temporaryUrl() }}" alt="Preview"
-                                class="w-20 h-20 object-cover rounded" />
-                        </div>
+                    <div class="relative w-20 h-20">
+                        <img src="{{ $images->temporaryUrl() }}" alt="Preview"
+                            class="w-20 h-20 object-cover rounded" />
+                    </div>
                 </div>
             @endif
-             @php
+            @php
                 $existingImages = $plan->getMedia('planImages');
             @endphp
 
@@ -45,6 +45,16 @@
                 </div>
             @endforeach
 
+            <x-form.select name="type" label="Discount Type" wireModelLive="type" :options="['fixed' => 'Fixed', 'percentage' => 'Percentage']" />
+
+            @if ($type === 'percentage')
+                <x-form.input name="value" label="Discount Value (%)" wireModel="value" type="number" step="0.01"
+                    placeholder="e.g. 10" />
+            @endif
+
+            @if ($type === 'fixed')
+                <x-form.input name="amount" label="Amount" wireModel="amount" type="number" step="0.01" />
+            @endif
 
             <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Save" wireTarget="submit" />

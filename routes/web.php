@@ -18,9 +18,9 @@ use \App\Livewire\Admin\{
     Plan\Index as PlanIndex,
     Plan\Create as PlanCreate,
     Plan\Edit as PlanEdit,
+    Plan\Report as PlanReport,
 
     UserAccess
-
   };
 use \App\Livewire\Resturant\{
     Dashboard as ResturantDashboard,
@@ -116,6 +116,8 @@ Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFr
         Route::get('/', PlanIndex::class)->name('index');
         Route::get('/create', PlanCreate::class)->name('create');
         Route::get('/edit/{id}', PlanEdit::class)->name('edit');
+        Route::get('/report', PlanReport::class)->name('report');
+
     });
  });
 
