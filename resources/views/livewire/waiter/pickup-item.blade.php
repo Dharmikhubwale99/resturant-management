@@ -105,7 +105,8 @@
             <div class="flex-1 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
                     <div class="flex flex-wrap gap-2">
-                        <input type="text" wire:model.live="search" placeholder="Search by product, code, or short name..."
+                        <input type="text" wire:model.live="search"
+                            placeholder="Search by product, code, or short name..."
                             class="border px-3 py-2 rounded w-50" />
                     </div>
                 </div>
@@ -174,49 +175,37 @@
                 class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200">
 
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
-                <div class="flex items-center justify-between mb-2">
-                    @if (!empty($customerName))
-                        <div class="text-xs md:text-sm font-semibold text-gray-700">
-                            Customer: {{ $customerName }}
-                        </div>
-                    @endif
-                    @if (!empty($mobile))
-                        <div class="text-xs md:text-sm font-semibold text-gray-700">
-                            {{ $mobile }}
-                        </div>
-                    @endif
-                </div>
                 @if (count($cartItems))
                     <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
                         @if ($editMode)
-                        <p class="text-xs md:text-sm font-semibold text-blue-600">Previous KOT Items:</p>
-                    @endif
+                            <p class="text-xs md:text-sm font-semibold text-blue-600">Previous KOT Items:</p>
+                        @endif
 
-                    @foreach ($cartItems as $key => $row)
-                        @if (in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
-                            <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"
-                                wire:key="row-{{ $row['id'] }}">
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs text-blue-600 font-semibold mb-0.5">
-                                        KOT: #{{ $row['kot_number'] ?? '-' }} • {{ $row['kot_time'] ?? '-' }}
-                                    </p>
-                                    <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
-                                        {{ $row['name'] }}
-                                    </p>
-                                    <div class="flex flex-row items-baseline gap-2">
-                                        <p class="text-xs text-gray-500 whitespace-nowrap">
-                                            ₹{{ number_format($row['price'], 2) }} × {{ $row['qty'] }}
+                        @foreach ($cartItems as $key => $row)
+                            @if (in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
+                                <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"
+                                    wire:key="row-{{ $row['id'] }}">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs text-blue-600 font-semibold mb-0.5">
+                                            KOT: #{{ $row['kot_number'] ?? '-' }} • {{ $row['kot_time'] ?? '-' }}
                                         </p>
-                                        <p class="text-xs text-green-600 font-semibold whitespace-nowrap">
-                                            = ₹{{ number_format($row['price'] * $row['qty'], 2) }}
+                                        <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
+                                            {{ $row['name'] }}
                                         </p>
-                                        <button class="text-red-500 text-xs md:text-sm"
-                                            wire:click="remove('{{ $row['id'] }}')">✕</button>
+                                        <div class="flex flex-row items-baseline gap-2">
+                                            <p class="text-xs text-gray-500 whitespace-nowrap">
+                                                ₹{{ number_format($row['price'], 2) }} × {{ $row['qty'] }}
+                                            </p>
+                                            <p class="text-xs text-green-600 font-semibold whitespace-nowrap">
+                                                = ₹{{ number_format($row['price'] * $row['qty'], 2) }}
+                                            </p>
+                                            <button class="text-red-500 text-xs md:text-sm"
+                                                wire:click="remove('{{ $row['id'] }}')">✕</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
-                    @endforeach
+                            @endif
+                        @endforeach
 
 
                         @if (count($cartItems) > count($originalKotItemKeys))
@@ -553,61 +542,95 @@
         </div>
     @endif
 
-
-
     @if ($showCartDetailModal)
         <div class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center">
-            <div class="bg-white rounded shadow-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-                <h2 class="text-lg font-bold mb-4">Cart Details</h2>
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">🛒 Cart Details</h2>
 
-                <!-- Cart Items -->
-                <div class="mb-4 space-y-2">
-                    <h3 class="text-md font-semibold text-gray-700 mb-2">Items in Cart</h3>
+                <!-- 🧾 Cart Items -->
+                <div class="mb-6">
+                    <h3 class="text-md font-semibold text-gray-700 mb-3">Items in Cart</h3>
+
                     @forelse ($cart as $key => $item)
                         @if ($item['qty'] > 0)
-                            <div class="border p-2 rounded text-sm bg-gray-50">
-                                <div class="font-semibold">{{ $item['name'] }}</div>
-                                <div class="text-gray-600">
-                                    Qty: {{ $item['qty'] }} × ₹{{ number_format($item['price'], 2) }}
-                                </div>
-                                <div class="flex flex-row justify-between text-blue-600 font-semibold">
-                                    Total: ₹{{ number_format($item['qty'] * $item['price'], 2) }}
-                                    <button class="text-xs bg-yellow-100 text-yellow-700 px-1 md:px-2 rounded mt-1"
-                                        wire:click="openPriceModal('{{ $row['id'] }}')">Edit Price</button>
-                                    <div class="flex justify-end items-center">
-                                        <button class="text-red-500 text-xs md:text-sm"
-                                            wire:click="remove('{{ $row['id'] }}')">✕</button>
+                            <div class="border border-gray-200 p-3 rounded bg-gray-50 mb-2">
+                                <div class="font-semibold text-sm text-gray-800">{{ $item['name'] }}</div>
+                                <div class="text-sm text-gray-600">Qty: {{ $item['qty'] }} ×
+                                    ₹{{ number_format($item['price'], 2) }}</div>
+                                <div
+                                    class="flex justify-between items-center mt-2 text-sm font-semibold text-blue-600">
+                                    <span>Total: ₹{{ number_format($item['qty'] * $item['price'], 2) }}</span>
+                                    <div class="flex items-center gap-2">
+                                        <button class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded"
+                                            wire:click="openPriceModal('{{ $item['id'] }}')">Edit</button>
+                                        <button class="text-red-500"
+                                            wire:click="remove('{{ $item['id'] }}')">✕</button>
                                     </div>
                                 </div>
                             </div>
                         @endif
                     @empty
-                        <p class="text-gray-500">Cart is empty.</p>
+                        <p class="text-gray-500 text-sm">Cart is empty.</p>
                     @endforelse
                 </div>
 
-                <!-- Charges -->
-                <div class="mb-3">
-                    <label class="block text-sm font-semibold">Service Charge (₹)</label>
-                    <input type="number" step="0.01" wire:model.live="serviceCharge"
-                        class="w-full border rounded p-2" />
+                <!-- 🚚 Transport & Service Charges -->
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Service Charge (₹)</label>
+                        <input type="number" step="0.01" wire:model.live="serviceCharge"
+                            class="w-full border rounded p-2" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Transport Charge (₹)</label>
+                        <input type="number" step="0.01" wire:model.live="transport_charge"
+                            class="w-full border rounded p-2" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Transport Name</label>
+                        <input type="text" wire:model.defer="transport_name" class="w-full border rounded p-2" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Vehicle Number</label>
+                        <input type="text" wire:model.defer="vehicle_number" class="w-full border rounded p-2" />
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold mb-1">Transport Address</label>
+                        <input type="text" wire:model.defer="transport_address"
+                            class="w-full border rounded p-2" />
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold mb-1">Transport Distance (KM)</label>
+                        <input type="text" wire:model.defer="transport_distance"
+                            class="w-full border rounded p-2" />
+                    </div>
                 </div>
 
-                <!-- Totals -->
-                <div class="mb-4 text-sm text-gray-700">
+                <!-- 💰 Totals -->
+                <div class="mb-6 text-sm text-gray-700 border-t pt-4 space-y-1">
                     <p>Subtotal: ₹{{ number_format($this->getSubtotal(), 2) }}</p>
+                    <p>Transport: ₹{{ number_format(floatval($transport_charge), 2) }}</p>
                     <p>Service: ₹{{ number_format($serviceCharge, 2) }}</p>
-                    <p class="font-bold text-blue-600">Total: ₹{{ number_format($this->getCartTotal(), 2) }}</p>
+                    <p class="font-bold text-lg text-blue-600">Total: ₹{{ number_format($this->getCartTotal(), 2) }}
+                    </p>
                 </div>
 
-                <div class="flex justify-end gap-2">
-                    <button wire:click="$set('showCartDetailModal', false)" class="px-4 py-2 bg-gray-200 rounded">
+                <!-- ✅ Actions -->
+                <div class="flex justify-end gap-3">
+                    <button wire:click="$set('showCartDetailModal', false)"
+                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-5 py-2 rounded">
                         Close
                     </button>
                 </div>
             </div>
         </div>
     @endif
+
 
     @if ($showRemoveModal)
         <div
@@ -630,7 +653,8 @@
     @endif
 
     @if ($showCustomerModal)
-        <div class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex justify-center items-center z-50">
+        <div
+            class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex justify-center items-center z-50">
             <div class="bg-white p-6 rounded shadow w-full max-w-md">
                 <h2 class="text-lg font-bold mb-4">Customer Details</h2>
 
@@ -640,9 +664,9 @@
                     <input type="text" wire:model.defer="followupCustomer_name" class="w-full border p-2 rounded"
                         placeholder="Customer Name">
 
-                    <input type="text" wire:model.defer="followupCustomer_mobile" class="w-full border p-2 rounded"
-                        placeholder="Mobile Number" maxlength="10"
-                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" >
+                    <input type="text" wire:model.defer="followupCustomer_mobile"
+                        class="w-full border p-2 rounded" placeholder="Mobile Number" maxlength="10"
+                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)">
 
                     <input type="email" wire:model.defer="followupCustomer_email" class="w-full border p-2 rounded"
                         placeholder="Email (optional)">
@@ -657,8 +681,7 @@
                 <div class="mt-4 flex justify-end gap-2">
                     <button wire:click="$set('showCustomerModal', false)"
                         class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
-                    <button wire:click="saveCustomer"
-                        class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+                    <button wire:click="saveCustomer" class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
                 </div>
             </div>
         </div>
