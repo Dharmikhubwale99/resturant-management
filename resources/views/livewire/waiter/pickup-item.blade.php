@@ -174,6 +174,18 @@
                 class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200">
 
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
+                <div class="flex items-center justify-between mb-2">
+                    @if (!empty($customerName))
+                        <div class="text-xs md:text-sm font-semibold text-gray-700">
+                            Customer: {{ $customerName }}
+                        </div>
+                    @endif
+                    @if (!empty($mobile))
+                        <div class="text-xs md:text-sm font-semibold text-gray-700">
+                            {{ $mobile }}
+                        </div>
+                    @endif
+                </div>
                 @if (count($cartItems))
                     <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
                         @if ($editMode)
