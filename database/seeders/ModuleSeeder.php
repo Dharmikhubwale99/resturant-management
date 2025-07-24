@@ -17,7 +17,12 @@ class ModuleSeeder extends Seeder
             'category_module',
             'area_module',
             'expense-type-module',
-            'user'
+            'user',
+            'item',
+            'expense',
+            'table',
+            'discount',
+            'kitchen'
         ];
 
         foreach ($modules as $key) {

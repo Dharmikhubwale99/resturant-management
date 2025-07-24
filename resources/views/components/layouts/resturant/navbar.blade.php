@@ -11,17 +11,27 @@
             @if (setting('category_module'))
                 { text: 'Category', href: '{{ route('restaurant.categories.index') }}' },
             @endif
-            { text: 'Item', href: '{{ route('restaurant.items.index') }}' },
+            @if (setting('item'))
+                { text: 'Item', href: '{{ route('restaurant.items.index') }}' },
+            @endif
             @if (setting('area_module'))
                 { text: 'Area', href: '{{ route('restaurant.areas.index') }}' },
             @endif
-            { text: 'Table', href: '{{ route('restaurant.tables.index') }}' },
+            @if (setting('table'))
+                { text: 'Table', href: '{{ route('restaurant.tables.index') }}' },
+            @endif
             @if (setting('expense-type-module'))
                 { text: 'Expense-Type', href: '{{ route('restaurant.expense-types.index') }}' },
             @endif
-            { text: 'Expenses', href: '{{ route('restaurant.expenses.index') }}' },
-            { text: 'Discount', href: '{{ route('restaurant.discount.index') }}' },
-            { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
+            @if(setting('expense'))
+                { text: 'Expenses', href: '{{ route('restaurant.expenses.index') }}' },
+            @endif
+            @if (setting('discount'))
+                { text: 'Discount', href: '{{ route('restaurant.discount.index') }}' },
+            @endif
+            @if (setting('kitchen'))
+                { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
+            @endif
         ]
     }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
