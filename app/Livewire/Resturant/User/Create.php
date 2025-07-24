@@ -30,28 +30,36 @@ class Create extends Component
 
     public function mount()
     {
-        $this->data['roles'] = Role::whereIn('name',['manager','waiter','kitchen',])->pluck('name', 'name');
+        $this->data['roles'] = Role::whereIn('name', ['manager', 'waiter', 'kitchen'])->pluck('name', 'name');
     }
 
     public function submit()
     {
         $this->validate([
             'name' => ['required', 'min:2', 'max:50'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'mobile' => ['required', 'numeric', 'digits_between:10,10'],
+            'email' => ['required', 'email'],
+            'mobile' => ['required', 'numeric', 'digits:10'],
             'password' => ['required', 'min:6', 'max:20', 'confirmed'],
-            'role' => ['required']
+            'role' => ['required'],
         ]);
+
+        $restaurantSuffix = preg_replace('/[^a-z0-9]/', '', strtolower($this->resturant->name));
+
+        $emailLocalPart = explode('@', $this->email)[0];
+
+        $finalEmail = $emailLocalPart . '@' . $restaurantSuffix . 'gmail.com';
 
         $user = User::create([
             'restaurant_id' => $this->resturant->id,
             'name' => $this->name,
-            'email' => $this->email,
+            'email' => $finalEmail,
             'mobile' => $this->mobile,
             'password' => bcrypt($this->password),
         ]);
+
         $user->assignRole($this->role);
-        
+
         $this->redirect(route('restaurant.users.index'));
     }
+
 }

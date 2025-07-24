@@ -27,6 +27,11 @@ class OrderItem extends Model
         'total_price',
         'special_notes',
         'status',
+        'price_override',
+        'discount_value',
+        'final_price',
+        'discount_type',
+        'delete_reason'
     ];
 
     /**

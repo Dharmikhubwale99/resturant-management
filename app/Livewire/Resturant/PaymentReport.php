@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PaymentReportExport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\RestaurantPaymentLog;
 
 class PaymentReport extends Component
 {
@@ -22,12 +23,71 @@ class PaymentReport extends Component
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
-    {
-        return view('livewire.resturant.payment-report', [
-            'payments' => $this->payments,
-            'paymentMethod' => $this->paymentMethod,
+{
+    $restaurantId = Auth::user()->restaurants()->first()->id;
+
+    $payments = Payment::whereHas('order', function ($q) use ($restaurantId) {
+        $q->where('restaurant_id', $restaurantId);
+    })->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
+    ->latest()
+    ->paginate(10);
+
+    $logs = RestaurantPaymentLog::whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
+        ->where('restaurant_id', $restaurantId)
+        ->get();
+
+    $processedLogs = collect();
+
+    foreach ($logs as $log) {
+    if ($log->method === 'due') {
+        // Directly push as due
+        $processedLogs->push((object)[
+            'id' => $log->id,
+            'created_at' => $log->created_at,
+            'amount' => $log->amount,
+            'method' => 'due',
+            'customer_name' => $log->customer_name,
+            'mobile' => $log->mobile,
+        ]);
+    } elseif ($log->amount > $log->paid_amount) {
+        if ($log->paid_amount > 0) {
+            $processedLogs->push((object)[
+                'id' => $log->id,
+                'created_at' => $log->created_at,
+                'amount' => $log->paid_amount,
+                'method' => $log->method,
+                'customer_name' => $log->customer_name,
+                'mobile' => $log->mobile,
+            ]);
+        }
+        $processedLogs->push((object)[
+            'id' => $log->id,
+            'created_at' => $log->created_at,
+            'amount' => $log->amount - $log->paid_amount,
+            'method' => 'due',
+            'customer_name' => $log->customer_name,
+            'mobile' => $log->mobile,
+        ]);
+    } else {
+        $processedLogs->push((object)[
+            'id' => $log->id,
+            'created_at' => $log->created_at,
+            'amount' => $log->paid_amount,
+            'method' => $log->method,
+            'customer_name' => $log->customer_name,
+            'mobile' => $log->mobile,
         ]);
     }
+}
+
+
+    return view('livewire.resturant.payment-report', [
+        'payments' => $payments,
+        'logs' => $processedLogs,
+        'paymentMethod' => $this->paymentMethod,
+    ]);
+}
+
 
     public function mount()
     {
@@ -84,6 +144,7 @@ class PaymentReport extends Component
     {
         $restaurantId = Auth::user()->restaurants()->first()->id;
 
+        // Payments
         $query = Payment::whereHas('order', function ($q) use ($restaurantId) {
             $q->where('restaurant_id', $restaurantId);
         })->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59']);
@@ -91,8 +152,14 @@ class PaymentReport extends Component
         if ($this->paymentMethod !== 'all') {
             $query->where('method', $this->paymentMethod);
         }
+        $paymentSum = $query->sum('amount');
 
-        return $query->sum('amount');
+        // RestaurantPaymentLog
+        $logSum = RestaurantPaymentLog::whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
+            ->where('restaurant_id', $restaurantId)
+            ->sum('paid_amount');
+
+        return $paymentSum + $logSum;
     }
 
     public function exportExcel()
@@ -120,12 +187,17 @@ class PaymentReport extends Component
         if ($this->paymentMethod !== 'all') {
             $query->where('method', $this->paymentMethod);
         }
-
         $payments = $query->get();
-        $totalAmount = $payments->sum('amount');
+
+        $logs = RestaurantPaymentLog::whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
+            ->where('restaurant_id', $restaurantId)
+            ->get();
+
+        $totalAmount = $payments->sum('amount') + $logs->sum('paid_amount');
 
         $pdf = Pdf::loadView('livewire.pdf.payment-report-pdf', [
             'payments' => $payments,
+            'logs' => $logs,
             'totalAmount' => $totalAmount,
         ]);
 

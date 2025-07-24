@@ -25,7 +25,7 @@
             wireModel="password_confirmation" required placeholder="Confirm the password" />
 
         <div class="flex flex-row text-center  space-x-3">
-                <x-form.button type="submit" title="Save" wireClick="submit" wireTarget="submit" />
+                <x-form.button type="submit" title="Save" wireTarget="submit" />
                 <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
                     route="restaurant.users.index" />
             </div>

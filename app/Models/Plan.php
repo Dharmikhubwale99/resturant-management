@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Plan extends Model
+class Plan extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -22,6 +24,9 @@ class Plan extends Model
         'duration_days',
         'description',
         'is_active',
+        'type',
+        'value',
+        'amount',
     ];
 
     /**
@@ -35,11 +40,18 @@ class Plan extends Model
             'id' => 'integer',
             'price' => 'decimal:2',
             'is_active' => 'boolean',
+            'type' => 'string',
+            'amount' => 'decimal:2',
         ];
     }
 
     public function planFeatures(): HasMany
     {
         return $this->hasMany(PlanFeature::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('planImages');
     }
 }
