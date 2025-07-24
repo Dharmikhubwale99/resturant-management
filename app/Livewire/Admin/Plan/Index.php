@@ -13,9 +13,8 @@ class Index extends Component
 
     public $confirmingDelete = false;
     public $planToDelete = null;
+
     public $search = '';
-    public $confirmingBlock = false;
-    public $blockId = null;
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -51,30 +50,6 @@ class Index extends Component
         }
 
         $this->cancelDelete();
-    }
-
-    public function confirmBlock($id)
-    {
-        $this->blockId = $id;
-        $this->confirmingBlock = true;
-    }
-
-    public function cancelBlock()
-    {
-        $this->blockId = null;
-        $this->confirmingBlock = false;
-    }
-
-    public function toggleBlock()
-    {
-        $plan = Plan::findOrFail($this->blockId);
-        $plan->is_active = !$plan->is_active;
-        $plan->save();
-
-        $status = $plan->is_active ? 'unblocked' : 'blocked';
-        session()->flash('message', "Plan {$status} successfully.");
-
-        $this->cancelBlock();
     }
 }
 

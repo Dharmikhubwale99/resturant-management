@@ -9,37 +9,26 @@
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <div class="flex items-center space-x-2">
-                        <img src="https://via.placeholder.com/40x40/FF6B6B/FFFFFF?text=P" alt="PetPooja"
+
+                        <a href="{{ route('waiter.dashboard') }}" class="text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-arrow-left text-xl"></i>
+                        </a>
+                        <img src="{{ asset('assets/images/logo.jpeg') }}" alt="HubWale"
                             class="w-8 h-8 md:w-10 md:h-10 rounded">
-                        <span class="text-lg md:text-xl font-semibold text-gray-800">PetPooja</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 md:hidden">
-                    <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-user text-lg"></i></button>
-                    <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-power-off text-lg"></i></button>
-                </div>
-            </div>
+                    <button wire:click="openCustomerModal" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-user text-lg"></i>
+                    </button>
 
-            <!-- Middle Row (Mobile) -->
-            <div class="flex items-center w-full md:w-auto mb-2 md:mb-0">
-                <button
-                    class="bg-red-500 text-white px-3 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-sm md:text-base">
-                    New Order
-                </button>
-                <div class="flex items-center space-x-2 ml-2 flex-1 md:flex-none">
-                    <i class="fas fa-search text-gray-400"></i>
-                    <input type="text" placeholder="Bill No"
-                        class="border-none outline-none text-gray-600 bg-transparent w-full md:w-32">
+                    <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-power-off text-lg"></i></button>
                 </div>
             </div>
 
             <!-- Bottom Row (Desktop) -->
             <div class="hidden md:flex items-center space-x-4">
-                <div class="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded">
-                    <i class="fas fa-phone text-gray-500"></i>
-                    <span class="text-sm text-gray-600">Support</span>
-                    <span class="text-sm font-medium">9099912483</span>
-                </div>
+
                 <div class="flex items-center space-x-3">
                     <!-- Pending KOT  (PDF icon) -->
                     <a href="{{ route('waiter.kots.pending') }}" class="text-gray-600 hover:text-gray-800"
@@ -50,7 +39,10 @@
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-th text-lg"></i></button>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-clock text-lg"></i></button>
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-bell text-lg"></i></button>
-                    <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-user text-lg"></i></button>
+                    <button wire:click="openCustomerModal" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-user text-lg"></i>
+                    </button>
+
                     <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-power-off text-lg"></i></button>
                 </div>
             </div>
@@ -60,7 +52,7 @@
     <div class="flex flex-col md:flex-row h-full">
         <!-- Sidebar - Responsive -->
         @if (setting('category_module'))
-            <div class="w-full md:w-48 bg-gray-800 text-white flex-shrink-0 overflow-y-auto">
+            <div class="w-full md:w-64 h-full md:min-h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col">
                 <div class="p-2 md:p-4 flex justify-between items-center">
                     <div class="text-sm text-gray-400">Categories</div>
                     <!-- Mobile expand button (hidden on desktop) -->
@@ -113,24 +105,27 @@
             <div class="flex-1 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
                     <div class="flex flex-wrap gap-2">
-                        <input type="text" wire:model.live="search" placeholder="Search product..."
-                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
-
-                        <input type="text" wire:model.live="searchCode" placeholder="Search code..."
-                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
-
-                        <input type="text" wire:model.live="searchShortName" placeholder="Search short name..."
-                            class="border px-3 py-2 rounded flex-1 min-w-[150px]">
+                        <input type="text" wire:model.live="search" placeholder="Search by product, code, or short name..."
+                            class="border px-3 py-2 rounded w-50" />
                     </div>
                 </div>
-                    <x-form.error />
+
+                <x-form.error />
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
                     @forelse ($filteredItems as $item)
                         <div wire:click="itemClicked({{ $item->id }})"
                             class="relative bg-white p-1 md:p-2 rounded shadow hover:shadow-md transition
                border-2 {{ $item->type_color_class }} cursor-pointer">
-                            <!-- Veg/Non-veg dot/icon -->
+                            @php
+                                $cartQty = isset($cart[$item->id]['qty']) ? $cart[$item->id]['qty'] : 0;
+                            @endphp
+                            @if ($cartQty > 0)
+                                <span
+                                    class="absolute top-1 left-1 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5 z-10">
+                                    {{ $cartQty }}
+                                </span>
+                            @endif
                             <span
                                 class="absolute top-1 right-1 w-2 h-2 md:w-3 md:h-3 rounded-full
                      {{ $item->type_dot_class }}"></span>
@@ -177,71 +172,46 @@
             <!-- Cart Section - Responsive -->
             <div
                 class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200">
-                {{-- <!-- Order Type Buttons -->
-                <div class="flex flex-wrap gap-1 md:gap-2 mb-2 md:mb-4">
-                    @php
-                        $opts = ['dine_in' => 'Dine In', 'delivery' => 'Delivery', 'takeaway' => 'Pick Up'];
-                    @endphp
-
-                    @foreach ($opts as $value => $label)
-                        <button wire:click="selectOrderType('{{ $value }}')" @class([
-                            'px-3 py-1 md:px-4 md:py-2 rounded text-xs md:text-sm flex-1 transition',
-                            $order_type === $value
-                                ? 'bg-red-500 text-white hover:bg-red-600'
-                                : 'bg-gray-300 text-gray-700 hover:bg-gray-400',
-                        ])>
-                            {{ $label }}
-                        </button>
-                    @endforeach
-                    @error('order_type')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div> --}}
 
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
-                <div class="flex items-center justify-between mb-2">
-                    @if (!empty($customerName))
-                        <div class="text-xs md:text-sm font-semibold text-gray-700">
-                            Customer: {{ $customerName }}
-                        </div>
-                    @endif
-                    @if (!empty($mobile))
-                        <div class="text-xs md:text-sm font-semibold text-gray-700">
-                            {{ $mobile }}
-                        </div>
-                    @endif
-                </div>
                 @if (count($cartItems))
                     <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
-                        @if (request()->query('mode') === 'edit')
-                            <p class="text-xs md:text-sm font-semibold text-blue-600">Old - #{{ $kotId ?? '-' }} •
-                                {{ \Carbon\Carbon::parse($kotTime)->format('h:i') }}</p>
-                        @endif
-                        @foreach ($cartItems as $key => $row)
-                            @if (in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
-                                <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"
-                                    wire:key="row-{{ $row['id'] }}">
-                                    <div class="flex-1 min-w-0">
-                                        <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
-                                            {{ $row['name'] }}
+                        @if ($editMode)
+                        <p class="text-xs md:text-sm font-semibold text-blue-600">Previous KOT Items:</p>
+                    @endif
+
+                    @foreach ($cartItems as $key => $row)
+                        @if (in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
+                            <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"
+                                wire:key="row-{{ $row['id'] }}">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-blue-600 font-semibold mb-0.5">
+                                        KOT: #{{ $row['kot_number'] ?? '-' }} • {{ $row['kot_time'] ?? '-' }}
+                                    </p>
+                                    <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
+                                        {{ $row['name'] }}
+                                    </p>
+                                    <div class="flex flex-row items-baseline gap-2">
+                                        <p class="text-xs text-gray-500 whitespace-nowrap">
+                                            ₹{{ number_format($row['price'], 2) }} × {{ $row['qty'] }}
                                         </p>
-                                        <div class="flex items-baseline gap-2">
-                                            <p class="text-xs text-gray-500 whitespace-nowrap">
-                                                ₹{{ number_format($row['price'], 2) }} × {{ $row['qty'] }}
-                                            </p>
-                                            <p class="text-xs text-green-600 font-semibold whitespace-nowrap">
-                                                = ₹{{ number_format($row['price'] * $row['qty'], 2) }}
-                                            </p>
-                                        </div>
+                                        <p class="text-xs text-green-600 font-semibold whitespace-nowrap">
+                                            = ₹{{ number_format($row['price'] * $row['qty'], 2) }}
+                                        </p>
+                                        <button class="text-red-500 text-xs md:text-sm"
+                                            wire:click="remove('{{ $row['id'] }}')">✕</button>
                                     </div>
                                 </div>
-                            @endif
-                        @endforeach
+                            </div>
+                        @endif
+                    @endforeach
+
 
                         @if (count($cartItems) > count($originalKotItemKeys))
                             <hr class="my-1 md:my-2 border-t">
                             <p class="text-xs md:text-sm font-semibold text-blue-600">New -
                                 {{ \Carbon\Carbon::parse(now())->format('h:i:s') }}</p>
+
                             @foreach ($cartItems as $key => $row)
                                 @if (!in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
                                     <div class="border rounded p-1 md:p-2 flex items-center justify-between"
@@ -261,6 +231,10 @@
                                             </div>
                                             <button class="text-xs bg-blue-100 text-blue-700 px-1 md:px-2 rounded mt-1"
                                                 wire:click="openNoteModal('{{ $row['id'] }}')">Note</button>
+                                            <button
+                                                class="text-xs bg-yellow-100 text-yellow-700 px-1 md:px-2 rounded mt-1"
+                                                wire:click="openPriceModal('{{ $row['id'] }}')">Edit Price</button>
+
                                         </div>
 
                                         <div class="flex items-center gap-1 md:gap-2 ml-2">
@@ -286,12 +260,17 @@
 
                     @if (count($cartItems))
                         <div class="border-t pt-2 md:pt-4 mt-2 md:mt-4 space-y-1 md:space-y-2">
-                            <div class="flex flex-wrap items-center gap-1 md:gap-2 mb-1 md:mb-2">
+                            <button wire:click="$set('showCartDetailModal', true)"
+                                class="bg-blue-500 text-white px-2 py-1 rounded text-xs md:text-sm">
+                                Cart Details
+                            </button>
+
+                            {{-- <div class="flex flex-wrap items-center gap-1 md:gap-2 mb-1 md:mb-2">
                                 <button class="bg-red-500 text-white px-2 py-1 rounded text-xs md:text-sm flex-1">Bogo
                                     Offer</button>
                                 <button
                                     class="bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs md:text-sm flex-1">Split</button>
-                            </div>
+                            </div> --}}
 
                             <div class="text-right text-lg md:text-xl font-bold py-1 md:py-2">
                                 Total: ₹{{ number_format($cartTotal, 2) }}
@@ -355,12 +334,12 @@
         </div>
     </div>
 
-    <!-- Modals (unchanged from original) -->
     @if ($showVariantModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-lg">
             <div class="bg-white w-full max-w-sm rounded shadow-lg p-6 mx-2">
                 @if ($variantOptions)
-                    <h3 class="text-lg font-bold mb-4">Select Variant <span class="text-sm font-normal">(optional)</span>
+                    <h3 class="text-lg font-bold mb-4">Select Variant <span
+                            class="text-sm font-normal">(optional)</span>
                     </h3>
 
                     <div class="space-y-2 mb-6">
@@ -376,16 +355,16 @@
                 @endif
 
                 @if (count($addonOptions))
-                <div class="mb-4">
-                    <h4 class="text-sm font-semibold mb-2">Select Addons</h4>
-                    @foreach ($addonOptions as $addon)
-                        <label class="flex items-center space-x-2 mb-1">
-                            <input type="checkbox" wire:model="selectedAddons" value="{{ $addon['id'] }}">
-                            <span>{{ $addon['name'] }} — ₹{{ number_format($addon['price'], 2) }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            @endif
+                    <div class="mb-4">
+                        <h4 class="text-sm font-semibold mb-2">Select Addons</h4>
+                        @foreach ($addonOptions as $addon)
+                            <label class="flex items-center space-x-2 mb-1">
+                                <input type="checkbox" wire:model="selectedAddons" value="{{ $addon['id'] }}">
+                                <span>{{ $addon['name'] }} — ₹{{ number_format($addon['price'], 2) }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
                 <div class="flex justify-end gap-2">
                     <button class="px-4 py-2 bg-gray-200 rounded"
                         wire:click="$set('showVariantModal', false)">Cancel</button>
@@ -400,7 +379,7 @@
     @endif
 
     @if ($showNoteModal)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center z-50">
             <div class="bg-white p-4 md:p-6 rounded shadow w-full max-w-md mx-2">
                 <h2 class="text-lg font-bold mb-4">Add Note</h2>
                 <textarea wire:model.defer="noteInput" rows="4" class="w-full border rounded p-2"
@@ -419,7 +398,7 @@
     @endif
 
     @if ($showSplitModal)
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center z-50">
             <div class="bg-white rounded shadow p-4 w-full max-w-md">
                 <h3 class="font-bold mb-3">Split Payment</h3>
                 <x-form.error />
@@ -467,7 +446,7 @@
     @endif
 
     @if ($showDuoPaymentModal)
-        <div class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="fixed inset-0 z-50 bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center">
             <div class="bg-white rounded shadow p-4 w-full max-w-md">
                 <h3 class="text-lg font-bold mb-4">Duo Payment Details</h3>
                 <x-form.error />
@@ -506,7 +485,7 @@
 
                 <div class="mb-4">
                     <label class="block text-sm font-semibold">Issue</label>
-                    <textarea wire:model.defer="duoIssue" class="border rounded w-full p-2" rows="3"></textarea>
+                    <textarea wire:model="duoIssue" class="border rounded w-full p-2" rows="3"></textarea>
                 </div>
 
                 <div class="flex justify-end gap-2">
@@ -518,6 +497,161 @@
             </div>
         </div>
     @endif
+
+    @if ($showPriceModal)
+        <div
+            class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center z-50">
+            <div class="bg-white p-4 md:p-6 rounded shadow w-full max-w-md mx-2">
+                <h2 class="text-lg font-bold mb-4">Edit Item Price</h2>
+
+                <p class="text-sm font-medium mb-1">
+                    <strong>Item:</strong> {{ $priceItemName }}<br>
+                    <strong>Original Price:</strong> ₹{{ number_format($originalPrice, 2) }}
+                </p>
+
+                <div class="mb-2">
+                    <label class="block text-sm font-semibold mb-1">Discount Type</label>
+                    <select wire:model.live="discountType" class="w-full border rounded p-2">
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed (₹)</option>
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <label class="block text-sm font-semibold mb-1">Discount Value</label>
+                    <input type="number" min="0" wire:model.live="discountValue"
+                        class="w-full border rounded p-2" placeholder="e.g. 10 for 10% " />
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-1">Final Price</label>
+                    <input type="number" step="0.01" min="0" wire:model.defer="priceInput"
+                        class="w-full border rounded p-2" readonly />
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button wire:click="$set('showPriceModal', false)" class="px-4 py-2 bg-gray-200 rounded">
+                        Cancel
+                    </button>
+                    <button wire:click="savePrice" class="px-4 py-2 bg-green-600 text-white rounded">
+                        Save Price
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+
+
+    @if ($showCartDetailModal)
+        <div class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center">
+            <div class="bg-white rounded shadow-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+                <h2 class="text-lg font-bold mb-4">Cart Details</h2>
+
+                <!-- Cart Items -->
+                <div class="mb-4 space-y-2">
+                    <h3 class="text-md font-semibold text-gray-700 mb-2">Items in Cart</h3>
+                    @forelse ($cart as $key => $item)
+                        @if ($item['qty'] > 0)
+                            <div class="border p-2 rounded text-sm bg-gray-50">
+                                <div class="font-semibold">{{ $item['name'] }}</div>
+                                <div class="text-gray-600">
+                                    Qty: {{ $item['qty'] }} × ₹{{ number_format($item['price'], 2) }}
+                                </div>
+                                <div class="flex flex-row justify-between text-blue-600 font-semibold">
+                                    Total: ₹{{ number_format($item['qty'] * $item['price'], 2) }}
+                                    <button class="text-xs bg-yellow-100 text-yellow-700 px-1 md:px-2 rounded mt-1"
+                                        wire:click="openPriceModal('{{ $row['id'] }}')">Edit Price</button>
+                                    <div class="flex justify-end items-center">
+                                        <button class="text-red-500 text-xs md:text-sm"
+                                            wire:click="remove('{{ $row['id'] }}')">✕</button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    @empty
+                        <p class="text-gray-500">Cart is empty.</p>
+                    @endforelse
+                </div>
+
+                <!-- Charges -->
+                <div class="mb-3">
+                    <label class="block text-sm font-semibold">Service Charge (₹)</label>
+                    <input type="number" step="0.01" wire:model.live="serviceCharge"
+                        class="w-full border rounded p-2" />
+                </div>
+
+                <!-- Totals -->
+                <div class="mb-4 text-sm text-gray-700">
+                    <p>Subtotal: ₹{{ number_format($this->getSubtotal(), 2) }}</p>
+                    <p>Service: ₹{{ number_format($serviceCharge, 2) }}</p>
+                    <p class="font-bold text-blue-600">Total: ₹{{ number_format($this->getCartTotal(), 2) }}</p>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button wire:click="$set('showCartDetailModal', false)" class="px-4 py-2 bg-gray-200 rounded">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($showRemoveModal)
+        <div
+            class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex items-center justify-center z-50">
+            <div class="bg-white rounded shadow p-4 w-full max-w-md mx-2">
+                <h2 class="text-lg font-bold mb-3">Remove Item</h2>
+                <p class="mb-2 text-sm text-gray-700">Please enter the reason for removing this item:</p>
+                <textarea wire:model.defer="removeReason" rows="3" class="w-full border rounded p-2"></textarea>
+
+                <div class="flex justify-end gap-2 mt-4">
+                    <button wire:click="$set('showRemoveModal', false)" class="px-4 py-2 bg-gray-200 rounded">
+                        Cancel
+                    </button>
+                    <button wire:click="confirmRemove" class="px-4 py-2 bg-red-600 text-white rounded">
+                        Confirm Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($showCustomerModal)
+        <div class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex justify-center items-center z-50">
+            <div class="bg-white p-6 rounded shadow w-full max-w-md">
+                <h2 class="text-lg font-bold mb-4">Customer Details</h2>
+
+                <x-form.error />
+
+                <div class="space-y-3">
+                    <input type="text" wire:model.defer="followupCustomer_name" class="w-full border p-2 rounded"
+                        placeholder="Customer Name">
+
+                    <input type="text" wire:model.defer="followupCustomer_mobile" class="w-full border p-2 rounded"
+                        placeholder="Mobile Number" maxlength="10"
+                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" >
+
+                    <input type="email" wire:model.defer="followupCustomer_email" class="w-full border p-2 rounded"
+                        placeholder="Email (optional)">
+
+                    <input type="date" wire:model.defer="customer_dob" class="w-full border p-2 rounded"
+                        placeholder="DOB (optional)">
+
+                    <input type="date" wire:model.defer="customer_anniversary" class="w-full border p-2 rounded"
+                        placeholder="Anniversary (optional)">
+                </div>
+
+                <div class="mt-4 flex justify-end gap-2">
+                    <button wire:click="$set('showCustomerModal', false)"
+                        class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
+                    <button wire:click="saveCustomer"
+                        class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>
 
 @push('scripts')
@@ -601,11 +735,10 @@
     </script>
 
 
-<script>
-    Livewire.on('printBill', (event) => {
-        const billId = event.billId;
-        window.open(`/waiter/bill-print/${billId}`, '_blank');
-    });
-</script>
-
+    <script>
+        Livewire.on('printBill', (event) => {
+            const billId = event.billId;
+            window.open(`/waiter/bill-print/${billId}`, '_blank');
+        });
+    </script>
 @endpush
