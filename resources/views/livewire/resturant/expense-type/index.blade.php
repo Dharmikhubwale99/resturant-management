@@ -5,7 +5,7 @@
             <div class="flex items-center gap-4">
                 <x-form.input name="search" placeholder="Search by name" wireModelLive="search" wrapperClass="mb-0"
                     inputClass="w-72" />
-                @can('expense-type-create')
+                @can('expensetype-create')
                     <x-form.button title="+ Add" route="restaurant.expense-types.create"
                         class="bg-blue-600 hover:bg-blue-700 text-white" />
                 @endcan
@@ -28,7 +28,7 @@
                             <td class="px-6 text-sm text-gray-900">{{ $expenseType->name }}</td>
                             <td class="px-2 text-sm text-gray-900">
                                 <div class="flex items-center justify-start space-x-2">
-                                    @can('expense-type-edit')
+                                    @can('expensetype-edit')
                                         <x-form.button title=""
                                             class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.expense-types.edit', $expenseType->id]">
                                             <span class="w-4 h-4">
@@ -36,7 +36,7 @@
                                             </span>
                                         </x-form.button>
                                     @endcan
-                                    @can('expense-type-delete')
+                                    @can('expensetype-delete')
                                         <x-form.button title=""
                                             class="w-8 h-8 rounded flex items-center justify-center"
                                             wireClick="confirmDelete({{ $expenseType->id }})">

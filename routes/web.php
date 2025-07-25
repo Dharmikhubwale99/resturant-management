@@ -155,9 +155,9 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     });
 
      Route::prefix('expense-types')->as('expense-types.')->group(function () {
-        Route::get('/', ExpenseTypeIndex::class)->name('index')->middleware('can:expense-type-index');
-        Route::get('/create', ExpenseTypeCreate::class)->name('create')->middleware('can:expense-type-create');
-        Route::get('/edit/{id}', ExpenseTypeEdit::class)->name('edit')->middleware('can:expense-type-edit');
+        Route::get('/', ExpenseTypeIndex::class)->name('index')->middleware('can:expensetype-index');
+        Route::get('/create', ExpenseTypeCreate::class)->name('create')->middleware('can:expensetype-create');
+        Route::get('/edit/{id}', ExpenseTypeEdit::class)->name('edit')->middleware('can:expensetype-edit');
     });
 
      Route::prefix('expenses')->as('expenses.')->group(function () {
