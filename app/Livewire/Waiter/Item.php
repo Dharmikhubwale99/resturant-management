@@ -794,13 +794,13 @@ class Item extends Component
     {
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
 
-        $kot = Kot::where('order_id', $order->id)->where('status', 'pending')->latest()->firstOrFail();
+        $kots = Kot::where('order_id', $order->id)->where('status', 'pending')->get();
 
         $restaurantId = Auth::user()->restaurant_id;
 
         $orderItems = OrderItem::where('order_id', $order->id)->get();
 
-        $kotItems = KOTItem::where('kot_id', $kot->id)->get();
+        $kotItems = KOTItem::whereIn('kot_id', $kots->pluck('id'))->get();
 
         $this->validate([
             'customerName' => 'nullable|string|max:100',
@@ -848,13 +848,15 @@ class Item extends Component
                 $item->update(['status' => 'served']);
             });
 
-            $kot->each(function ($kot) use ($order) {
+            $kots->each(function ($kot) {
                 $kot->update(['status' => 'ready']);
             });
 
-            $kotItems->each(function ($item) use ($kot) {
+
+            $kotItems->each(function ($item) {
                 $item->update(['status' => 'served']);
             });
+
         }
 
         $this->reset(['splits', 'paymentMethod', 'showSplitModal', 'customerName', 'mobile']);
@@ -878,9 +880,12 @@ class Item extends Component
             $order = $this->createOrderAndKot();
         }
 
-        $kot = Kot::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+        $pendingKOTs = Kot::where('table_id', $this->table_id)
+            ->where('order_id', $order->id)
+            ->where('status', 'pending')
+            ->get();
 
-        if ($kot) {
+        foreach ($pendingKOTs as $kot) {
             $kotItems = KOTItem::where('kot_id', $kot->id)->get();
             $kot->update(['status' => 'ready']);
             $kotItems->each(fn($item) => $item->update(['status' => 'served']));
@@ -893,10 +898,15 @@ class Item extends Component
         $orderItems->each(fn($item) => $item->update(['status' => 'served']));
         $table->update(['status' => 'available']);
 
+        if ($this->duoAmount > $order->total_amount) {
+            session()->flash('error', 'Paid amount cannot exceed total order amount.');
+            return;
+        }
+
         $payment = Payment::create([
             'order_id' => $order->id,
             'amount' => $order->total_amount,
-            'method' => 'duo',
+            'method' => $this->duoMethod,
         ]);
 
         $remainingAmount = $order->total_amount - $this->duoAmount;
@@ -913,10 +923,19 @@ class Item extends Component
             'issue' => $this->duoIssue,
         ]);
 
-        $this->reset(['showDuoPaymentModal', 'duoCustomerName', 'duoMobile', 'duoAmount', 'duoMethod', 'duoIssue', 'paymentMethod']);
+        $this->reset([
+            'showDuoPaymentModal',
+            'duoCustomerName',
+            'duoMobile',
+            'duoAmount',
+            'duoMethod',
+            'duoIssue',
+            'paymentMethod'
+        ]);
 
         return redirect()->route('waiter.dashboard')->with('success', 'Duo Payment Completed!');
     }
+
 
     public function confirmRemove()
     {
