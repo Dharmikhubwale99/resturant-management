@@ -18,6 +18,13 @@ class Create extends Component
         return view('livewire.resturant.category.create');
     }
 
+    public function mount()
+    {
+        if (!setting('category_module')) {
+            abort(403, 'You do not have access to this module.');
+        }
+    }
+
     public function submit()
     {
        $this->validate([

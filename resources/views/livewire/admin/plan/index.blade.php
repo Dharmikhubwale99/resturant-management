@@ -23,9 +23,6 @@
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Image</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Value</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                 </tr>
@@ -42,9 +39,6 @@
                             </td>
                         <td class="px-6 text-sm text-gray-900">{{ $plan->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $plan->price }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $plan->type }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $plan->value }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $plan->amount }}</td>
                         <td class="px-6 text-sm">
 
                                 @if ($plan->is_active)

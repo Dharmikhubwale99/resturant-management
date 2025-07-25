@@ -30,6 +30,9 @@ class Create extends Component
 
     public function mount()
     {
+        if (!setting('user')) {
+            abort(403, 'You do not have access to this module.');
+        }
         $this->data['roles'] = Role::whereIn('name', ['manager', 'waiter', 'kitchen'])->pluck('name', 'name');
     }
 

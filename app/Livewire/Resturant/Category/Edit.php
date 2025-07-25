@@ -16,8 +16,12 @@ class Edit extends Component
         return view('livewire.resturant.category.edit');
     }
 
-    public function mount($id) 
+    public function mount($id)
     {
+        if (!setting('category_module')) {
+            abort(403, 'You do not have access to this module.');
+        }
+
         $this->category = Category::find($id);
         $this->fill($this->category->only('name'));
     }
