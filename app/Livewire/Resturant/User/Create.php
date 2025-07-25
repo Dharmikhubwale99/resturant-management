@@ -18,22 +18,56 @@ class Create extends Component
     public $password;
     public $password_confirmation;
     public $resturant;
+    public $permissions = [];
     public $data = [
         'roles' => [],
+        'permissions' => [],
     ];
+
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
-        $this->resturant = auth()->user()->restaurants()->first();
         return view('livewire.resturant.user.create');
     }
 
     public function mount()
     {
+        $this->resturant = auth()->user()->restaurants()->first();
+
         if (!setting('user')) {
             abort(403, 'You do not have access to this module.');
         }
+
+        $allPermissions = $this->getAllPermissionGroups();
+
+        $restaurantConfigIds = $this->resturant->configurations()->where('value', 1)->pluck('configuration_id')->toArray();
+
+        $filteredPermissions = [];
+        foreach ($allPermissions as $group => $perms) {
+            if (in_array($this->mapModuleToConfigId($group), $restaurantConfigIds)) {
+                $filteredPermissions[$group] = $perms;
+            }
+        }
+
+        $this->data['permissions'] = $filteredPermissions;
         $this->data['roles'] = Role::whereIn('name', ['manager', 'waiter', 'kitchen'])->pluck('name', 'name');
+    }
+
+    protected function mapModuleToConfigId($moduleName)
+    {
+        $mapping = [
+            'category' => 1,
+            'area' => 2,
+            'expensetype' => 3,
+            'user' => 4,
+            'item' => 5,
+            'expenses' => 6,
+            'table' => 7,
+            'discount' => 8,
+            'kitchen' => 9,
+        ];
+
+        return $mapping[strtolower($moduleName)] ?? null;
     }
 
     public function submit()
@@ -47,9 +81,7 @@ class Create extends Component
         ]);
 
         $restaurantSuffix = preg_replace('/[^a-z0-9]/', '', strtolower($this->resturant->name));
-
         $emailLocalPart = explode('@', $this->email)[0];
-
         $finalEmail = $emailLocalPart . '@' . $restaurantSuffix . 'gmail.com';
 
         $user = User::create([
@@ -61,8 +93,10 @@ class Create extends Component
         ]);
 
         $user->assignRole($this->role);
+        if (!empty($this->permissions)) {
+            $user->syncPermissions($this->permissions);
+        }
 
         $this->redirect(route('restaurant.users.index'));
     }
-
 }

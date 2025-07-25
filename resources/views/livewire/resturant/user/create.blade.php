@@ -1,4 +1,4 @@
-<div class="p-6 bg-white rounded shadow max-w-3xl mx-auto">
+<div class="p-6 bg-white rounded shadow max-w-4xl mx-auto">
     <h2 class="text-2xl font-bold mb-6">Add User</h2>
     <x-form.error />
     <form wire:submit.prevent="submit" class="space-y-4">
@@ -16,6 +16,10 @@
             @error('role')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
+        </div>
+
+        <div class="mb-4">
+            <x-form.checkbox-group name="permissions" :groups="$data['permissions']" wireModel="permissions" />
         </div>
 
         <x-form.input name="password" label="Password" type="password" wireModel="password" required
