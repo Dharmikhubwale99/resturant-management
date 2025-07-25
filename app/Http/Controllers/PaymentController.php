@@ -9,9 +9,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\{PlanFeature, AppConfiguration, RestaurantConfiguration};
+use App\Traits\HasRolesAndPermissions;
+use Spatie\Permission\Models\Permission;
 
 class PaymentController extends Controller
 {
+    use HasRolesAndPermissions;
     /**
      * Create Razorpay Order with discount support
      */
@@ -76,6 +79,14 @@ class PaymentController extends Controller
                 ]
             );
 
+            $permissions = $this->getAllPermissions(); // FIXED
+            foreach ($permissions as $perm) {
+                Permission::firstOrCreate(['name' => $perm]);
+            }
+            $user->givePermissionTo($permissions);
+
+
+
             $this->syncRestaurantFeatures($restaurant, $plan);
 
             session()->forget(['razorpay_order_id', 'plan_id']);
@@ -111,8 +122,15 @@ class PaymentController extends Controller
             'plan_id' => $plan->id,
             'plan_expiry_at' => Carbon::now()->addDays($plan->duration_days),
         ]);
+        $permissions = $this->getAllPermissions(); // FIXED
+        foreach ($permissions as $perm) {
+            Permission::firstOrCreate(['name' => $perm]);
+        }
+        $user->givePermissionTo($permissions);
+
         $this->syncRestaurantFeatures($restaurant, $plan);
         session()->forget(['razorpay_order_id', 'plan_id']);
+
 
         return response()->json([
             'success' => true,
