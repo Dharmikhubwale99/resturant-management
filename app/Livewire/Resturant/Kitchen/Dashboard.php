@@ -15,7 +15,7 @@ class Dashboard extends Component
     public $itemToCancel = null;
     public $cancelReason = '';
     public $dateFilter = 'today';
-    
+
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
@@ -48,8 +48,12 @@ class Dashboard extends Component
         ]);
     }
 
-
-
+    public function mount()
+    {
+        if (!setting('kitchen')) {
+            abort(403, 'You do not have access to this module.');
+        }
+    }
 
     public function updateKotStatus($kotId)
     {
@@ -61,7 +65,7 @@ class Dashboard extends Component
         $itemStatuses = $kot->items->pluck('status')->unique()->toArray();
 
         if ($kot->status === 'pending' && in_array('preparing', $itemStatuses)) {
-            
+
             foreach ($kot->items as $item) {
                 if ($item->status === 'preparing') {
                     $item->status = 'ready';
@@ -74,7 +78,7 @@ class Dashboard extends Component
         }
 
         if ($kot->status === 'preparing' && in_array('pending', $itemStatuses)) {
-            return; 
+            return;
         }
 
         $nextStatus = match ($kot->status) {
@@ -143,10 +147,10 @@ class Dashboard extends Component
             $item->status = 'cancelled';
             $item->reason = $this->cancelReason;
             $item->save();
-            
+
             // Check if all items in the KOT are now ready or cancelled
             $this->checkKotStatus($item->kot_id);
-            
+
             $this->dispatch('kotItemStatusUpdated');
         }
 
