@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin\Plan;
 
-use App\Models\Plan;
+use App\Models\{Plan, AppConfiguration};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\WithFileUploads;
@@ -12,9 +12,12 @@ class Edit extends Component
     use WithFileUploads;
     public $plan, $name, $price, $duration_days, $description;
     public $images;
+    public $featureAccess = [];
+    public $availableFeatures = [];
     public $type;
     public $value;
     public $amount;
+
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -24,9 +27,16 @@ class Edit extends Component
 
     public function mount($id)
     {
+        $this->plan = Plan::findOrFail($id);
+        $this->fill($this->plan->only('name', 'price', 'duration_days', 'description'));
+
+        $this->availableFeatures = AppConfiguration::all()->pluck('key')->toArray();
+
+        $this->featureAccess = $this->plan->planFeatures()->where('is_active', true)->pluck('feature')->toArray();
         $this->plan = Plan::find($id);
         $this->fill($this->plan->only('name', 'price', 'duration_days', 'description','type','value','amount'));
     }
+
 
      public function removeImage($mediaId)
     {
@@ -51,6 +61,10 @@ class Edit extends Component
             $rules['amount'] = 'nullable|numeric|min:0';
         }
 
+    if ($this->images) {
+        $this->plan->clearMediaCollection('planImages');
+
+        $storedPath = $this->images->store('plans', 'public');
         $this->validate($rules);
 
         $this->plan->update([
@@ -72,6 +86,13 @@ class Edit extends Component
                     ->usingFileName($this->images->getClientOriginalName())
                     ->toMediaCollection('planImages');
         }
+      
+          foreach ($this->featureAccess as $featureKey) {
+        $this->plan->planFeatures()->create([
+            'feature' => $featureKey,
+            'is_active' => true,
+        ]);
+    }
 
         return redirect()->route('superadmin.plans.index')
             ->with('success', 'Plan updated successfully.');

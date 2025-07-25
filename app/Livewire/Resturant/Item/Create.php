@@ -36,9 +36,13 @@ class Create extends Component
             'itemTypes' => ItemType::cases(),
         ]);
     }
-    
+
     public function mount(): void
     {
+        if (!setting('item')) {
+            abort(403, 'You do not have access to this module.');
+        }
+
         $this->restaurant = auth()->user()->restaurants()->first();
 
         // associative array: [id => name]
