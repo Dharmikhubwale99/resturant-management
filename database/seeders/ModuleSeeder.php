@@ -16,10 +16,10 @@ class ModuleSeeder extends Seeder
         $modules = [
             'category_module',
             'area_module',
-            'expense-type-module',
+            'expensetype',
             'user',
             'item',
-            'expense',
+            'expenses',
             'table',
             'discount',
             'kitchen'
