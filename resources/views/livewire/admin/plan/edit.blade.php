@@ -56,6 +56,16 @@
                         </label>
                     @endforeach
                 </div>
+            <x-form.select name="type" label="Discount Type" wireModelLive="type" :options="['fixed' => 'Fixed', 'percentage' => 'Percentage']" />
+
+            @if ($type === 'percentage')
+                <x-form.input name="value" label="Discount Value (%)" wireModel="value" type="number" step="0.01"
+                    placeholder="e.g. 10" />
+            @endif
+
+            @if ($type === 'fixed')
+                <x-form.input name="amount" label="Amount" wireModel="amount" type="number" step="0.01" />
+            @endif
 
                 <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Save" wireTarget="submit" />
