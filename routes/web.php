@@ -18,9 +18,9 @@ use \App\Livewire\Admin\{
     Plan\Index as PlanIndex,
     Plan\Create as PlanCreate,
     Plan\Edit as PlanEdit,
+    Plan\Report as PlanReport,
 
     UserAccess
-
   };
 use \App\Livewire\Resturant\{
     Dashboard as ResturantDashboard,
@@ -116,6 +116,8 @@ Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFr
         Route::get('/', PlanIndex::class)->name('index');
         Route::get('/create', PlanCreate::class)->name('create');
         Route::get('/edit/{id}', PlanEdit::class)->name('edit');
+        Route::get('/report', PlanReport::class)->name('report');
+
     });
  });
 
@@ -127,58 +129,58 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/edit-profile', EditProfile::class)->name('edit-profile');
 
     Route::prefix('categories')->as('categories.')->group(function () {
-        Route::get('/', CategoryIndex::class)->name('index')->middleware('can:category-index');
-        Route::get('/create', CategoryCreate::class)->name('create')->middleware('can:category-create');
-        Route::get('/edit/{id}', CategoryEdit::class)->name('edit')->middleware('can:category-edit');
+        Route::get('/', CategoryIndex::class)->name('index');
+        Route::get('/create', CategoryCreate::class)->name('create');
+        Route::get('/edit/{id}', CategoryEdit::class)->name('edit');
     });
 
     Route::prefix('items')->as('items.')->group(function () {
-        Route::get('/', ItemIndex::class)->name('index')->middleware('can:item-index');
-        Route::get('/create', ItemCreate::class)->name('create')->middleware('can:item-create');
-        Route::get('/edit/{id}', ItemEdit::class)->name('edit')->middleware('can:item-edit');
-        Route::get('/show/{id}', ItemShow::class)->name('show')->middleware('can:item-show');
+        Route::get('/', ItemIndex::class)->name('index');
+        Route::get('/create', ItemCreate::class)->name('create');
+        Route::get('/edit/{id}', ItemEdit::class)->name('edit');
+        Route::get('/show/{id}', ItemShow::class)->name('show');
     });
 
      Route::prefix('areas')->as('areas.')->group(function () {
-        Route::get('/', AreaIndex::class)->name('index')->middleware('can:area-index');
-        Route::get('/create', AreaCreate::class)->name('create')->middleware('can:area-create');
-        Route::get('/edit/{id}', AreaEdit::class)->name('edit')->middleware('can:area-edit');
+        Route::get('/', AreaIndex::class)->name('index');
+        Route::get('/create', AreaCreate::class)->name('create');
+        Route::get('/edit/{id}', AreaEdit::class)->name('edit');
     });
 
     Route::prefix('tables')->as('tables.')->group(function () {
-        Route::get('/', TableIndex::class)->name('index')->middleware('can:table-index');
-        Route::get('/create', TableCreate::class)->name('create')->middleware('can:table-create');
-        Route::get('/edit/{id}', TableEdit::class)->name('edit')->middleware('can:table-edit');
-        Route::get('/show/{id}', TableShow::class)->name('show')->middleware('can:table-show');
+        Route::get('/', TableIndex::class)->name('index');
+        Route::get('/create', TableCreate::class)->name('create');
+        Route::get('/edit/{id}', TableEdit::class)->name('edit');
+        Route::get('/show/{id}', TableShow::class)->name('show');
     });
 
      Route::prefix('expense-types')->as('expense-types.')->group(function () {
-        Route::get('/', ExpenseTypeIndex::class)->name('index')->middleware('can:expense-type-index');
-        Route::get('/create', ExpenseTypeCreate::class)->name('create')->middleware('can:expense-type-create');
-        Route::get('/edit/{id}', ExpenseTypeEdit::class)->name('edit')->middleware('can:expense-type-edit');
+        Route::get('/', ExpenseTypeIndex::class)->name('index');
+        Route::get('/create', ExpenseTypeCreate::class)->name('create');
+        Route::get('/edit/{id}', ExpenseTypeEdit::class)->name('edit');
     });
 
      Route::prefix('expenses')->as('expenses.')->group(function () {
-        Route::get('/', ExpensesIndex::class)->name('index')->middleware('can:expenses-index');
-        Route::get('/create', ExpensesCreate::class)->name('create')->middleware('can:expenses-create');
-        Route::get('/edit/{id}', ExpensesEdit::class)->name('edit')->middleware('can:expenses-edit');
-        Route::get('/show/{id}', ExpensesShow::class)->name('show')->middleware('can:expenses-show');
+        Route::get('/', ExpensesIndex::class)->name('index');
+        Route::get('/create', ExpensesCreate::class)->name('create');
+        Route::get('/edit/{id}', ExpensesEdit::class)->name('edit');
+        Route::get('/show/{id}', ExpensesShow::class)->name('show');
     });
 
     Route::prefix('users')->as('users.')->group(function () {
-        Route::get('/', UserIndex::class)->name('index')->middleware('can:user-index');
-        Route::get('/create', UserCreate::class)->name('create')->middleware('can:user-create');
-        Route::get('/edit/{id}', UserEdit::class)->name('edit')->middleware('can:user-edit');
+        Route::get('/', UserIndex::class)->name('index');
+        Route::get('/create', UserCreate::class)->name('create');
+        Route::get('/edit/{id}', UserEdit::class)->name('edit');
     });
 
     Route::prefix('discount')->as('discount.')->group(function () {
-        Route::get('/', DiscountIndex::class)->name('index')->middleware('can:discount-index');
-        Route::get('/create', DiscountCreate::class)->name('create')->middleware('can:discount-create');
-        Route::get('/edit/{id}', DiscountEdit::class)->name('edit')->middleware('can:discount-edit');
+        Route::get('/', DiscountIndex::class)->name('index');
+        Route::get('/create', DiscountCreate::class)->name('create');
+        Route::get('/edit/{id}', DiscountEdit::class)->name('edit');
     });
 
     Route::prefix('kitchen')->as('kitchen.')->group(function () {
-        Route::get('/index', AdminKitchenDashboard::class)->name('index')->middleware('can:kitchen-dashboard');
+        Route::get('/index', AdminKitchenDashboard::class)->name('index');
     });
 
     Route::get('/sales-report', SalesReport::class)->name('sales-report');

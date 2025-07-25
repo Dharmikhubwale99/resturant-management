@@ -20,10 +20,6 @@ class Create extends Component
     #[Layout('components.layouts.resturant.app')]
     public function mount()
     {
-        if (!setting('table')) {
-            abort(403, 'You do not have access to this module.');
-        }
-
         $restaurant = auth()->user()->restaurants()->first();
         $this->areas = $restaurant->areas()->pluck('name', 'id')->toArray();
     }

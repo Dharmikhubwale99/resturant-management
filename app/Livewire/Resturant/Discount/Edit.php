@@ -23,10 +23,6 @@ class Edit extends Component
 
     public function mount($id)
     {
-        if (!setting('item')) {
-            abort(403, 'You do not have access to this module.');
-        }
-
         $this->discount = Discount::findOrFail($id);
         $this->resturant = auth()->user()->restaurants()->first();
 
@@ -42,13 +38,16 @@ class Edit extends Component
         $this->starts_at = $this->discount->starts_at ? $this->discount->starts_at->format('Y-m-d\TH:i') : null;
         $this->ends_at = $this->discount->ends_at ? $this->discount->ends_at->format('Y-m-d\TH:i') : null;
 
-        // Load all items for the restaurant
-        $this->items = \App\Models\Item::where('restaurant_id', $this->resturant->id)
-            ->orderBy('name')
-            ->pluck('name', 'id')
-            ->toArray();
-        // Load selected items for this discount
         $this->selected_items = $this->discount->items()->pluck('items.id')->toArray();
+        // Load all items for the restaurant
+         $this->items = \App\Models\Item::with('category')
+        ->where('restaurant_id', $this->resturant->id)
+        ->get()
+        ->mapWithKeys(function ($item) {
+            $category = ($item->category && $item->category->name) ? $item->category->name : '';
+            return [$item->id => $item->name . ($category ? ' | ' . $category : '')];
+        })
+        ->toArray();
     }
 
     #[Layout('components.layouts.resturant.app')]

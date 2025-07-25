@@ -13,10 +13,6 @@ class Show extends Component
     #[Layout('components.layouts.resturant.app')]
     public function mount($id)
     {
-        if (!setting('table')) {
-            abort(403, 'You do not have access to this module.');
-        }
-
         $this->table = Table::with('area')->findOrFail($id);
     }
 
@@ -24,4 +20,4 @@ class Show extends Component
     {
         return view('livewire.resturant.table.show');
     }
-}
+} 

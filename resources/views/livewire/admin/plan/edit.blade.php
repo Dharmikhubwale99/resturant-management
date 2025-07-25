@@ -14,8 +14,6 @@
             <x-form.input name="description" label="Description" type="textarea" wireModel="description"
                 placeholder="Enter description" />
 
-
-
             <x-form.input label="Images" name="images" type="file" wireModel="images" />
             <div wire:loading wire:target="images" class="flex items-center justify-center mt-2">
                 <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -45,19 +43,20 @@
                         Delete
                     </button>
                 </div>
-                @endforeach
+            @endforeach
 
-                <div class="grid grid-cols-2 gap-2">
-                    @foreach ($availableFeatures as $feature)
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" wire:model="featureAccess" value="{{ $feature }}"
-                                class="form-checkbox">
-                            <span class="ml-2 capitalize">{{ str_replace('_', ' ', $feature) }}</span>
-                        </label>
-                    @endforeach
-                </div>
+            <x-form.select name="type" label="Discount Type" wireModelLive="type" :options="['fixed' => 'Fixed', 'percentage' => 'Percentage']" />
 
-                <div class="flex flex-row text-center  space-x-3">
+            @if ($type === 'percentage')
+                <x-form.input name="value" label="Discount Value (%)" wireModel="value" type="number" step="0.01"
+                    placeholder="e.g. 10" />
+            @endif
+
+            @if ($type === 'fixed')
+                <x-form.input name="amount" label="Amount" wireModel="amount" type="number" step="0.01" />
+            @endif
+
+            <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Save" wireTarget="submit" />
                 <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
                     route="superadmin.plans.index" />

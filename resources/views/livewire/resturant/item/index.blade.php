@@ -13,28 +13,25 @@
                 ]"
                     placeholder="All Types" wrapperClass="mb-0" inputClass="text-sm" />
 
-                @can('item-import')
-                    <x-form.button title="Import" class="bg-green-600 hover:bg-green-700 text-white"
-                        wire:click="$set('showImportModal', true)" />
-                @endcan
-                @can('item-create')
-                    <x-form.button title="+ Add" route="restaurant.items.create"
-                        class="bg-blue-600 hover:bg-blue-700 text-white" />
-                @endcan
+                <x-form.button title="Import"
+                    class="bg-green-600 hover:bg-green-700 text-white"
+                    wire:click="$set('showImportModal', true)" />
+                <x-form.button title="+ Add" route="restaurant.items.create"
+                    class="bg-blue-600 hover:bg-blue-700 text-white" />
             </div>
         </div>
-        @if ($importErrors)
-            <div class="mt-4 p-4 bg-red-100 text-red-800 rounded w-full text-sm">
-                <strong>Import Errors:</strong>
-                <ul class="list-disc list-inside mt-1">
-                    @foreach ($importErrors as $error)
-                        <li><b>Row {{ $error['row'] }}</b>: {{ $error['error'] }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+         @if ($importErrors)
+                <div class="mt-4 p-4 bg-red-100 text-red-800 rounded w-full text-sm">
+                    <strong>Import Errors:</strong>
+                    <ul class="list-disc list-inside mt-1">
+                        @foreach ($importErrors as $error)
+                            <li><b>Row {{ $error['row'] }}</b>: {{ $error['error'] }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         <x-form.error />
-
+        
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
                 <thead class="bg-gray-100">
@@ -70,31 +67,27 @@
                             <td class="px-6 text-sm text-gray-900">{{ $item->price }}</td>
                             <td class="px-2 text-sm text-gray-900">
                                 <div class="flex items-center justify-start space-x-2">
-                                    @can('item-show')
-                                        <x-form.button title=""
-                                            class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.items.show', $item->id]">
-                                            <span class="w-4 h-4 text-yellow-700">
-                                                {!! file_get_contents(public_path('icon/view.svg')) !!}
-                                            </span>
-                                        </x-form.button>
-                                    @endcan
-                                    @can('item-edit')
-                                        <x-form.button title=""
-                                            class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.items.edit', $item->id]">
-                                            <span class="w-4 h-4">
-                                                {!! file_get_contents(public_path('icon/edit.svg')) !!}
-                                            </span>
-                                        </x-form.button>
-                                    @endcan
-                                    @can('item-delete')
-                                        <x-form.button title=""
-                                            class="w-8 h-8 rounded flex items-center justify-center"
-                                            wireClick="confirmDelete({{ $item->id }})">
-                                            <span class="w-4 h-4">
-                                                {!! file_get_contents(public_path('icon/delete.svg')) !!}
-                                            </span>
-                                        </x-form.button>
-                                    @endcan
+                                    <x-form.button title=""
+                                        class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.items.show', $item->id]">
+                                        <span class="w-4 h-4 text-yellow-700">
+                                            {!! file_get_contents(public_path('icon/view.svg')) !!}
+                                        </span>
+                                    </x-form.button>
+                                    <x-form.button title=""
+                                        class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.items.edit', $item->id]">
+                                        <span class="w-4 h-4">
+                                            {!! file_get_contents(public_path('icon/edit.svg')) !!}
+                                        </span>
+                                    </x-form.button>
+
+
+                                    <x-form.button title=""
+                                        class="w-8 h-8 rounded flex items-center justify-center"
+                                        wireClick="confirmDelete({{ $item->id }})">
+                                        <span class="w-4 h-4">
+                                            {!! file_get_contents(public_path('icon/delete.svg')) !!}
+                                        </span>
+                                    </x-form.button>
                                 </div>
                             </td>
                         </tr>
@@ -124,58 +117,48 @@
         </div>
     </div>
 
-    @if ($showImportModal)
-        <div class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
-            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-                <button class="absolute top-2 right-2 text-gray-500"
-                    wire:click="$set('showImportModal', false)">✕</button>
-                <h3 class="text-lg font-bold mb-2">Import Items from Excel</h3>
-                @if (setting('category_module'))
-                    <p class="mb-2 text-sm text-gray-600">Required columns: <b>category_name, name, item_type, price</b>
-                    </p>
-                    <a href="{{ asset('sample_items_import_with_category.xlsx') }}"
-                        class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
-                @else
-                    <p class="mb-2 text-sm text-gray-600">Required columns: <b>name, item_type, price</b></p>
-                    <a href="{{ asset('sample_items_import_without_category.xlsx') }}"
-                        class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
+    @if($showImportModal)
+    <div class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+            <button class="absolute top-2 right-2 text-gray-500" wire:click="$set('showImportModal', false)">✕</button>
+            <h3 class="text-lg font-bold mb-2">Import Items from Excel</h3>
+            @if(setting('category_module'))
+                <p class="mb-2 text-sm text-gray-600">Required columns: <b>category_name, name, item_type, price</b></p>
+                <a href="{{ asset('sample_items_import_with_category.xlsx') }}" class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
+            @else
+                <p class="mb-2 text-sm text-gray-600">Required columns: <b>name, item_type, price</b></p>
+                <a href="{{ asset('sample_items_import_without_category.xlsx') }}" class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
+            @endif
+            <form wire:submit.prevent="importItems" enctype="multipart/form-data" class="space-y-3">
+                <div class="relative">
+                    <input type="file" wire:model="importFile" accept=".xlsx,.xls" class="border rounded px-2 py-1 w-full" />
+                    <div wire:loading wire:target="importFile" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 rounded">
+                        <svg class="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        <span class="ml-2 text-green-700 text-xs">Uploading...</span>
+                    </div>
+                </div>
+                @error('importFile') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                @if($importErrors)
+                    <div class="bg-red-100 text-red-700 p-2 rounded text-xs">
+                        <ul>
+                            @foreach($importErrors as $err)
+                                <li>Row {{ $err['row'] }}: {{ $err['error'] }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 @endif
-                <form wire:submit.prevent="importItems" enctype="multipart/form-data" class="space-y-3">
-                    <div class="relative">
-                        <input type="file" wire:model="importFile" accept=".xlsx,.xls"
-                            class="border rounded px-2 py-1 w-full" />
-                        <div wire:loading wire:target="importFile"
-                            class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 rounded">
-                            <svg class="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                            </svg>
-                            <span class="ml-2 text-green-700 text-xs">Uploading...</span>
-                        </div>
-                    </div>
-                    @error('importFile')
-                        <span class="text-red-500 text-xs">{{ $message }}</span>
-                    @enderror
-                    @if ($importErrors)
-                        <div class="bg-red-100 text-red-700 p-2 rounded text-xs">
-                            <ul>
-                                @foreach ($importErrors as $err)
-                                    <li>Row {{ $err['row'] }}: {{ $err['error'] }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    <div class="flex justify-end gap-2">
-                        {{-- <button type="button" wire:click="$set('showImportModal', false)" class="px-3 py-1 bg-gray-300 rounded">Cancel</button> --}}
-                        {{-- <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded">Import</button> --}}
-                        <x-form.button type="submit" title="Save" wireTarget="submit" />
-                        <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
-                            route="restaurant.items.index" />
-                    </div>
-                </form>
-            </div>
+                <div class="flex justify-end gap-2">
+                    {{-- <button type="button" wire:click="$set('showImportModal', false)" class="px-3 py-1 bg-gray-300 rounded">Cancel</button> --}}
+                    {{-- <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded">Import</button> --}}
+                    <x-form.button type="submit" title="Save" wireTarget="submit" />
+                    <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
+                        route="restaurant.items.index" />
+                </div>
+            </form>
         </div>
+    </div>
     @endif
 </div>

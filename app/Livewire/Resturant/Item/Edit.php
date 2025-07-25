@@ -39,10 +39,6 @@ class Edit extends Component
     }
     public function mount($id)
     {
-        if (!setting('item')) {
-            abort(403, 'You do not have access to this module.');
-        }
-
         $this->item = Item::with('media')->findOrFail($id);
 
         $this->category_id = $this->item->category_id;
