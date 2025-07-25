@@ -5,10 +5,12 @@
             <div class="flex items-center gap-4">
                 <x-form.input name="search" placeholder="Search by name" wireModelLive="search" wrapperClass="mb-0"
                     inputClass="w-72" />
-                @if (setting('category_module'))
-                    <x-form.button title="+ Add" route="restaurant.categories.create"
-                        class="bg-blue-600 hover:bg-blue-700 text-white" />
-                @endif
+                @can('category-create')
+                    @if (setting('category_module'))
+                        <x-form.button title="+ Add" route="restaurant.categories.create"
+                            class="bg-blue-600 hover:bg-blue-700 text-white" />
+                    @endif
+                @endcan
             </div>
         </div>
         <x-form.error />
@@ -28,13 +30,15 @@
                             <td class="px-6 text-sm text-gray-900">{{ $category->name }}</td>
                             <td class="px-2 text-sm text-gray-900">
                                 <div class="flex items-center justify-start space-x-2">
+                                @can('category-edit')
                                     <x-form.button title=""
                                         class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.categories.edit', $category->id]">
                                         <span class="w-4 h-4">
                                             {!! file_get_contents(public_path('icon/edit.svg')) !!}
                                         </span>
                                     </x-form.button>
-
+                                @endcan
+                                @can('category-delete')
                                     <x-form.button title=""
                                         class="w-8 h-8 rounded flex items-center justify-center"
                                         wireClick="confirmDelete({{ $category->id }})">
@@ -42,6 +46,7 @@
                                             {!! file_get_contents(public_path('icon/delete.svg')) !!}
                                         </span>
                                     </x-form.button>
+                                @endcan
                                 </div>
                             </td>
                         </tr>

@@ -8,9 +8,10 @@
 
                 {{-- <x-form.select name="filterExpenseType" wireModelLive="filterExpenseType" :options="[]"
                     placeholder="All Types" wrapperClass="mb-0" inputClass="text-sm" /> --}}
-
-                <x-form.button title="+ Add" route="restaurant.expenses.create"
-                    class="bg-blue-600 hover:bg-blue-700 text-white" />
+                @can('expenses-create')
+                    <x-form.button title="+ Add" route="restaurant.expenses.create"
+                        class="bg-blue-600 hover:bg-blue-700 text-white" />
+                @endcan
             </div>
 
         </div>
@@ -33,7 +34,7 @@
                     @foreach ($expenses as $expense)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 text-sm text-gray-900">{{ $loop->iteration }}</td>
-                           
+
                             @if (setting('expense-type-module'))
                                 <td class="px-6 text-sm text-gray-900">{{ $expense->expenseType->name ?? '' }}</td>
                             @endif
@@ -44,27 +45,31 @@
                             </td>
                             <td class="px-2 text-sm text-gray-900">
                                 <div class="flex items-center justify-start space-x-2">
-                                    <x-form.button title=""
-                                        class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.expenses.show', $expense->id]">
-                                        <span class="w-4 h-4 text-yellow-700">
-                                            {!! file_get_contents(public_path('icon/view.svg')) !!}
-                                        </span>
-                                    </x-form.button>
-                                    <x-form.button title=""
-                                        class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.expenses.edit', $expense->id]">
-                                        <span class="w-4 h-4">
-                                            {!! file_get_contents(public_path('icon/edit.svg')) !!}
-                                        </span>
-                                    </x-form.button>
-
-
-                                    <x-form.button title=""
-                                        class="w-8 h-8 rounded flex items-center justify-center"
-                                        wireClick="confirmDelete({{ $expense->id }})">
-                                        <span class="w-4 h-4">
-                                            {!! file_get_contents(public_path('icon/delete.svg')) !!}
-                                        </span>
-                                    </x-form.button>
+                                    @can('expenses-show')
+                                        <x-form.button title=""
+                                            class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.expenses.show', $expense->id]">
+                                            <span class="w-4 h-4 text-yellow-700">
+                                                {!! file_get_contents(public_path('icon/view.svg')) !!}
+                                            </span>
+                                        </x-form.button>
+                                    @endcan
+                                    @can('expenses-edit')
+                                        <x-form.button title=""
+                                            class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.expenses.edit', $expense->id]">
+                                            <span class="w-4 h-4">
+                                                {!! file_get_contents(public_path('icon/edit.svg')) !!}
+                                            </span>
+                                        </x-form.button>
+                                    @endcan
+                                    @can('expenses-delete')
+                                        <x-form.button title=""
+                                            class="w-8 h-8 rounded flex items-center justify-center"
+                                            wireClick="confirmDelete({{ $expense->id }})">
+                                            <span class="w-4 h-4">
+                                                {!! file_get_contents(public_path('icon/delete.svg')) !!}
+                                            </span>
+                                        </x-form.button>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

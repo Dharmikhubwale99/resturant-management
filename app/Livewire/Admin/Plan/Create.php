@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\Plan;
 
 use Livewire\Component;
-use App\Models\Plan;
+use App\Models\{Plan, AppConfiguration};
 use Livewire\Attributes\Layout;
 use Livewire\WithFileUploads;
 
@@ -16,11 +16,18 @@ class Create extends Component
     public $type;
     public $value;
     public $amount;
+    public $featureAccess = [];
+    public $availableFeatures = [];
 
     #[Layout('components.layouts.admin.app')]
     public function render()
     {
         return view('livewire.admin.plan.create');
+    }
+
+    public function mount()
+    {
+        $this->availableFeatures = AppConfiguration::all()->pluck('key')->toArray();
     }
 
     public function submit()
@@ -54,6 +61,15 @@ class Create extends Component
         foreach ($this->images as $image) {
             $this->plan->addMedia($image)->toMediaCollection('planImages');
         }
+
+        foreach ($this->featureAccess as $featureKey) {
+            $this->plan->planFeatures()->create([
+                'feature' => $featureKey,
+                'is_active' => true,
+                'belongs_to' => 'restaurant',
+            ]);
+        }
+
 
         session()->flash('success', 'Plan created successfully!');
         $this->reset(['name', 'price', 'description']);
