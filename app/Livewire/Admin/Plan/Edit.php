@@ -14,6 +14,10 @@ class Edit extends Component
     public $images;
     public $featureAccess = [];
     public $availableFeatures = [];
+    public $type;
+    public $value;
+    public $amount;
+
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -29,6 +33,8 @@ class Edit extends Component
         $this->availableFeatures = AppConfiguration::all()->pluck('key')->toArray();
 
         $this->featureAccess = $this->plan->planFeatures()->where('is_active', true)->pluck('feature')->toArray();
+        $this->plan = Plan::find($id);
+        $this->fill($this->plan->only('name', 'price', 'duration_days', 'description','type','value','amount'));
     }
 
 
@@ -39,42 +45,56 @@ class Edit extends Component
     }
 
     public function submit()
-{
-    $this->validate([
-        'name' => 'required|string|max:255',
-        'price' => 'nullable|numeric|min:0',
-        'duration_days' => 'nullable|numeric|min:0',
-        'description' => 'nullable|string|max:255',
-        'images' => 'nullable|image|max:2048',
-    ]);
+    {
+        $rules = [
+            'name' => 'required|string|max:255',
+            'price' => 'nullable|numeric|min:0',
+            'duration_days' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string|max:255',
+            'images' => 'nullable|image|max:2048',
+            'type' => 'nullable',
+        ];
 
-    $this->plan->update([
-        'name' => $this->name,
-        'price' => $this->price,
-        'duration_days' => $this->duration_days,
-        'description' => $this->description,
-    ]);
+        if ($this->type === 'percentage') {
+            $rules['value'] = 'nullable|numeric|min:0';
+        } elseif ($this->type === 'fixed') {
+            $rules['amount'] = 'nullable|numeric|min:0';
+        }
 
     if ($this->images) {
         $this->plan->clearMediaCollection('planImages');
 
         $storedPath = $this->images->store('plans', 'public');
+        $this->validate($rules);
 
-        $this->plan->addMedia(storage_path('app/public/' . $storedPath))
-                   ->usingFileName($this->images->getClientOriginalName())
-                   ->toMediaCollection('planImages');
-    }
+        $this->plan->update([
+            'name' => $this->name,
+            'price' => $this->price,
+            'duration_days' => $this->duration_days,
+            'description' => $this->description,
+            'type' => $this->type,
+            'value' => $this->value,
+            'amount' => $this->amount,
+        ]);
 
-    foreach ($this->featureAccess as $featureKey) {
+        if ($this->images) {
+            $this->plan->clearMediaCollection('planImages');
+
+            $storedPath = $this->images->store('plans', 'public');
+
+            $this->plan->addMedia(storage_path('app/public/' . $storedPath))
+                    ->usingFileName($this->images->getClientOriginalName())
+                    ->toMediaCollection('planImages');
+        }
+      
+          foreach ($this->featureAccess as $featureKey) {
         $this->plan->planFeatures()->create([
             'feature' => $featureKey,
             'is_active' => true,
         ]);
     }
 
-    return redirect()->route('superadmin.plans.index')
-        ->with('success', 'Plan updated successfully.');
-}
-
-
+        return redirect()->route('superadmin.plans.index')
+            ->with('success', 'Plan updated successfully.');
+    }
 }
