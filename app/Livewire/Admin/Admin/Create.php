@@ -8,17 +8,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting};
 use Livewire\WithFileUploads;
-use App\Traits\HasRolesAndPermissions;
 
 class Create extends Component
 {
-    use WithFileUploads, HasRolesAndPermissions;
+    use WithFileUploads;
     public $user_name, $email, $mobile, $password;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
     public $restaurant_name, $restaurant_address, $gst_no, $password_confirmation;
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
-    public $permissions = [];
 
     #[Layout('components.layouts.admin.app')]
     public function render()

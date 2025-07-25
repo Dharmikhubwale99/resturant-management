@@ -16,12 +16,8 @@ class Edit extends Component
         return view('livewire.resturant.expense-type.edit');
     }
 
-    public function mount($id)
+    public function mount($id) 
     {
-        if (!setting('expense-type-module')) {
-            abort(403, 'You do not have access to this module.');
-        }
-
         $this->expense_type = ExpenseType::find($id);
         $this->fill($this->expense_type->only('name'));
     }

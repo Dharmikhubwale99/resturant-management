@@ -1,4 +1,4 @@
-<div class="p-6 bg-white rounded shadow max-w-4xl mx-auto">
+<div class="p-6 bg-white rounded shadow max-w-3xl mx-auto">
     <h2 class="text-2xl font-bold mb-6">Add User</h2>
     <x-form.error />
     <form wire:submit.prevent="submit" class="space-y-4">
@@ -18,15 +18,11 @@
             @enderror
         </div>
 
-        <div class="mb-4">
-            <x-form.checkbox-group name="permissions" :groups="$data['permissions']" wireModel="permissions" />
-        </div>
-
         <x-form.input name="password" label="Password" type="password" wireModel="password" required
-            placeholder="Create a password" />
+            placeholder="Create a password" showToggle="true"/>
 
         <x-form.input name="password_confirmation" label="Confirm Password" type="password"
-            wireModel="password_confirmation" required placeholder="Confirm the password" />
+            wireModel="password_confirmation" required placeholder="Confirm the password" showToggle="true"/>
 
         <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Save" wireTarget="submit" />

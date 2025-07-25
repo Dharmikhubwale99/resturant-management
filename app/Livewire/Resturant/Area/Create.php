@@ -19,13 +19,6 @@ class Create extends Component
         return view('livewire.resturant.area.create');
     }
 
-    public function mount()
-    {
-        if (!setting('area_module')) {
-            abort(403, 'You do not have access to this module.');
-        }
-    }
-
     public function submit()
     {
         $this->validate([

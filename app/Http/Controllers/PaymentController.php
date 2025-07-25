@@ -8,13 +8,9 @@ use App\Models\{Plan, Restaurant};
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use App\Models\{PlanFeature, AppConfiguration, RestaurantConfiguration};
-use App\Traits\HasRolesAndPermissions;
-use Spatie\Permission\Models\Permission;
 
 class PaymentController extends Controller
 {
-    use HasRolesAndPermissions;
     /**
      * Create Razorpay Order with discount support
      */
@@ -24,17 +20,18 @@ class PaymentController extends Controller
         $api_secret = config('razorpay.api_secret');
         $api = new Api($api_key, $api_secret);
 
+        // 🧠 Calculate discounted price
         $price = $plan->price;
         if ($plan->type === 'fixed' && $plan->amount) {
             $price -= $plan->amount;
         } elseif ($plan->type === 'percentage' && $plan->value) {
             $price -= ($plan->price * $plan->value / 100);
         }
-        $price = max(0, $price);
+        $price = max(0, $price); // never go negative
 
         $razorpayOrder = $api->order->create([
             'receipt' => 'order_rcptid_' . uniqid(),
-            'amount' => $price * 100,
+            'amount' => $price * 100, // convert to paisa
             'currency' => 'INR',
         ]);
 
@@ -52,6 +49,9 @@ class PaymentController extends Controller
         ]);
     }
 
+    /**
+     * Handle Razorpay callback after payment success
+     */
     public function handleCallback(Request $request)
     {
         $api_key = config('razorpay.api_key');
@@ -61,6 +61,7 @@ class PaymentController extends Controller
         $expectedOrderId = session('razorpay_order_id');
 
         try {
+            // ✅ Verify payment signature
             $api->utility->verifyPaymentSignature([
                 'razorpay_order_id' => $expectedOrderId,
                 'razorpay_payment_id' => $request->razorpay_payment_id,
@@ -71,6 +72,7 @@ class PaymentController extends Controller
             $restaurant = $user->restaurants()->first();
             $plan = Plan::find(session('plan_id'));
 
+            // ✅ If restaurant doesn't exist, create new
             $restaurant = Restaurant::firstOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -79,18 +81,15 @@ class PaymentController extends Controller
                 ]
             );
 
-            $permissions = $this->getAllPermissions(); // FIXED
-            foreach ($permissions as $perm) {
-                Permission::firstOrCreate(['name' => $perm]);
-            }
-            $user->givePermissionTo($permissions);
-
-
-
-            $this->syncRestaurantFeatures($restaurant, $plan);
+            // ✅ Update plan details
+            // $restaurant->update([
+            //     'plan_id' => $plan->id,
+            //     'plan_expiry_at' => Carbon::now()->addDays($plan->duration_days),
+            // ]);
 
             session()->forget(['razorpay_order_id', 'plan_id']);
 
+            // ✅ Redirect based on profile completeness
             if (empty($restaurant->name) || empty($restaurant->email) || empty($restaurant->mobile) || empty($restaurant->address) || empty($restaurant->pin_code_id)) {
                 return redirect()->route('restaurant.resto-register')->with('info', 'Please complete your restaurant profile.');
             } else {
@@ -103,6 +102,9 @@ class PaymentController extends Controller
         }
     }
 
+    /**
+     * Activate free plan (₹0)
+     */
     public function activateFreePlan(Plan $plan)
     {
         if ($plan->price > 0) {
@@ -122,38 +124,12 @@ class PaymentController extends Controller
             'plan_id' => $plan->id,
             'plan_expiry_at' => Carbon::now()->addDays($plan->duration_days),
         ]);
-        $permissions = $this->getAllPermissions(); // FIXED
-        foreach ($permissions as $perm) {
-            Permission::firstOrCreate(['name' => $perm]);
-        }
-        $user->givePermissionTo($permissions);
 
-        $this->syncRestaurantFeatures($restaurant, $plan);
         session()->forget(['razorpay_order_id', 'plan_id']);
-
 
         return response()->json([
             'success' => true,
             'redirect' => route('restaurant.dashboard'),
         ]);
-    }
-
-    protected function syncRestaurantFeatures($restaurant, $plan)
-    {
-        Log::info('Syncing restaurant features for plan: ' . $plan->name);
-        Log::info('Restaurant ID: ' . $restaurant->id);
-        RestaurantConfiguration::where('restaurant_id', $restaurant->id)->delete();
-
-        foreach ($plan->planFeatures as $feature) {
-            $configId = AppConfiguration::where('key', $feature->feature)->value('id');
-
-            if ($configId) {
-                RestaurantConfiguration::create([
-                    'restaurant_id' => $restaurant->id,
-                    'configuration_id' => $configId,
-                    'value' => $feature->is_active ? 1 : 0,
-                ]);
-            }
-        }
     }
 }

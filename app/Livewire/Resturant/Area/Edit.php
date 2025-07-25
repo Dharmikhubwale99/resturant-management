@@ -16,12 +16,8 @@ class Edit extends Component
         return view('livewire.resturant.area.edit');
     }
 
-     public function mount($id)
+     public function mount($id) 
     {
-        if (!setting('area_module')) {
-            abort(403, 'You do not have access to this module.');
-        }
-
         $this->area = Area::find($id);
         $this->fill($this->area->only('name','description'));
     }

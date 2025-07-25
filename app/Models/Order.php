@@ -34,12 +34,7 @@ class Order extends Model
         'notes',
         'customer_name',
         'mobile',
-        'service_charge',
-        'transport_name',
-        'transport_address',
-        'transport_distance',
-        'vehicle_number',
-        'transport_charge'
+        'service_charge'
     ];
 
     /**

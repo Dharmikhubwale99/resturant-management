@@ -18,7 +18,7 @@ class Edit extends Component
     public $password;
     public $password_confirmation;
     public $restaurant;
-    public array $roles = [];
+    public array $roles = []; 
 
     public $user;
     #[Layout('components.layouts.resturant.app')]
@@ -29,10 +29,6 @@ class Edit extends Component
 
     public function mount($id)
     {
-        if (!setting('user')) {
-            abort(403, 'You do not have access to this module.');
-        }
-
         $this->restaurant = auth()->user()->restaurants()->first();
         $this->user = User::findOrFail($id);
         $this->roles = Role::whereIn('name', ['manager', 'waiter', 'kitchen'])

@@ -19,10 +19,6 @@ class Edit extends Component
     #[Layout('components.layouts.resturant.app')]
     public function mount($id)
     {
-        if (!setting('table')) {
-            abort(403, 'You do not have access to this module.');
-        }
-
         $this->table = Table::findOrFail($id);
         $this->area_id = $this->table->area_id;
         $this->name = $this->table->name;
