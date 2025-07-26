@@ -49,7 +49,6 @@ class Edit extends Component
             'price' => 'nullable|numeric|min:0',
             'duration_days' => 'nullable|numeric|min:0',
             'description' => 'nullable|string|max:255',
-            'images' => 'nullable|image|max:2048',
             'type' => 'nullable',
         ];
 
@@ -59,41 +58,37 @@ class Edit extends Component
             $rules['amount'] = 'nullable|numeric|min:0';
         }
 
+        $this->validate($rules);
+
+        // Update plan details
+        $this->plan->update([
+            'name' => $this->name,
+            'price' => $this->price,
+            'duration_days' => $this->duration_days,
+            'description' => $this->description,
+            'type' => $this->type,
+            'value' => $this->value,
+            'amount' => $this->amount,
+        ]);
+
+        // Handle image upload (if new image is uploaded)
         if ($this->images) {
             $this->plan->clearMediaCollection('planImages');
-
-            $storedPath = $this->images->store('plans', 'public');
-            $this->validate($rules);
-
-            $this->plan->update([
-                'name' => $this->name,
-                'price' => $this->price,
-                'duration_days' => $this->duration_days,
-                'description' => $this->description,
-                'type' => $this->type,
-                'value' => $this->value,
-                'amount' => $this->amount,
-            ]);
-
-            if ($this->images) {
-                $this->plan->clearMediaCollection('planImages');
-
-                $storedPath = $this->images->store('plans', 'public');
-
-                $this->plan
-                    ->addMedia(storage_path('app/public/' . $storedPath))
-                    ->usingFileName($this->images->getClientOriginalName())
-                    ->toMediaCollection('planImages');
-            }
-
-            foreach ($this->featureAccess as $featureKey) {
-                $this->plan->planFeatures()->create([
-                    'feature' => $featureKey,
-                    'is_active' => true,
-                ]);
-            }
-
-            return redirect()->route('superadmin.plans.index')->with('success', 'Plan updated successfully.');
+            $this->plan
+                ->addMedia($this->images->getRealPath())
+                ->usingFileName($this->images->getClientOriginalName())
+                ->toMediaCollection('planImages');
         }
+
+        // Update features
+        $this->plan->planFeatures()->delete(); // remove old
+        foreach ($this->featureAccess as $featureKey) {
+            $this->plan->planFeatures()->create([
+                'feature' => $featureKey,
+                'is_active' => true,
+            ]);
+        }
+
+        return redirect()->route('superadmin.plans.index')->with('success', 'Plan updated successfully.');
     }
 }
