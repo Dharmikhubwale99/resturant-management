@@ -62,6 +62,8 @@ trait HasRolesAndPermissions
             'discount-active',
 
             'kitchen-dashboard',
+
+            'order',
         ];
     }
 
