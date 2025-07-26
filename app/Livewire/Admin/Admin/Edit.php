@@ -5,7 +5,7 @@ namespace App\Livewire\Admin\Admin;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Hash;
-use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting};
+use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting, Plan};
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Http;
 
@@ -19,6 +19,8 @@ class Edit extends Component
     public $country_id, $state_id, $city_id, $district_id;
     public $restaurant_name, $restaurant_address, $gst_no;
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
+    public $plan_id;
+    public $plans = [];
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -50,6 +52,7 @@ class Edit extends Component
             $this->restaurant_name = $restaurant->name;
             $this->restaurant_address = $restaurant->address;
             $this->gst_no = $restaurant->gstin;
+            $this->plan_id = $restaurant->plan_id;
         }
 
         if($setting) {
@@ -59,6 +62,12 @@ class Edit extends Component
             $this->favicon = $setting->favicon;
             $this->oldFavicon = $setting->favicon;
         }
+
+        $this->plans = Plan::all()->mapWithKeys(function ($plan) {
+            return [
+                $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days'
+            ];
+        });
     }
 
     public function updatedPincode($value)
@@ -127,9 +136,12 @@ class Edit extends Component
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
-            'favicon' => 'nullable|image|max:1024',
+            'favicon' => 'nullable',
+            'plan_id' => 'exists:plans,id',
         ]);
 
+        $selectedPlan = Plan::find($this->plan_id);
+        $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
         $user = User::findOrFail($this->user_id);
         $user->update([
             'name' => $this->user_name,
@@ -144,6 +156,8 @@ class Edit extends Component
                 'address' => $this->restaurant_address,
                 'gstin' => $this->gst_no,
                 'pin_code_id' => $this->pincode_id,
+                'plan_id' => $selectedPlan->id,
+                'plan_expiry_at' => $expiryDate,
             ]);
         }
 
@@ -151,7 +165,7 @@ class Edit extends Component
         if ($this->favicon && $this->favicon !== $this->oldFavicon) {
             $faviconPath = $this->favicon->store('icon', 'public');
         } else if ($this->favicon === null) {
-            $faviconPath = null; // Handle case where favicon is removed
+            $faviconPath = null;
         }
 
         if($this->setting_id) {
