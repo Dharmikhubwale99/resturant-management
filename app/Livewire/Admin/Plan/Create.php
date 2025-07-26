@@ -18,6 +18,8 @@ class Create extends Component
     public $amount;
     public $featureAccess = [];
     public $availableFeatures = [];
+    public $selectAllFeatures = false;
+
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -29,6 +31,16 @@ class Create extends Component
     {
         $this->availableFeatures = AppConfiguration::all()->pluck('key')->toArray();
     }
+
+    public function updatedSelectAllFeatures($value)
+    {
+        if ($value) {
+            $this->featureAccess = $this->availableFeatures; // બધું select
+        } else {
+            $this->featureAccess = [];
+        }
+    }
+
 
     public function submit()
     {
