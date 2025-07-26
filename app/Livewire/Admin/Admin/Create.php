@@ -6,11 +6,9 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting, plan, AppConfiguration, RestaurantConfiguration};
+use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting};
 use Livewire\WithFileUploads;
 use App\Traits\HasRolesAndPermissions;
-use Illuminate\Support\Facades\Log;
-use Spatie\Permission\Models\Permission;
 
 class Create extends Component
 {
@@ -21,24 +19,12 @@ class Create extends Component
     public $restaurant_name, $restaurant_address, $gst_no, $password_confirmation;
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
     public $permissions = [];
-    public $plan_id;
-    public $plans = [];
 
     #[Layout('components.layouts.admin.app')]
     public function render()
     {
         return view('livewire.admin.admin.create');
     }
-
-    public function mount()
-    {
-        $this->plans = Plan::all()->mapWithKeys(function ($plan) {
-            return [
-                $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days'
-            ];
-        });
-    }
-
 
     public function updatedPincode($value)
     {
@@ -125,11 +111,7 @@ class Create extends Component
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
             'favicon' => 'nullable|file|max:1024',
-            'plan_id' => 'exists:plans,id',
         ]);
-
-        $selectedPlan = Plan::find($this->plan_id);
-        $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
 
         $faviconPath = $this->oldFavicon;
 
@@ -147,20 +129,13 @@ class Create extends Component
         ]);
 
         $user->assignRole('admin');
-        $permissions = $this->getAllPermissions(); // FIXED
-        foreach ($permissions as $perm) {
-            Permission::firstOrCreate(['name' => $perm]);
-        }
-        $user->givePermissionTo($permissions);
 
-        $restaurant = Restaurant::create([
+        Restaurant::create([
             'user_id' => $user->id,
             'pin_code_id' => $this->pincode_id,
             'name' => $this->restaurant_name,
             'address' => $this->restaurant_address,
             'gstin' => $this->gst_no,
-            'plan_id' => $selectedPlan->id,
-            'plan_expiry_at' => $expiryDate,
         ]);
 
         Setting::create([
@@ -171,33 +146,7 @@ class Create extends Component
             'favicon' => $faviconPath,
         ]);
 
-        $this->syncRestaurantFeatures($restaurant, $selectedPlan);
         session()->flash('success', 'User Restaurant created successfully.');
         return redirect()->route('superadmin.admin.index');
     }
-
-    protected function syncRestaurantFeatures($restaurant, $plan)
-    {
-        Log::info('Syncing restaurant features for plan: ' . $plan->name);
-        Log::info('Restaurant ID: ' . $restaurant->id);
-
-        RestaurantConfiguration::where('restaurant_id', $restaurant->id)->delete();
-
-        $configMap = AppConfiguration::pluck('id', 'key')->toArray();
-
-        foreach ($plan->planFeatures as $feature) {
-            $configId = $configMap[$feature->feature] ?? null;
-
-            if ($configId) {
-                RestaurantConfiguration::create([
-                    'restaurant_id'    => $restaurant->id,
-                    'configuration_id' => $configId,
-                    'value'            => $feature->is_active ? 1 : 0,
-                ]);
-            } else {
-                Log::warning('No AppConfiguration found for feature: ' . $feature->feature);
-            }
-        }
-    }
-
 }

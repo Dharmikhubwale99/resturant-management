@@ -41,9 +41,6 @@
             </div>
         @endif
 
-        <x-form.select name="plan_id" label="Select Plan" :options="$plans" wireModel="plan_id"
-                placeholder="-- Select Plan --" />
-
         <div class="flex flex-row text-center  space-x-3">
             <x-form.button type="submit" title="Update" wireTarget="update" />
             <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white" route="superadmin.admin.index" />
