@@ -17,6 +17,7 @@ class Edit extends Component
     public $type;
     public $value;
     public $amount;
+    public $selectAllFeatures = false;
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -32,6 +33,8 @@ class Edit extends Component
         $this->availableFeatures = AppConfiguration::all()->pluck('key')->toArray();
 
         $this->featureAccess = $this->plan->planFeatures()->where('is_active', true)->pluck('feature')->toArray();
+        $this->selectAllFeatures = count($this->featureAccess) === count($this->availableFeatures);
+
         $this->plan = Plan::find($id);
         $this->fill($this->plan->only('name', 'price', 'duration_days', 'description', 'type', 'value', 'amount'));
     }
@@ -42,6 +45,21 @@ class Edit extends Component
         $this->plan->refresh();
     }
 
+    public function updatedSelectAllFeatures($value)
+    {
+        if ($value) {
+            $this->featureAccess = $this->availableFeatures; // બધાં features select
+        } else {
+            $this->featureAccess = []; // બધાં deselect
+        }
+    }
+
+    public function updatedFeatureAccess()
+    {
+        $this->selectAllFeatures = count($this->featureAccess) === count($this->availableFeatures);
+    }
+
+
     public function submit()
     {
         $rules = [
@@ -49,6 +67,7 @@ class Edit extends Component
             'price' => 'nullable|numeric|min:0',
             'duration_days' => 'nullable|numeric|min:0',
             'description' => 'nullable|string|max:255',
+            'images' => 'nullable|image|max:2048',
             'type' => 'nullable',
         ];
 
@@ -58,37 +77,41 @@ class Edit extends Component
             $rules['amount'] = 'nullable|numeric|min:0';
         }
 
-        $this->validate($rules);
-
-        // Update plan details
-        $this->plan->update([
-            'name' => $this->name,
-            'price' => $this->price,
-            'duration_days' => $this->duration_days,
-            'description' => $this->description,
-            'type' => $this->type,
-            'value' => $this->value,
-            'amount' => $this->amount,
-        ]);
-
-        // Handle image upload (if new image is uploaded)
         if ($this->images) {
             $this->plan->clearMediaCollection('planImages');
-            $this->plan
-                ->addMedia($this->images->getRealPath())
-                ->usingFileName($this->images->getClientOriginalName())
-                ->toMediaCollection('planImages');
-        }
 
-        // Update features
-        $this->plan->planFeatures()->delete(); // remove old
-        foreach ($this->featureAccess as $featureKey) {
-            $this->plan->planFeatures()->create([
-                'feature' => $featureKey,
-                'is_active' => true,
+            $storedPath = $this->images->store('plans', 'public');
+            $this->validate($rules);
+
+            $this->plan->update([
+                'name' => $this->name,
+                'price' => $this->price,
+                'duration_days' => $this->duration_days,
+                'description' => $this->description,
+                'type' => $this->type,
+                'value' => $this->value,
+                'amount' => $this->amount,
             ]);
-        }
 
-        return redirect()->route('superadmin.plans.index')->with('success', 'Plan updated successfully.');
+            if ($this->images) {
+                $this->plan->clearMediaCollection('planImages');
+
+                $storedPath = $this->images->store('plans', 'public');
+
+                $this->plan
+                    ->addMedia(storage_path('app/public/' . $storedPath))
+                    ->usingFileName($this->images->getClientOriginalName())
+                    ->toMediaCollection('planImages');
+            }
+
+            foreach ($this->featureAccess as $featureKey) {
+                $this->plan->planFeatures()->create([
+                    'feature' => $featureKey,
+                    'is_active' => true,
+                ]);
+            }
+
+            return redirect()->route('superadmin.plans.index')->with('success', 'Plan updated successfully.');
+        }
     }
 }
