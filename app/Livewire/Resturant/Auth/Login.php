@@ -23,12 +23,8 @@ class Login extends Component
             $user = Auth::user();
             if (in_array($user->role,['superadmin'])) {
                 return to_route('superadmin.dashboard')->with('success', 'Login successfully.');
-            } elseif ($user->role == 'admin') {
+            } elseif ($user->role == ['admin','waiter','kitchen']) {
                 return to_route('restaurant.dashboard')->with('success', 'Login successfully.');
-            } elseif ($user->role == 'waiter') {
-                return to_route('waiter.dashboard')->with('success', 'Login successfully.');
-            } elseif ($user->role == 'kitchen') {
-                return to_route('kitchen.dashboard')->with('success', 'Login successfully.');
             }
         }
     }
@@ -66,16 +62,8 @@ class Login extends Component
             return to_route('superadmin.dashboard')->with('success', 'Login successfully.');
         }
 
-        if ($user->role === 'admin') {
+        if (in_array($user->role , ['admin','waiter','kitchen'])) {
             return to_route('restaurant.dashboard')->with('success', 'Login successfully.');
-        }
-
-        if ($user->role === 'waiter') {
-            return to_route('waiter.dashboard')->with('success', 'Login successfully.');
-        }
-
-        if ($user->role === 'kitchen') {
-            return to_route('kitchen.dashboard')->with('success', 'Login successfully.');
         }
 
         Auth::logout();

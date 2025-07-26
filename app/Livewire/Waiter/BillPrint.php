@@ -12,9 +12,8 @@ class BillPrint extends Component
 
     public function mount(Order $order)
     {
-        // Eager load relationships: items, item, variant
         $this->order = $order->load([
-            'orderItems',             // Correct relationship name
+            'orderItems',
             'orderItems.item',
             'orderItems.variant',
             'table'
@@ -22,7 +21,7 @@ class BillPrint extends Component
 
     }
 
-    #[Layout('components.layouts.waiter.app')]
+    #[Layout('components.layouts.resturant.app')]
     public function render()
     {
         return view('livewire.waiter.bill-print');
