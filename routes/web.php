@@ -186,7 +186,7 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/sales-report', SalesReport::class)->name('sales-report');
     Route::get('/payment-report', PaymentReport::class)->name('payment-report');
 
-    Route::get('/order', WaiterDashboard::class)->name('dashboard')->middleware('can:order');
+    Route::get('/waiter-order', WaiterDashboard::class)->name('waiter.dashboard')->middleware('can:order');
 
     Route::get('/item/{table_id}', Item::class)->name('item');
     Route::get('/kot-print/{kot_id}', KotPrint::class)->name('kot.print');

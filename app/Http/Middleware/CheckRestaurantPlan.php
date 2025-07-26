@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Restaurant;
 
 class CheckRestaurantPlan
 {
@@ -14,17 +15,23 @@ class CheckRestaurantPlan
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-   // app/Http/Middleware/CheckRestaurantPlan.php
-    public function handle($request, Closure $next)
-    {
-        $user = Auth::user();
-        $restaurant = $user->restaurants()->first();
+   public function handle($request, Closure $next)
+   {
+       $user = Auth::user();
 
-        if (!$restaurant || !$restaurant->plan_id || now()->greaterThan($restaurant->plan_expiry_at)) {
-            return redirect()->route('plan.purchase')->with('error', 'Your restaurant plan has expired or is not set. Please contact support.');
-        }
+       if ($user->restaurant_id) {
+           $restaurantId = $user->restaurant_id;
+       } else {
+           $restaurantId = Restaurant::where('user_id', $user->id)->value('id');
+       }
 
-        return $next($request);
-    }
+       $restaurant = Restaurant::find($restaurantId);
+
+       if (!$restaurant || !$restaurant->plan_id || now()->greaterThan($restaurant->plan_expiry_at)) {
+           return redirect()->route('plan.purchase')->with('error', 'Your restaurant plan has expired or is not set. Please contact support.');
+       }
+
+       return $next($request);
+   }
 
 }
