@@ -44,6 +44,14 @@
                 <x-form.input name="amount" label="Amount" wireModel="amount" type="number" step="0.01"/>
                 @endif
 
+                <div class="mb-2">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" wire:model.live="selectAllFeatures" class="form-checkbox">
+                        <span class="ml-2 font-semibold">Select All Features</span>
+                    </label>
+                </div>
+
+
                 <div class="grid grid-cols-2 gap-2">
                     @foreach ($availableFeatures as $feature)
                         <label class="inline-flex items-center">
