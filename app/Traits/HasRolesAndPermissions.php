@@ -82,4 +82,22 @@ trait HasRolesAndPermissions
 
         ];
     }
+
+    protected function mapModuleToConfigId($moduleName)
+    {
+        $mapping = [
+            'category' => 1,
+            'area' => 2,
+            'expensetype' => 3,
+            'user' => 4,
+            'item' => 5,
+            'expenses' => 6,
+            'table' => 7,
+            'discount' => 8,
+            'kitchen' => 9,
+            'order' => 10,
+        ];
+
+        return $mapping[strtolower($moduleName)] ?? null;
+    }
 }
