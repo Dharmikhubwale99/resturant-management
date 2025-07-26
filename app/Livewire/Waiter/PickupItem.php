@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer};
+use App\Models\{Restaurant, Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -49,7 +49,7 @@ class PickupItem extends Component
     public float|string $transport_charge = 0;
 
 
-    #[Layout('components.layouts.waiter.app')]
+    #[Layout('components.layouts.resturant.app')]
     public function render()
     {
         return view('livewire.waiter.pickup-item', [
@@ -468,7 +468,11 @@ class PickupItem extends Component
     protected function createOrderAndKot($print = false)
     {
         return DB::transaction(function () use ($print) {
-            $restaurantId = Auth::user()->restaurant_id;
+            if (auth()->user()->restaurant_id) {
+                $restaurantId = auth()->user()->restaurant_id;
+            } else {
+                $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
+            }
             $subTotal = $this->getCartTotal();
 
             $order = Order::findOrFail($this->orderId);
@@ -483,7 +487,7 @@ class PickupItem extends Component
                 'service_charge' => $this->serviceCharge,
                 'transport_name' => $this->transport_name,
                 'transport_address' => $this->transport_address,
-                'transport_distance' => $this->transport_distance,
+                'transport_distance' => !empty($this->transport_distance) ? $this->transport_distance : 0,
                 'vehicle_number' => $this->vehicle_number,
                 'transport_charge' => $this->transport_charge,
             ]);
@@ -551,12 +555,12 @@ class PickupItem extends Component
         if ($this->editMode) {
             $this->updateOrder();
             session()->flash('success', 'KOT updated!');
-            return redirect()->route('waiter.pickup.create')->with('success', 'KOT updated!');
+            return redirect()->route('restaurant.pickup.create')->with('success', 'KOT updated!');
         }
 
         $this->createOrderAndKot();
         $this->reset(['cart', 'showVariantModal']);
-        return redirect()->route('waiter.pickup.create')->with('success', 'Order placed!');
+        return redirect()->route('restaurant.pickup.create')->with('success', 'Order placed!');
     }
 
     public function placeOrderAndPrint()
@@ -576,13 +580,13 @@ class PickupItem extends Component
                 $this->dispatch('printKot', kotId: $kot->id);
             }
 
-            return redirect()->route('waiter.dashboard')->with('success', 'KOT updated & printed!');
+            return redirect()->route('restaurant.dashboard')->with('success', 'KOT updated & printed!');
         }
 
         $this->createOrderAndKot(true);
         $this->reset(['cart', 'showVariantModal', 'noteInput', 'currentNoteKey']);
 
-        return redirect()->route('waiter.pickup.create')->with('success', 'Order placed & KOT printed!');
+        return redirect()->route('restaurant.pickup.create')->with('success', 'Order placed & KOT printed!');
     }
 
     public function updateOrder()
@@ -658,7 +662,7 @@ class PickupItem extends Component
         });
 
         session()->flash('success', 'KOT updated & sent to kitchen!');
-        return redirect()->route('waiter.pickup.create')->with('success', 'Order Payment Complete!');
+        return redirect()->route('restaurant.pickup.create')->with('success', 'Order Payment Complete!');
     }
 
     public function save()
@@ -718,7 +722,7 @@ class PickupItem extends Component
             ]);
         }
 
-        return redirect()->route('waiter.pickup.create')->with('success', 'Order Payment Complete!');
+        return redirect()->route('restaurant.pickup.create')->with('success', 'Order Payment Complete!');
     }
 
     public function saveAndPrint()
@@ -779,7 +783,7 @@ class PickupItem extends Component
         }
 
         $this->dispatch('printBill', billId: $order->id);
-        return redirect()->route('waiter.pickup.create')->with('success', 'Order Payment Complete!');
+        return redirect()->route('restaurant.pickup.create')->with('success', 'Order Payment Complete!');
     }
 
     public function addSplit()
@@ -799,7 +803,11 @@ class PickupItem extends Component
 
         $kots = Kot::where('order_id', $order->id)->where('status', 'pending')->get();
 
-        $restaurantId = Auth::user()->restaurant_id;
+        if (auth()->user()->restaurant_id) {
+            $restaurantId = auth()->user()->restaurant_id;
+        } else {
+            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
+        }
 
         $orderItems = OrderItem::where('order_id', $order->id)->get();
 
@@ -857,7 +865,7 @@ class PickupItem extends Component
 
         $this->reset(['splits', 'paymentMethod', 'showSplitModal', 'customerName', 'mobile']);
 
-        return redirect()->route('waiter.pickup.create')->with('success', 'Order split payment recorded!');
+        return redirect()->route('restaurant.pickup.create')->with('success', 'Order split payment recorded!');
     }
 
     public function confirmDuoPayment()
@@ -898,9 +906,14 @@ class PickupItem extends Component
         ]);
 
         $remainingAmount = $order->total_amount - $this->duoAmount;
+        if (auth()->user()->restaurant_id) {
+            $restaurantId = auth()->user()->restaurant_id;
+        } else {
+            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
+        }
 
         RestaurantPaymentLog::create([
-            'restaurant_id' => Auth::user()->restaurant_id,
+            'restaurant_id' => $restaurantId,
             'payment_id' => $payment->id,
             'order_id' => $order->id,
             'customer_name' => $this->duoCustomerName,
@@ -913,7 +926,7 @@ class PickupItem extends Component
 
         $this->reset(['showDuoPaymentModal', 'duoCustomerName', 'duoMobile', 'duoAmount', 'duoMethod', 'duoIssue', 'paymentMethod']);
 
-        return redirect()->route('waiter.pickup.create')->with('success', 'Duo Payment Completed!');
+        return redirect()->route('restaurant.pickup.create')->with('success', 'Duo Payment Completed!');
     }
 
     public function confirmRemove()
@@ -961,6 +974,11 @@ class PickupItem extends Component
 
     public function saveCustomer()
     {
+        if (auth()->user()->restaurant_id) {
+            $restaurantId = auth()->user()->restaurant_id;
+        } else {
+            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
+        }
         $this->validate([
             'followupCustomer_name' => 'required|string|max:100',
             'followupCustomer_mobile' => 'required|string|max:20',
@@ -969,7 +987,7 @@ class PickupItem extends Component
             'customer_anniversary' => 'nullable|date',
         ]);
 
-        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
+        $order = Order::where('id', $this->order)->where('status', 'pending')->latest()->firstOrFail();
         $coustomer = Customer::where('order_id', $order->id)->first();
         if(!$coustomer) {
             $coustomer->create([
@@ -979,7 +997,7 @@ class PickupItem extends Component
                 'email' => $this->followupCustomer_email,
                 'dob' => $this->customer_dob,
                 'anniversary' => $this->customer_anniversary,
-                'restaurant_id' => auth()->user()->restaurant_id,
+                'restaurant_id' => $restaurantId,
             ]);
 
             $order->update([

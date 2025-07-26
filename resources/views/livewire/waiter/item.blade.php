@@ -10,7 +10,7 @@
                     </button>
                     <div class="flex items-center space-x-2">
 
-                        <a href="{{ route('waiter.dashboard') }}" class="text-gray-600 hover:text-gray-800">
+                        <a href="{{ route('restaurant.dashboard') }}" class="text-gray-600 hover:text-gray-800">
                             <i class="fas fa-arrow-left text-xl"></i>
                         </a>
                         <img src="{{ asset('assets/images/logo.jpeg') }}" alt="HubWale"
@@ -31,7 +31,7 @@
 
                 <div class="flex items-center space-x-3">
                     <!-- Pending KOT  (PDF icon) -->
-                    <a href="{{ route('waiter.kots.pending') }}" class="text-gray-600 hover:text-gray-800"
+                    <a href="{{ route('restaurant.kots.pending') }}" class="text-gray-600 hover:text-gray-800"
                         title="Pending KOT Orders">
                         <i class="fas fa-file-pdf text-lg"></i>
                     </a>
@@ -721,7 +721,7 @@
     <script>
         Livewire.on('printKot', (event) => {
             const kotId = event.kotId;
-            window.open(`/waiter/kot-print/${kotId}`, '_blank');
+            window.open(`/restaurant/kot-print/${kotId}`, '_blank');
         });
     </script>
     <script>
@@ -754,7 +754,7 @@
     <script>
         Livewire.on('printBill', (event) => {
             const billId = event.billId;
-            window.open(`/waiter/bill-print/${billId}`, '_blank');
+            window.open(`/restaurant/bill-print/${billId}`, '_blank');
         });
     </script>
 @endpush
