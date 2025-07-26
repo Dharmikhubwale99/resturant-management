@@ -29,6 +29,8 @@ use \App\Livewire\Resturant\{
     Auth\Register,
     Auth\Login as ResturantLogin,
     Auth\RestoRegister as RestoRegister,
+    Auth\ResetPassword as ResetPassword,
+    Auth\ForgotPassword as ForgotPassword,
     PlanPurchase as ResturantPlanPurchase,
 
     Category\Index as CategoryIndex,
@@ -91,6 +93,7 @@ Route::get('superadmin/login', Login::class)->name('superadmin.login');
 Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
 Route::get('register', Register::class)->name('register');
 Route::get('/', ResturantLogin::class)->name('login');
+Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
 
 Route::get('/create-razorpay-order/{plan}', [PaymentController::class, 'createRazorpayOrder']);
 Route::post('/razorpay/callback', [PaymentController::class, 'handleCallback'])->name('razorpay.callback');
@@ -123,7 +126,7 @@ Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFr
 
 Route::get('/plan-purchase', ResturantPlanPurchase::class)->name('plan.purchase');
 
-Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role:admin|waiter|kitchen', 'check.restaurant.plan'])->group(function () {
+Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role:admin', 'check.restaurant.plan'])->group(function () {
     Route::get('/resto-register', RestoRegister::class)->name('resto-register');
     Route::get('/', ResturantDashboard::class)->name('dashboard');
     Route::get('/edit-profile', EditProfile::class)->name('edit-profile');
@@ -185,8 +188,10 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
 
     Route::get('/sales-report', SalesReport::class)->name('sales-report');
     Route::get('/payment-report', PaymentReport::class)->name('payment-report');
+});
 
-    Route::get('/waiter-order', WaiterDashboard::class)->name('waiter.dashboard')->middleware('can:order');
+Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {
+    Route::get('/', WaiterDashboard::class)->name('dashboard');
 
     Route::get('/item/{table_id}', Item::class)->name('item');
     Route::get('/kot-print/{kot_id}', KotPrint::class)->name('kot.print');
@@ -196,18 +201,7 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/pickup/item/{id}', PickupItem::class)->name('pickup.item');
 });
 
-// Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {
-//     Route::get('/', WaiterDashboard::class)->name('dashboard');
-
-//     Route::get('/item/{table_id}', Item::class)->name('item');
-//     Route::get('/kot-print/{kot_id}', KotPrint::class)->name('kot.print');
-//     Route::get('/kots/pending', PendingKotOrders::class)->name('kots.pending');
-//     Route::get('/bill-print/{order}', BillPrint::class)->name('bill.print');
-//     Route::get('/pickup', PickupCreate::class)->name('pickup.create');
-//     Route::get('/pickup/item/{id}', PickupItem::class)->name('pickup.item');
-// });
-
-// Route::prefix('kitchen')->as('kitchen.')->middleware(['web', 'auth', 'role:kitchen'])->group(function () {
-//     Route::get('/', KitchenDashboard::class)->name('dashboard');
-// });
+Route::prefix('kitchen')->as('kitchen.')->middleware(['web', 'auth', 'role:kitchen'])->group(function () {
+    Route::get('/', KitchenDashboard::class)->name('dashboard');
+});
 

@@ -23,4 +23,18 @@ trait WhatsappTrait {
             info($th->getMessage());
         }
     }
+
+    public function sendText($message, $mobileNumber){
+        $instance_id = config('whatsapp.instance_id');
+        $access_token = config('whatsapp.access_token');
+        // $mobileNumber = config('whatsapp.mobile_number');
+
+        $url = "{$this->baseUrl}send?number=91$mobileNumber&type=text&message=$message&instance_id=$instance_id&access_token=$access_token";
+
+        try {
+            Http::timeout(30)->get($url);
+        } catch (\Throwable $th) {
+            info($th->getMessage());
+        }
+    }
 }

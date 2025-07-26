@@ -5,7 +5,7 @@ namespace App\Livewire\Waiter;
 use App\Models\Order;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
-use App\Models\{Table, Restaurant};
+use App\Models\Table;
 
 class Dashboard extends Component
 {
@@ -13,7 +13,7 @@ class Dashboard extends Component
     public $selectedTable = null;
     public $tables, $pickupOrders;
 
-    #[Layout('components.layouts.resturant.app')]
+    #[Layout('components.layouts.waiter.app')]
     public function render()
     {
         // Group tables by area name (or 'No Area' if null)
@@ -28,11 +28,7 @@ class Dashboard extends Component
 
     public function mount()
     {
-        if (auth()->user()->restaurant_id) {
-            $restaurantId = auth()->user()->restaurant_id;
-        } else {
-            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
-        }
+        $restaurantId = auth()->user()->restaurant_id;
 
         $this->tables = Table::with('area')
             ->where('restaurant_id', $restaurantId)
@@ -42,6 +38,7 @@ class Dashboard extends Component
             ->where('order_type', 'takeaway')
             ->where('status', 'pending')
             ->count();
+
     }
 
     public function openConfirm($tableId)
@@ -52,7 +49,7 @@ class Dashboard extends Component
 
     public function editTable($tableId)
     {
-        return redirect()->route('restaurant.item', [
+        return redirect()->route('waiter.item', [
             'table_id' => $tableId,
             'mode'     => 'edit'
         ]);

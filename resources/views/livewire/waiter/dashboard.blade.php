@@ -2,7 +2,7 @@
     <x-form.error />
 
     <div class="flex justify-end gap-6 mb-8">
-         <a href="{{ route('restaurant.pickup.create') }}">
+         <a href="{{ route('waiter.pickup.create') }}">
             <button
                 class="bg-red-500 text-white px-3 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-sm md:text-base">
                 Pick Up
@@ -93,7 +93,7 @@
                 @if ($selectedTable->status == 'available')
                     <div class="text-center mb-4">
                         <h2 class="text-xl font-semibold text-center mb-4">This table is available for booking.</h2>
-                        <a href="{{ route('restaurant.item', ['table_id' => $selectedTable->id]) }}"
+                        <a href="{{ route('waiter.item', ['table_id' => $selectedTable->id]) }}"
                             class="block w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-center">
                             Book Now
                         </a>

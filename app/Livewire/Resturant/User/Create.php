@@ -65,7 +65,6 @@ class Create extends Component
             'table' => 7,
             'discount' => 8,
             'kitchen' => 9,
-            'order' => 10,
         ];
 
         return $mapping[strtolower($moduleName)] ?? null;

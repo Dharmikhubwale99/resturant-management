@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Resturant;
 
-use App\Models\{Order, Payment,RestaurantPaymentLog, Restaurant};
+use App\Models\{Order, Payment,RestaurantPaymentLog};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
@@ -28,13 +28,7 @@ class Dashboard extends Component
     {
         $user = Auth::user();
         $this->user = $user;
-        if ($user->restaurant_id) {
-            $restaurantId = $user->restaurant_id;
-        } else {
-            $restaurantId = Restaurant::where('user_id', $user->id)->value('id');
-        }
-
-        $restaurant = Restaurant::find($restaurantId);
+        $restaurant = $user->restaurants()->first();
 
         if (empty($restaurant->name) || empty($restaurant->email) || empty($restaurant->mobile) || empty($restaurant->address) || empty($restaurant->pin_code_id)) {
             return redirect()->route('restaurant.resto-register')->with('info', 'Please complete your restaurant profile.');
@@ -42,7 +36,7 @@ class Dashboard extends Component
 
         $this->calculateTodayIncome($restaurant->id);
         $this->calculateTodayMoney($restaurant->id);
-        $this->calculateTodayOrders($restaurant->id);
+        $this->calculateTodayOrders($restaurant->id); 
     }
 
     public function calculateTodayIncome($restaurantId)
@@ -76,7 +70,7 @@ class Dashboard extends Component
 
         $this->todayMoney = $paymentAmount + $logAmount;
 
-        $targetMoney = 10000;
+        $targetMoney = 10000; 
 
         $this->todayMoneyProgress = min(($this->todayMoney / $targetMoney) * 100, 100);
         $this->todayMoneyPercentage = number_format(($this->todayMoney / $targetMoney) * 100, 1);

@@ -10,10 +10,10 @@ use App\Models\KotItem;
 class PendingKotOrders extends Component
 {
     public array $orders = [];
-    public string $status = 'pending';
+    public string $status = 'pending'; 
     public array $openItems = [];
 
-    #[Layout('components.layouts.resturant.app')]
+    #[Layout('components.layouts.waiter.app')]
     public function render()
     {
         return view('livewire.waiter.pending-kot-orders');
@@ -33,7 +33,7 @@ class PendingKotOrders extends Component
 
     public function loadOrders(): void
     {
-        $this->orders = Kot::with(['items', 'table.area'])
+        $this->orders = Kot::with(['items', 'table.area']) 
             ->where('status', $this->status)
             ->latest()
             ->get()

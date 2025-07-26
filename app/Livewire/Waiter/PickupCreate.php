@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Order, Restaurant};
+use App\Models\Order;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -12,16 +12,10 @@ class PickupCreate extends Component
     public $takeawayOrders;
     public $customer_form = false;
 
-    #[Layout('components.layouts.resturant.app')]
+    #[Layout('components.layouts.waiter.app')]
     public function render()
     {
-        if (auth()->user()->restaurant_id) {
-            $restaurantId = auth()->user()->restaurant_id;
-        } else {
-            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
-        }
-
-        $this->takeawayOrders = Order::where('restaurant_id', $restaurantId)
+        $this->takeawayOrders = Order::where('restaurant_id', auth()->user()->restaurant_id)
         ->where('order_type', 'takeaway')
         ->latest()
         ->get();
@@ -41,7 +35,7 @@ class PickupCreate extends Component
 
     public function editTable($id)
     {
-        return redirect()->route('restaurant.pickup.item', [
+        return redirect()->route('waiter.pickup.item', [
             'id'   => $id,
             'mode' => 'edit'
         ]);
@@ -53,19 +47,13 @@ class PickupCreate extends Component
             'customer_name' => 'required',
         ]);
 
-        if (auth()->user()->restaurant_id) {
-            $restaurantId = auth()->user()->restaurant_id;
-        } else {
-            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
-        }
-
         $order = Order::create([
-            'restaurant_id' => $restaurantId,
+            'restaurant_id' => auth()->user()->restaurant_id,
             'customer_name' => $this->customer_name,
             'mobile' => $this->mobile,
             'order_type' => 'takeaway',
         ]);
 
-        return redirect()->route('restaurant.pickup.item', $order->id);
+        return redirect()->route('waiter.pickup.item', $order->id);
     }
 }

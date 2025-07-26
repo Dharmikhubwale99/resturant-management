@@ -1,6 +1,8 @@
 <div class="font-sans bg-gray-100 min-h-screen">
+    <!-- Header - Responsive -->
     <header class="bg-white shadow-sm border-b">
         <div class="flex flex-col md:flex-row items-center justify-between px-2 md:px-4 py-2 md:py-3">
+            <!-- Top Row (Mobile) -->
             <div class="flex items-center justify-between w-full md:w-auto mb-2 md:mb-0">
                 <div class="flex items-center space-x-2">
                     <button class="text-gray-600 hover:text-gray-800 md:hidden">
@@ -8,7 +10,7 @@
                     </button>
                     <div class="flex items-center space-x-2">
 
-                        <a href="{{ route('restaurant.dashboard') }}" class="text-gray-600 hover:text-gray-800">
+                        <a href="{{ route('waiter.dashboard') }}" class="text-gray-600 hover:text-gray-800">
                             <i class="fas fa-arrow-left text-xl"></i>
                         </a>
                         <img src="{{ asset('assets/images/logo.jpeg') }}" alt="HubWale"
@@ -24,10 +26,12 @@
                 </div>
             </div>
 
+            <!-- Bottom Row (Desktop) -->
             <div class="hidden md:flex items-center space-x-4">
 
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('restaurant.kots.pending') }}" class="text-gray-600 hover:text-gray-800"
+                    <!-- Pending KOT  (PDF icon) -->
+                    <a href="{{ route('waiter.kots.pending') }}" class="text-gray-600 hover:text-gray-800"
                         title="Pending KOT Orders">
                         <i class="fas fa-file-pdf text-lg"></i>
                     </a>
@@ -46,22 +50,26 @@
     </header>
 
     <div class="flex flex-col md:flex-row h-full">
+        <!-- Sidebar - Responsive -->
         @if (setting('category_module'))
             <div class="w-full md:w-64 h-full md:min-h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col">
                 <div class="p-2 md:p-4 flex justify-between items-center">
                     <div class="text-sm text-gray-400">Categories</div>
+                    <!-- Mobile expand button (hidden on desktop) -->
                     <button class="md:hidden text-gray-300 hover:text-white focus:outline-none"
                         onclick="document.querySelector('.category-nav').classList.toggle('hidden')">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
 
+                <!-- Navigation with expandable categories -->
                 <nav class="category-nav hidden md:block mb-4">
                     <button wire:click="clearCategory"
                         class="block w-full text-left px-3 py-2 md:px-4 md:py-3 text-sm md:text-base {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                         <i class="fas fa-list mr-2"></i>All Items
                     </button>
 
+                    <!-- Visible categories (first 5 on mobile) -->
                     @foreach ($categories->take(5) as $category)
                         <button wire:click="selectCategory({{ $category->id }})"
                             class="block w-full text-left px-3 py-2 md:px-4 md:py-3 flex items-center gap-2 text-sm md:text-base {{ $selectedCategory === $category->id ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
@@ -69,6 +77,7 @@
                         </button>
                     @endforeach
 
+                    <!-- Hidden categories (shown when expanded on mobile) -->
                     <div class="mobile-categories hidden md:hidden">
                         @foreach ($categories->slice(5) as $category)
                             <button wire:click="selectCategory({{ $category->id }})"
@@ -78,6 +87,7 @@
                         @endforeach
                     </div>
 
+                    <!-- Show More/Less toggle for mobile -->
                     <button
                         class="md:hidden w-full text-left px-3 py-2 text-gray-300 hover:text-white flex items-center gap-2 text-sm"
                         onclick="document.querySelector('.mobile-categories').classList.toggle('hidden'); this.querySelector('span').textContent = this.querySelector('span').textContent === 'Show More +' ? 'Show Less -' : 'Show More +'">
@@ -89,7 +99,9 @@
         @endif
 
 
+        <!-- Main Content - Responsive -->
         <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+            <!-- Menu Items - Responsive -->
             <div class="flex-1 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
                     <div class="flex flex-wrap gap-2">
@@ -158,6 +170,7 @@
                 </div>
             </div>
 
+            <!-- Cart Section - Responsive -->
             <div
                 class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200">
 
@@ -546,6 +559,7 @@
             <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">🛒 Cart Details</h2>
 
+                <!-- 🧾 Cart Items -->
                 <div class="mb-6">
                     <h3 class="text-md font-semibold text-gray-700 mb-3">Items in Cart</h3>
 
@@ -572,6 +586,7 @@
                     @endforelse
                 </div>
 
+                <!-- 🚚 Transport & Service Charges -->
                 <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1">Service Charge (₹)</label>
@@ -608,6 +623,7 @@
                     </div>
                 </div>
 
+                <!-- 💰 Totals -->
                 <div class="mb-6 text-sm text-gray-700 border-t pt-4 space-y-1">
                     <p>Subtotal: ₹{{ number_format($this->getSubtotal(), 2) }}</p>
                     <p>Transport: ₹{{ number_format(floatval($transport_charge), 2) }}</p>
@@ -616,6 +632,7 @@
                     </p>
                 </div>
 
+                <!-- ✅ Actions -->
                 <div class="flex justify-end gap-3">
                     <button wire:click="$set('showCartDetailModal', false)"
                         class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-5 py-2 rounded">
@@ -735,7 +752,7 @@
     <script>
         Livewire.on('printKot', (event) => {
             const kotId = event.kotId;
-            window.open(`/restaurant/kot-print/${kotId}`, '_blank');
+            window.open(`/waiter/kot-print/${kotId}`, '_blank');
         });
     </script>
     <script>
@@ -768,7 +785,7 @@
     <script>
         Livewire.on('printBill', (event) => {
             const billId = event.billId;
-            window.open(`/restaurant/bill-print/${billId}`, '_blank');
+            window.open(`/waiter/bill-print/${billId}`, '_blank');
         });
     </script>
 @endpush

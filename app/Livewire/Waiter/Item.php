@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Restaurant ,Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer};
+use App\Models\{Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -67,7 +67,7 @@ class Item extends Component
     public string $customer_anniversary = '';
 
 
-    #[Layout('components.layouts.resturant.app')]
+    #[Layout('components.layouts.waiter.app')]
     public function render()
     {
         return view('livewire.waiter.item', [
@@ -473,11 +473,7 @@ class Item extends Component
     protected function createOrderAndKot($print = false)
     {
         return DB::transaction(function () use ($print) {
-            if (auth()->user()->restaurant_id) {
-                $restaurantId = auth()->user()->restaurant_id;
-            } else {
-                $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
-            }
+            $restaurantId = Auth::user()->restaurant_id;
             $subTotal = $this->getCartTotal();
 
             $order = Order::create([
@@ -562,7 +558,7 @@ class Item extends Component
 
         $this->createOrderAndKot();
         $this->reset(['cart', 'showVariantModal']);
-        return redirect()->route('restaurant.dashboard')->with('success', 'Order placed!');
+        return redirect()->route('waiter.dashboard')->with('success', 'Order placed!');
     }
 
     public function placeOrderAndPrint()
@@ -582,13 +578,13 @@ class Item extends Component
                 $this->dispatch('printKot', kotId: $kot->id);
             }
 
-            return redirect()->route('restaurant.dashboard')->with('success', 'KOT updated & printed!');
+            return redirect()->route('waiter.dashboard')->with('success', 'KOT updated & printed!');
         }
 
         $this->createOrderAndKot(true);
         $this->reset(['cart', 'showVariantModal', 'noteInput', 'currentNoteKey']);
 
-        return redirect()->route('restaurant.dashboard')->with('success', 'Order placed & KOT printed!');
+        return redirect()->route('waiter.dashboard')->with('success', 'Order placed & KOT printed!');
     }
 
     public function updateOrder()
@@ -654,7 +650,7 @@ class Item extends Component
         });
 
         session()->flash('success', 'KOT updated & sent to kitchen!');
-        return redirect()->route('restaurant.dashboard');
+        return redirect()->route('waiter.dashboard');
     }
 
     public function save()
@@ -716,7 +712,7 @@ class Item extends Component
             ]);
         }
 
-        return redirect()->route('restaurant.dashboard')->with('success', 'Order Payment Complete!');
+        return redirect()->route('waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
 
 
@@ -780,7 +776,7 @@ class Item extends Component
         }
 
         $this->dispatch('printBill', billId: $order->id);
-        return redirect()->route('restaurant.dashboard')->with('success', 'Order Payment Complete!');
+        return redirect()->route('waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
 
     public function addSplit()
