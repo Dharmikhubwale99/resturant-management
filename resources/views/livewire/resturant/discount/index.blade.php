@@ -28,7 +28,6 @@
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Value</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Min Amount</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Max Amount</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Start Date</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">End Date</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
@@ -43,7 +42,6 @@
                             <td class="px-6 text-sm text-gray-900">{{ $discount->type }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ $discount->value }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ $discount->minimum_amount }}</td>
-                            <td class="px-6 text-sm text-gray-900">{{ $discount->maximum_discount }}</td>
                             <td class="px-6 text-sm text-gray-900">
                                 {{ \Carbon\Carbon::parse($discount->starts_at)->format('d-m-Y H:i') }}
                             </td>
