@@ -1,4 +1,10 @@
-@props(['name', 'groups' => [], 'labelKey' => 'name', 'valueKey' => 'name', 'wireModel' => null])
+@props([
+    'name',
+    'groups' => [],
+    'labelKey' => 'name',
+    'valueKey' => 'name',
+    'wireModel' => null,
+])
 
 <div class="space-y-4">
     @foreach ($groups as $groupName => $items)
@@ -14,7 +20,8 @@
                 @foreach ($items as $item)
                     <label class="inline-flex items-center space-x-2 text-sm text-gray-700">
                         <input type="checkbox" name="{{ $name }}[]"
-                            value="{{ is_array($item) ? $item[$valueKey] : $item }}" wire:model.defer="permissions"
+                            value="{{ is_array($item) ? $item[$valueKey] : $item }}"
+                            wire:model.defer="permissions"
                             class="text-blue-600 border-gray-300 rounded shadow-sm focus:ring-blue-500">
                         <span>{{ is_array($item) ? $item[$labelKey] : $item }}</span>
                     </label>
@@ -25,32 +32,18 @@
 </div>
 
 @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.select-all').forEach(selectAllCheckbox => {
-                selectAllCheckbox.addEventListener('change', function() {
-                    let groupName = this.dataset.group;
-                    let checkboxes = document.querySelectorAll('.group-checkboxes[data-group="' +
-                        groupName + '"] input[type="checkbox"]');
-                    checkboxes.forEach(cb => {
-                        cb.checked = this.checked;
-                        cb.dispatchEvent(new Event('input'));
-                    });
-                });
-            });
-        });
-
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.select-all').forEach(selectAllCheckbox => {
-            selectAllCheckbox.addEventListener('change', function() {
+            selectAllCheckbox.addEventListener('change', function () {
                 let groupName = this.dataset.group;
-                let checkboxes = document.querySelectorAll(
-                    '.group-checkboxes[data-group="' + groupName + '"] input[type="checkbox"]'
-                );
+                let checkboxes = document.querySelectorAll('.group-checkboxes[data-group="' + groupName + '"] input[type="checkbox"]');
                 checkboxes.forEach(cb => {
                     cb.checked = this.checked;
-                    cb.dispatchEvent(new Event('change'));
+                    cb.dispatchEvent(new Event('input'));
                 });
             });
         });
-    </script>
+    });
+</script>
 @endpush

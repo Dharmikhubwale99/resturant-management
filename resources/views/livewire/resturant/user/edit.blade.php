@@ -17,11 +17,7 @@
             @enderror
         </div>
 
-        <div class="mb-4">
-            <x-form.checkbox-group name="permissions" :groups="$data['permissions']" wireModel="permissions" />
-        </div>
-
-        <x-form.input name="password" label="Password" type="password" wireModel="password"
+        <x-form.input name="password" label="Password" type="password" wireModel="password" 
             placeholder="Create a password" showToggle="true"/>
 
         <x-form.input name="password_confirmation" label="Confirm Password" type="password"
