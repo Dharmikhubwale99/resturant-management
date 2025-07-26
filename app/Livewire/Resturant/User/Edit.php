@@ -18,7 +18,11 @@ class Edit extends Component
     public $password;
     public $password_confirmation;
     public $restaurant;
+    public $permissions = [];
     public array $roles = [];
+    public $data = [
+        'permissions' => [],
+    ];
 
     public $user;
     #[Layout('components.layouts.resturant.app')]
@@ -35,13 +39,34 @@ class Edit extends Component
 
         $this->restaurant = auth()->user()->restaurants()->first();
         $this->user = User::findOrFail($id);
+
         $this->roles = Role::whereIn('name', ['manager', 'waiter', 'kitchen'])
                            ->pluck('name', 'name')
                            ->toArray();
+
         $this->name = $this->user->name;
         $this->email = $this->user->email;
-        $this->role = $this->user->role;
+        $this->role = $this->user->roles->pluck('name')->first(); // role field
         $this->mobile = $this->user->mobile;
+
+        $this->permissions = $this->user->permissions->pluck('name')->toArray();
+
+        $allPermissions = $this->getAllPermissionGroups();
+
+        $restaurantConfigIds = $this->restaurant
+            ->configurations()
+            ->where('value', 1)
+            ->pluck('configuration_id')
+            ->toArray();
+
+        $filteredPermissions = [];
+        foreach ($allPermissions as $group => $perms) {
+            if (in_array($this->mapModuleToConfigId($group), $restaurantConfigIds)) {
+                $filteredPermissions[$group] = $perms;
+            }
+        }
+
+        $this->data['permissions'] = $filteredPermissions;
     }
 
     public function submit()
@@ -67,6 +92,10 @@ class Edit extends Component
 
         $this->user->update($data);
         $this->user->syncRoles([$this->role]);
+        if (!empty($this->permissions)) {
+            $this->user->syncPermissions($this->permissions);
+        }
+
 
         return redirect()->route('restaurant.users.index');
     }
