@@ -23,10 +23,10 @@
         </div>
 
         <x-form.input name="password" label="Password" type="password" wireModel="password" required
-            placeholder="Create a password" showToggle="true"/>
+            placeholder="Create a password" />
 
         <x-form.input name="password_confirmation" label="Confirm Password" type="password"
-            wireModel="password_confirmation" required placeholder="Confirm the password" showToggle="true"/>
+            wireModel="password_confirmation" required placeholder="Confirm the password" />
 
         <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Save" wireTarget="submit" />
