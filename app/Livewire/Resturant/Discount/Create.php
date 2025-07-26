@@ -12,7 +12,6 @@ class Create extends Component
     public $type;
     public $value;
     public $minimum_amount;
-    public $maximum_discount;
     public $max_uses;
     public $starts_at;
     public $ends_at;
@@ -70,7 +69,6 @@ class Create extends Component
             $rules['value'] = 'required|numeric|min:0';
         } elseif ($this->type === 'fixed') {
             $rules['minimum_amount'] = 'required|numeric|min:0';
-            $rules['maximum_discount'] = 'required|numeric|min:0';
         }
 
         $validated = $this->validate($rules);
@@ -81,7 +79,6 @@ class Create extends Component
             'type'             => $this->type,
             'value'            => $this->value,
             'minimum_amount'   => $this->minimum_amount,
-            'maximum_discount' => $this->maximum_discount,
             'max_uses'         => $this->max_uses,
             'starts_at'        => $this->starts_at,
             'ends_at'          => $this->ends_at,

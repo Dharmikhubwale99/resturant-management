@@ -19,7 +19,6 @@ return new class extends Migration
             $table->enum('type', ["fixed","percentage"]);
             $table->decimal('value', 10, 2)->nullable();
             $table->decimal('minimum_amount', 10, 2)->nullable();
-            $table->decimal('maximum_discount', 10, 2)->nullable();
             $table->boolean('is_active')->default(0);
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('ends_at')->nullable();
