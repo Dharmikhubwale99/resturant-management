@@ -6,7 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting, plan, AppConfiguration, RestaurantConfiguration};
+use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting, Plan, AppConfiguration, RestaurantConfiguration};
 use Livewire\WithFileUploads;
 use App\Traits\HasRolesAndPermissions;
 use Illuminate\Support\Facades\Log;
