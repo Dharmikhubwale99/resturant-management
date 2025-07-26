@@ -52,7 +52,7 @@
             @endcan
             @can('order')
                 @if ('order')
-                    { text: 'Order', href: '{{ route('restaurant.dashboard') }}' },
+                    { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
                 @endif
             @endcan
         ]
