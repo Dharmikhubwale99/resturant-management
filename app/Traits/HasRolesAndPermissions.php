@@ -44,10 +44,10 @@ trait HasRolesAndPermissions
             'table-delete',
             'table-show',
 
-            'expense-type-index',
-            'expense-type-create',
-            'expense-type-edit',
-            'expense-type-delete',
+            'expensetype-index',
+            'expensetype-create',
+            'expensetype-edit',
+            'expensetype-delete',
 
             'expenses-index',
             'expenses-create',
@@ -62,6 +62,8 @@ trait HasRolesAndPermissions
             'discount-active',
 
             'kitchen-dashboard',
+
+            'order',
         ];
     }
 

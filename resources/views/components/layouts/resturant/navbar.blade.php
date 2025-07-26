@@ -30,13 +30,13 @@
                     { text: 'Table', href: '{{ route('restaurant.tables.index') }}' },
                 @endif
             @endcan
-            @can('expense-type-index')
-                @if (setting('expense-type-module'))
+            @can('expensetype-index')
+                @if (setting('expensetype'))
                     { text: 'Expense-Type', href: '{{ route('restaurant.expense-types.index') }}' },
                 @endif
             @endcan
             @can('expenses-index')
-                @if(setting('expense'))
+                @if(setting('expenses'))
                     { text: 'Expenses', href: '{{ route('restaurant.expenses.index') }}' },
                 @endif
             @endcan
@@ -48,6 +48,11 @@
             @can('kitchen-dashboard')
                 @if (setting('kitchen'))
                     { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
+                @endif
+            @endcan
+            @can('order')
+                @if ('order')
+                    { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
                 @endif
             @endcan
         ]
