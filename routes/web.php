@@ -29,6 +29,8 @@ use \App\Livewire\Resturant\{
     Auth\Register,
     Auth\Login as ResturantLogin,
     Auth\RestoRegister as RestoRegister,
+    Auth\ResetPassword as ResetPassword,
+    Auth\ForgotPassword as ForgotPassword,
     PlanPurchase as ResturantPlanPurchase,
 
     Category\Index as CategoryIndex,
@@ -91,6 +93,7 @@ Route::get('superadmin/login', Login::class)->name('superadmin.login');
 Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
 Route::get('register', Register::class)->name('register');
 Route::get('/', ResturantLogin::class)->name('login');
+Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
 
 Route::get('/create-razorpay-order/{plan}', [PaymentController::class, 'createRazorpayOrder']);
 Route::post('/razorpay/callback', [PaymentController::class, 'handleCallback'])->name('razorpay.callback');

@@ -12,10 +12,10 @@
         <x-form.input name="mobile" label="Mobile" type="tel" wireModel="mobile" maxlength="10"
             oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" required />
 
-        <x-form.input name="password" label="Password" type="password" wireModel="password" required />
+        <x-form.input name="password" label="Password" type="password" wireModel="password" required showToggle="true" />
 
         <x-form.input name="password_confirmation" label="Confirm Password" type="password"
-            wireModel="password_confirmation" required />
+            wireModel="password_confirmation" required showToggle="true" />
 
         <x-form.input name="gst_number" label="GST Number" type="text" wireModel="gst_no" />
 
