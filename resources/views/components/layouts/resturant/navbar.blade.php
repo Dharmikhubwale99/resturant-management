@@ -50,6 +50,11 @@
                     { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
                 @endif
             @endcan
+            @can('order')
+                @if ('order')
+                    { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
+                @endif
+            @endcan
         ]
     }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

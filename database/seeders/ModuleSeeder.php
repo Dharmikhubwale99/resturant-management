@@ -22,7 +22,8 @@ class ModuleSeeder extends Seeder
             'expenses',
             'table',
             'discount',
-            'kitchen'
+            'kitchen',
+            'order'
         ];
 
         foreach ($modules as $key) {

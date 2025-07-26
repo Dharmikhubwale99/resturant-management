@@ -10,7 +10,7 @@ class KotPrint extends Component
 {
     public $kot;
 
-    #[Layout('components.layouts.waiter.app')]
+    #[Layout('components.layouts.resturant.app')]
     public function render()
     {
         return view('livewire.waiter.kot-print')
