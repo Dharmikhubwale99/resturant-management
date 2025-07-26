@@ -1,62 +1,61 @@
-<nav class="bg-white shadow-lg sticky top-0 z-50"
-    x-data="{
-        mobileMenuOpen: false,
-        profileMenuOpen: false,
-        start: 0,
-        visible: 5,
-        menuLinks: [
+<nav class="bg-white shadow-lg sticky top-0 z-50" x-data="{
+    mobileMenuOpen: false,
+    profileMenuOpen: false,
+    start: 0,
+    visible: 5,
+    menuLinks: [
+        @if (setting('user'))
             @can('user-index')
-                @if (setting('user'))
-                    { text: 'User', href: '{{ route('restaurant.users.index') }}' },
-                @endif
+                { text: 'User', href: '{{ route('restaurant.users.index') }}' },
             @endcan
+        @endif
+        @if (setting('category_module'))
             @can('category-index')
-                @if (setting('category_module'))
-                    { text: 'Category', href: '{{ route('restaurant.categories.index') }}' },
-                @endif
+                { text: 'Category', href: '{{ route('restaurant.categories.index') }}' },
             @endcan
+        @endif
+        @if (setting('item'))
             @can('item-index')
-                @if (setting('item'))
-                    { text: 'Item', href: '{{ route('restaurant.items.index') }}' },
-                @endif
+                { text: 'Item', href: '{{ route('restaurant.items.index') }}' },
             @endcan
+        @endif
+        @if (setting('area_module'))
             @can('area-index')
-                @if (setting('area_module'))
-                    { text: 'Area', href: '{{ route('restaurant.areas.index') }}' },
-                @endif
+                { text: 'Area', href: '{{ route('restaurant.areas.index') }}' },
             @endcan
+        @endif
+        @if (setting('table'))
             @can('table-index')
-                @if (setting('table'))
-                    { text: 'Table', href: '{{ route('restaurant.tables.index') }}' },
-                @endif
+                { text: 'Table', href: '{{ route('restaurant.tables.index') }}' },
             @endcan
+        @endif
+        @if (setting('expensetype'))
             @can('expensetype-index')
-                @if (setting('expensetype'))
-                    { text: 'Expense-Type', href: '{{ route('restaurant.expense-types.index') }}' },
-                @endif
+                { text: 'Expense-Type', href: '{{ route('restaurant.expense-types.index') }}' },
             @endcan
+        @endif
+        @if (setting('expenses'))
             @can('expenses-index')
-                @if(setting('expenses'))
-                    { text: 'Expenses', href: '{{ route('restaurant.expenses.index') }}' },
-                @endif
+                { text: 'Expenses', href: '{{ route('restaurant.expenses.index') }}' },
             @endcan
+        @endif
+        @if (setting('discount'))
             @can('discount-index')
-                @if (setting('discount'))
-                    { text: 'Discount', href: '{{ route('restaurant.discount.index') }}' },
-                @endif
+                { text: 'Discount', href: '{{ route('restaurant.discount.index') }}' },
             @endcan
+        @endif
+        @if (setting('kitchen'))
             @can('kitchen-dashboard')
-                @if (setting('kitchen'))
-                    { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
-                @endif
+                { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
             @endcan
+        @endif
+        @if ('order')
             @can('order')
-                @if ('order')
-                    { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
-                @endif
+                { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
             @endcan
-        ]
-    }">
+        @endif
+    ]
+}">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
             <!-- Logo -->
@@ -77,10 +76,10 @@
 
                     <!-- Centered Nav Links -->
                     <div class="flex space-x-6 justify-center items-center flex-1">
-                        <template x-for="(link, index) in menuLinks.slice(start, start + visible)" :key="index">
-                            <a :href="link.href"
-                               x-text="link.text"
-                               class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 whitespace-nowrap"></a>
+                        <template x-for="(link, index) in menuLinks.slice(start, start + visible)"
+                            :key="index">
+                            <a :href="link.href" x-text="link.text"
+                                class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 whitespace-nowrap"></a>
                         </template>
                     </div>
 
@@ -127,7 +126,7 @@
                         <div class="block md:hidden">
                             <template x-for="(link, index) in menuLinks" :key="index">
                                 <a :href="link.href" x-text="link.text"
-                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"></a>
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"></a>
                             </template>
                         </div>
 
