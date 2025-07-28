@@ -82,6 +82,7 @@ class Item extends Component
         $table = Table::findOrFail($table_id);
         $this->items = $table->restaurant
             ->items()
+            ->where('is_active', 0)
             ->with(['variants', 'discounts'])
             ->get();
         $this->categories = $this->items->pluck('category')->unique('id')->values();

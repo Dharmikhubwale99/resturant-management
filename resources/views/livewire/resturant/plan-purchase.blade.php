@@ -31,13 +31,19 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         @foreach ($plans as $plan)
             @php
-                $originalPrice = $plan->price;
+                $originalPrice = (float) $plan->price;
                 $finalPrice = $originalPrice;
+                $discount = 0;
+                $discountLabel = '';
 
                 if ($plan->type === 'fixed' && $plan->amount) {
-                    $finalPrice -= $plan->amount;
+                    $discount = (float) $plan->amount;
+                    $finalPrice -= $discount;
+                    $discountLabel = '₹' . number_format($discount, 2);
                 } elseif ($plan->type === 'percentage' && $plan->value) {
-                    $finalPrice -= ($originalPrice * $plan->value) / 100;
+                    $discount = ($originalPrice * (float) $plan->value) / 100;
+                    $finalPrice -= $discount;
+                    $discountLabel = $plan->value . '%';
                 }
 
                 $finalPrice = max(0, $finalPrice);
@@ -55,14 +61,18 @@
                         <div>
                             @if ($finalPrice < $originalPrice)
                                 <div>
-                                    <span
-                                        class="text-sm line-through text-red-400">₹{{ number_format($originalPrice, 2) }}</span>
-                                    <span
-                                        class="text-lg font-bold text-green-600 ml-2">₹{{ number_format($finalPrice, 2) }}</span>
+                                    <span class="text-sm line-through text-red-400">
+                                        ₹{{ number_format($originalPrice, 2) }}
+                                    </span>
+                                    <span class="text-lg font-bold text-green-600 ml-2">
+                                        ₹{{ number_format($finalPrice, 2) }}
+                                        ({{ $discountLabel }} off)
+                                    </span>
                                 </div>
                             @else
-                                <span
-                                    class="text-lg font-bold text-gray-800">₹{{ number_format($finalPrice, 2) }}</span>
+                                <span class="text-lg font-bold text-gray-800">
+                                    ₹{{ number_format($finalPrice, 2) }}
+                                </span>
                             @endif
                         </div>
                         <span class="text-sm text-gray-500">{{ $plan->duration_days }} Days</span>
@@ -78,6 +88,7 @@
             </div>
         @endforeach
     </div>
+
 </div>
 @push('scripts')
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>

@@ -105,7 +105,8 @@
             <div class="flex-1 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
                     <div class="flex flex-wrap gap-2">
-                        <input type="text" wire:model.live="search" placeholder="Search by product, code, or short name..."
+                        <input type="text" wire:model.live="search"
+                            placeholder="Search by product, code, or short name..."
                             class="border px-3 py-2 rounded w-50" />
                     </div>
                 </div>
@@ -116,7 +117,7 @@
                     @forelse ($filteredItems as $item)
                         <div wire:click="itemClicked({{ $item->id }})"
                             class="relative bg-white p-1 md:p-2 rounded shadow hover:shadow-md transition
-               border-2 {{ $item->type_color_class }} cursor-pointer">
+                        border-2 {{ $item->type_color_class }} cursor-pointer">
                             @php
                                 // Get cart quantity for this item (including variants/addons)
                                 $cartQty = 0;
@@ -154,28 +155,35 @@
                             @php
                                 $discount = $item->discounts->where('is_active', 0)->first();
                                 $hasDiscount = $discount !== null;
-                                $finalPrice = $hasDiscount
-                                    ? max(
-                                        $item->price -
-                                            ($discount->type === 'percentage'
-                                                ? ($item->price * $discount->value) / 100
-                                                : $discount->minimum_amount),
-                                        0,
-                                    )
-                                    : $item->price;
+                                $finalPrice = $item->price;
+                                $discountLable = '';
+
+                                if ($hasDiscount) {
+                                    if ($discount->type === 'percentage' && $discount->value > 0) {
+                                        $finalPrice -= ($item->price * $discount->value) / 100;
+                                        $discountLable = $discount->value . '%';
+                                    } elseif ($discount->type === 'fixed' && $discount->minimum_amount > 0) {
+                                        $finalPrice -= $discount->minimum_amount;
+                                        $discountLable = '₹' . number_format($discount->minimum_amount, 2);
+                                    }
+
+                                    $finalPrice = max(0, $finalPrice);
+                                }
                             @endphp
+
                             @if ($hasDiscount)
                                 <p class="text-gray-500 text-xs md:text-sm line-through">
                                     ₹{{ number_format($item->price, 2) }}
                                 </p>
                                 <p class="text-blue-700 font-bold text-xs md:text-sm">
-                                    ₹{{ number_format($finalPrice, 2) }}
+                                    ₹{{ number_format($finalPrice, 2) }} ({{ $discountLable }} off)
                                 </p>
                             @else
                                 <p class="text-blue-700 font-bold text-xs md:text-sm">
                                     ₹{{ number_format($item->price, 2) }}
                                 </p>
                             @endif
+
                         </div>
                     @empty
                         <p class="flex items-center col-span-full text-gray-500 text-center py-4">
@@ -193,34 +201,34 @@
                 @if (count($cartItems))
                     <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
                         @if ($editMode)
-                        <p class="text-xs md:text-sm font-semibold text-blue-600">Previous KOT Items:</p>
-                    @endif
+                            <p class="text-xs md:text-sm font-semibold text-blue-600">Previous KOT Items:</p>
+                        @endif
 
-                    @foreach ($cartItems as $key => $row)
-                        @if (in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
-                            <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"
-                                wire:key="row-{{ $row['id'] }}">
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs text-blue-600 font-semibold mb-0.5">
-                                        KOT: #{{ $row['kot_number'] ?? '-' }} • {{ $row['kot_time'] ?? '-' }}
-                                    </p>
-                                    <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
-                                        {{ $row['name'] }}
-                                    </p>
-                                    <div class="flex flex-row items-baseline gap-2">
-                                        <p class="text-xs text-gray-500 whitespace-nowrap">
-                                            ₹{{ number_format($row['price'], 2) }} × {{ $row['qty'] }}
+                        @foreach ($cartItems as $key => $row)
+                            @if (in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
+                                <div class="border rounded p-1 md:p-2 flex items-center justify-between bg-gray-50"
+                                    wire:key="row-{{ $row['id'] }}">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs text-blue-600 font-semibold mb-0.5">
+                                            KOT: #{{ $row['kot_number'] ?? '-' }} • {{ $row['kot_time'] ?? '-' }}
                                         </p>
-                                        <p class="text-xs text-green-600 font-semibold whitespace-nowrap">
-                                            = ₹{{ number_format($row['price'] * $row['qty'], 2) }}
+                                        <p class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
+                                            {{ $row['name'] }}
                                         </p>
-                                        <button class="text-red-500 text-xs md:text-sm"
-                                            wire:click="remove('{{ $row['id'] }}')">✕</button>
+                                        <div class="flex flex-row items-baseline gap-2">
+                                            <p class="text-xs text-gray-500 whitespace-nowrap">
+                                                ₹{{ number_format($row['price'], 2) }} × {{ $row['qty'] }}
+                                            </p>
+                                            <p class="text-xs text-green-600 font-semibold whitespace-nowrap">
+                                                = ₹{{ number_format($row['price'] * $row['qty'], 2) }}
+                                            </p>
+                                            <button class="text-red-500 text-xs md:text-sm"
+                                                wire:click="remove('{{ $row['id'] }}')">✕</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
-                    @endforeach
+                            @endif
+                        @endforeach
 
 
                         @if (count($cartItems) > count($originalKotItemKeys))
@@ -634,7 +642,8 @@
     @endif
 
     @if ($showCustomerModal)
-        <div class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex justify-center items-center z-50">
+        <div
+            class="fixed inset-0 bg-bg-transparent bg-opacity-40 backdrop-blur-lg flex justify-center items-center z-50">
             <div class="bg-white p-6 rounded shadow w-full max-w-md">
                 <h2 class="text-lg font-bold mb-4">Customer Details</h2>
 
@@ -644,9 +653,9 @@
                     <input type="text" wire:model.defer="followupCustomer_name" class="w-full border p-2 rounded"
                         placeholder="Customer Name">
 
-                    <input type="text" wire:model.defer="followupCustomer_mobile" class="w-full border p-2 rounded"
-                        placeholder="Mobile Number" maxlength="10"
-                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" >
+                    <input type="text" wire:model.defer="followupCustomer_mobile"
+                        class="w-full border p-2 rounded" placeholder="Mobile Number" maxlength="10"
+                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)">
 
                     <input type="email" wire:model.defer="followupCustomer_email" class="w-full border p-2 rounded"
                         placeholder="Email (optional)">
@@ -661,8 +670,7 @@
                 <div class="mt-4 flex justify-end gap-2">
                     <button wire:click="$set('showCustomerModal', false)"
                         class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
-                    <button wire:click="saveCustomer"
-                        class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+                    <button wire:click="saveCustomer" class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
                 </div>
             </div>
         </div>
