@@ -37,13 +37,13 @@ class Create extends Component
     {
         if (setting('area_module')) {
             $this->validate([
-                'area_id' => 'required|exists:areas,id',
+                'area_id' => 'nullable|exists:areas,id',
             ]);
         }
 
         $this->validate([
             'name' => 'required|string|max:255',
-            'capacity' => 'required|integer|min:1',
+            'capacity' => 'nullable|integer|min:1',
             'qr_enabled' => 'boolean',
         ]);
 
