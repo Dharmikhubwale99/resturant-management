@@ -35,7 +35,19 @@ class Index extends Component
 
     public function confirmDelete($id)
     {
-        $this->categoryToDelete = $id;
+        $category = Category::find($id);
+
+        if (!$category) {
+            session()->flash('error', 'Category not found.');
+            return;
+        }
+
+        if ($category->items()->exists()) {
+            session()->flash('error', 'This category cannot be deleted because items exist under it.');
+            return;
+        }
+
+        $this->categoryToDelete = $category;
         $this->confirmingDelete = true;
     }
 
@@ -47,9 +59,8 @@ class Index extends Component
 
     public function deleteCategory()
     {
-        $category = Category::find($this->categoryToDelete);
-        if ($category) {
-            $category->delete();
+        if ($this->categoryToDelete) {
+            $this->categoryToDelete->delete();
             session()->flash('success', 'Category deleted successfully.');
         } else {
             session()->flash('error', 'Category not found.');
