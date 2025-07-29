@@ -9,13 +9,13 @@
         <h2 class="text-lg font-bold text-gray-700 mb-2">TRANSACTION REPORTS</h2>
         <div class="flex flex-wrap gap-2">
             <x-form.button :route="'restaurant.sales-report'" class="bg-blue-600 hover:bg-blue-600 text-white">
-                Sale Report
+                Sales Report
             </x-form.button>
 
             <x-form.button :route="'restaurant.staffwise-report'">Staff Wise Sale Report</x-form.button>
             <x-form.button>Sale Wise Profit & Loss Statement</x-form.button>
             <x-form.button>Purchase Report</x-form.button>
-            <x-form.button>Money In Report</x-form.button>
+            <x-form.button :route="'restaurant.moneyin-report'">Money In Report</x-form.button>
             <x-form.button>Money Out Report</x-form.button>
             <x-form.button>Expense Report</x-form.button>
         </div>
