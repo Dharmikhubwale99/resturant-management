@@ -73,6 +73,7 @@ use \App\Livewire\Resturant\{
     Report\Index as ReportIndex,
     Report\SalesReport,
     Report\PaymentReport,
+    Report\StaffWise,
 };
 
 use \App\Livewire\Kitchen\{
@@ -201,6 +202,7 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/report', ReportIndex::class)->name('report');
     Route::get('/sales-report', SalesReport::class)->name('sales-report');
     Route::get('/payment-report', PaymentReport::class)->name('payment-report');
+    Route::get('/staff-wise-report', StaffWise::class)->name('staffwise-report');
 });
 
 // Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {
