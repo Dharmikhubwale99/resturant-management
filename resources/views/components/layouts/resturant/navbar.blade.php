@@ -54,6 +54,7 @@
                 { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
             @endcan
         @endif
+        { text: 'Report', href: '{{ route('restaurant.report') }}' },
     ]
 }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
