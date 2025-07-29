@@ -14,7 +14,7 @@ class Edit extends Component
     use WithFileUploads;
 
     public $user_id, $restaurant_id, $setting_id;
-    public $user_name, $email, $mobile;
+    public $user_name, $email, $mobile, $password, $password_confirmation;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
     public $restaurant_name, $restaurant_address, $gst_no;
@@ -72,9 +72,7 @@ class Edit extends Component
 
     public function updatedPincode($value)
     {
-        $cached = PinCode::with('district.city.state.country')
-            ->where('code', $value)
-            ->first();
+        $cached = PinCode::with('district.city.state.country')->where('code', $value)->first();
 
         if ($cached) {
             $this->pincode_id = $cached->id;
@@ -82,31 +80,50 @@ class Edit extends Component
             return;
         }
 
-        $response = Http::get("https://api.postalpincode.in/pincode/{$value}");
+        try {
+            $response = Http::retry(3, 200)
+                ->timeout(10)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36'
+                ])
+                ->withOptions([
+                    'curl' => [
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_FORBID_REUSE => true,
+                        CURLOPT_FRESH_CONNECT => true,
+                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                    ]
+                ])
+                ->get("https://api.postalpincode.in/pincode/{$value}");
 
-        if ($response->successful()) {
-            $data = $response->json()[0];
-            if ($data['Status'] === 'Success' && count($data['PostOffice']) > 0) {
-                $post = $data['PostOffice'][0];
+            if ($response->successful()) {
+                $data = $response->json()[0];
 
-                $country = Country::firstOrCreate(['name' => $post['Country']]);
-                $state = State::firstOrCreate(['name' => $post['State'], 'country_id' => $country->id]);
-                $city = City::firstOrCreate(['name' => $post['Block'] ?? $post['District'], 'state_id' => $state->id]);
-                $district = District::firstOrCreate(['name' => $post['District'], 'city_id' => $city->id]);
+                if ($data['Status'] === 'Success' && count($data['PostOffice']) > 0) {
+                    $post = $data['PostOffice'][0];
 
-                $pincode = PinCode::create([
-                    'code' => $value,
-                    'district_id' => $district->id,
-                ]);
+                    $country = Country::firstOrCreate(['name' => $post['Country']]);
+                    $state = State::firstOrCreate(['name' => $post['State'], 'country_id' => $country->id]);
+                    $city = City::firstOrCreate(['name' => $post['Block'] ?? $post['District'], 'state_id' => $state->id]);
+                    $district = District::firstOrCreate(['name' => $post['District'], 'city_id' => $city->id]);
 
-                $this->pincode_id = $pincode->id;
-                $this->setLocationFromModels($country, $state, $city, $district);
+                    $pincode = PinCode::create([
+                        'code' => $value,
+                        'district_id' => $district->id,
+                    ]);
 
+                    $this->pincode_id = $pincode->id;
+                    $this->setLocationFromModels($country, $state, $city, $district);
+
+                } else {
+                    session()->flash('message', 'Invalid pincode or no result found.');
+                }
             } else {
-
+                session()->flash('message', 'API request failed. Status: ' . $response->status());
             }
-        } else {
-
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            logger()->error("Pincode API error: " . $e->getMessage());
+            session()->flash('message', 'Pincode service temporarily unavailable. Please try again later.');
         }
     }
 
@@ -140,14 +157,23 @@ class Edit extends Component
             'plan_id' => 'exists:plans,id',
         ]);
 
+        $user = User::findOrFail($this->user_id);
+        if ($this->password) {
+            $this->validate(['password' => 'required|min:6']);
+            $hashedPassword = Hash::make($this->password);
+        } else {
+            $hashedPassword = $user->password;
+        }
+
+
         $selectedPlan = Plan::find($this->plan_id);
         $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
-        $user = User::findOrFail($this->user_id);
         $user->update([
             'name' => $this->user_name,
             'email' => $this->email,
             'mobile' => $this->mobile,
             'pin_code_id' => $this->pincode_id,
+            'password' => $hashedPassword,
         ]);
 
         if ($this->restaurant_id) {
