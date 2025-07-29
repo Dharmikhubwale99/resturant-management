@@ -95,8 +95,8 @@
             <thead>
                 <tr>
                     <th class="text-left">Item</th>
-                    <th class="text-center">Qty</th>
-                    <th class="text-right">Rate</th>
+                    <th class="text-center" style="padding-right:4px;">Qty</th>
+                    <th class="text-right" style="padding-right:4px;">Rate</th>
                     <th class="text-right">Total</th>
                 </tr>
             </thead>
@@ -124,13 +124,7 @@
                         <td class="text-right">{{ number_format($rate, 0) }}</td>
                         <td class="text-right">{{ number_format($lineTotal, 0) }}</td>
                     </tr>
-                    @if ($item->special_notes)
-                        <tr>
-                            <td colspan="4" class="text-[10px] italic text-gray-600 pl-1">
-                                [Note] {{ $item->special_notes }}
-                            </td>
-                        </tr>
-                    @endif
+
                 @endforeach
             </tbody>
         </table>
