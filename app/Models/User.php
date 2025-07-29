@@ -102,4 +102,10 @@ class User extends Authenticatable
         return $this->hasOne(Setting::class);
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+
 }
