@@ -27,6 +27,7 @@ class ItemImport implements ToCollection
 
     public function collection(Collection $rows)
     {
+        set_time_limit(500);
         $rows = $rows->skip(1); // skip header
         $rowNum = 2; // Excel starts at 1, header is first
 
