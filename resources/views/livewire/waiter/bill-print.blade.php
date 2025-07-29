@@ -2,118 +2,160 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Invoice #{{ $order->id }}</title>
+    <title>Bill #{{ $order->id }}</title>
     <style>
-        * {
-            font-family: 'Segoe UI', sans-serif;
-        }
-
         @media print {
             @page {
-                size: A4;
-                margin: 20mm;
+                size: 58mm auto;
+                margin: 0;
             }
-            footer, .hide-on-print {
-                display: none !important;
+
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                font-family: monospace;
+                background: white;
+            }
+
+            body * {
+                visibility: hidden;
+            }
+
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
             }
         }
 
-        body {
-            margin: 0;
-            padding: 20px;
-            background: #fff;
-            color: #000;
-        }
-
-        .invoice-box {
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
-        }
-
-        .header {
+        .text-center {
             text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            margin: 0;
-        }
-
-        .meta {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #999;
-        }
-
-        th {
-            background: #f0f0f0;
         }
 
         .text-right {
             text-align: right;
         }
 
-        .total {
+        .font-bold {
             font-weight: bold;
-            font-size: 16px;
-            margin-top: 20px;
         }
 
+        table {
+            width: 100%;
+            font-size: 12px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 2px 0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px dashed black;
+            margin: 4px 0;
+        }
     </style>
 </head>
 <body>
-    <div class="invoice-box">
-        <div class="header">
-            <h1>Invoice #{{ $order->id }}</h1>
+    <div class="print-area w-[58mm] mx-auto px-2 py-1 text-[12px] leading-tight font-mono">
+
+        <!-- RESTAURANT INFO -->
+        <div class="text-center mb-1">
+            <h2 class="font-bold text-[14px] uppercase">
+                {{ $restaurant->name ?? 'Your Restaurant' }}
+            </h2>
+            <p class="text-[11px] leading-tight">
+                {{ $restaurant->address ?? '' }}<br>
+                Phone: {{ $restaurant->mobile ?? '-' }}<br>
+                Email: {{ $restaurant->email ?? '-' }}
+                @if ($restaurant->gstin)
+                    <br>FSSAI No.: {{ $restaurant->gstin }}
+                @endif
+            </p>
         </div>
 
-        <div class="meta">
-            <div><strong>Table:</strong> {{ $order->table->name ?? 'N/A' }}</div>
-            <div><strong>Date:</strong> {{ $order->created_at->format('d-m-Y H:i') }}</div>
+        <hr>
+
+        <!-- BILL META -->
+        <div>
+            <p><strong>Order No:</strong> {{ $order->order_number }}</p>
+            <p><strong>Created On:</strong> {{ $order->created_at->format('d/m/y h:i A') }}</p>
+            <p><strong>Bill To:</strong> {{ ucfirst($order->order_type) }}</p>
         </div>
 
+        <hr>
+
+        <!-- ITEM TABLE -->
         <table>
             <thead>
                 <tr>
-                    <th>Item</th>
-                    <th class="text-center">Qty</th>
-                    <th class="text-right">Rate</th>
+                    <th class="text-left">Item</th>
+                    <th class="text-center" style="padding-right:4px;">Qty</th>
+                    <th class="text-right" style="padding-right:4px;">Rate</th>
                     <th class="text-right">Total</th>
                 </tr>
             </thead>
             <tbody>
+                @php
+                    $totalQty = 0;
+                    $totalItems = count($order->orderItems);
+                @endphp
+
                 @foreach ($order->orderItems as $item)
+                    @php
+                        $qty = $item->quantity;
+                        $rate = $item->base_price;
+                        $lineTotal = $item->total_price;
+                        $totalQty += $qty;
+                    @endphp
                     <tr>
                         <td>
-                            {{ $item->item->name }}{{ $item->variant?->name ? ' (' . $item->variant->name . ')' : '' }}
+                            {{ $item->item->name }}
+                            @if ($item->variant)
+                                <small>({{ $item->variant->name }})</small>
+                            @endif
                         </td>
-                        <td class="text-center">{{ $item->quantity }}</td>
-                        <td class="text-right">₹{{ number_format($item->base_price, 2) }}</td>
-                        <td class="text-right">₹{{ number_format($item->total_price, 2) }}</td>
+                        <td class="text-center">{{ $qty }}</td>
+                        <td class="text-right">{{ number_format($rate, 0) }}</td>
+                        <td class="text-right">{{ number_format($lineTotal, 0) }}</td>
                     </tr>
+
                 @endforeach
             </tbody>
         </table>
 
-        <div class="text-right total">
-            Total: ₹{{ number_format($order->total_amount, 2) }}
+        <hr>
+
+        <!-- SUMMARY -->
+        <table>
+            <tr>
+                <td>Total Items: {{ $totalItems }}</td>
+                <td colspan="3" class="text-right">Total Qty: {{ $totalQty }}</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-right">Sub Total:</td>
+                <td class="text-right">{{ number_format($order->total_amount, 0) }}</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-right font-bold">Total:</td>
+                <td class="text-right font-bold">{{ number_format($order->total_amount, 0) }}</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="text-right">Balance:</td>
+                <td class="text-right">{{ number_format($order->total_amount, 0) }}</td>
+            </tr>
+        </table>
+
+        <hr>
+
+        <!-- FOOTER -->
+        <div class="text-center text-[10px] mt-2">
+            Thank You! Visit Again 🙏
         </div>
     </div>
 
