@@ -47,15 +47,6 @@
                 </div>
             @endforeach
 
-            <div class="grid grid-cols-2 gap-2">
-                @foreach ($availableFeatures as $feature)
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" wire:model="featureAccess" value="{{ $feature }}"
-                            class="form-checkbox">
-                        <span class="ml-2 capitalize">{{ str_replace('_', ' ', $feature) }}</span>
-                    </label>
-                @endforeach
-            </div>
             <x-form.select name="type" label="Discount Type" wireModelLive="type" :options="['fixed' => 'Fixed', 'percentage' => 'Percentage']" />
 
             @if ($type === 'percentage')
@@ -66,6 +57,24 @@
             @if ($type === 'fixed')
                 <x-form.input name="amount" label="Amount" wireModel="amount" type="number" step="0.01" />
             @endif
+
+            <div class="mb-2">
+                <label class="inline-flex items-center">
+                    <input type="checkbox" wire:model.live="selectAllFeatures" class="form-checkbox">
+                    <span class="ml-2 font-semibold">Select All Features</span>
+                </label>
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-2">
+                @foreach ($availableFeatures as $feature)
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" wire:model="featureAccess" value="{{ $feature }}"
+                            class="form-checkbox">
+                        <span class="ml-2 capitalize">{{ str_replace('_', ' ', $feature) }}</span>
+                    </label>
+                @endforeach
+            </div>
 
             <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Save" wireTarget="submit" />
