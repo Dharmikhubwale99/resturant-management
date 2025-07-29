@@ -8,7 +8,7 @@
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 border border-gray-300 mb-6">
-            <thead class="bg-blue-600 text-white">
+            <thead class="bg-orange-600 text-white">
                 <tr>
                     <th class="px-4 py-2 text-sm font-semibold">#</th>
                     <th class="px-4 py-2 text-sm font-semibold">Name</th>
