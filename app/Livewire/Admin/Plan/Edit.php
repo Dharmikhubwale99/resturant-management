@@ -17,7 +17,6 @@ class Edit extends Component
     public $type;
     public $value;
     public $amount;
-    public $selectAllFeatures = false;
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -33,8 +32,6 @@ class Edit extends Component
         $this->availableFeatures = AppConfiguration::all()->pluck('key')->toArray();
 
         $this->featureAccess = $this->plan->planFeatures()->where('is_active', true)->pluck('feature')->toArray();
-        $this->selectAllFeatures = count($this->featureAccess) === count($this->availableFeatures);
-
         $this->plan = Plan::find($id);
         $this->fill($this->plan->only('name', 'price', 'duration_days', 'description', 'type', 'value', 'amount'));
     }
@@ -44,21 +41,6 @@ class Edit extends Component
         $this->plan->deleteMedia($mediaId);
         $this->plan->refresh();
     }
-
-    public function updatedSelectAllFeatures($value)
-    {
-        if ($value) {
-            $this->featureAccess = $this->availableFeatures; // બધાં features select
-        } else {
-            $this->featureAccess = []; // બધાં deselect
-        }
-    }
-
-    public function updatedFeatureAccess()
-    {
-        $this->selectAllFeatures = count($this->featureAccess) === count($this->availableFeatures);
-    }
-
 
     public function submit()
     {

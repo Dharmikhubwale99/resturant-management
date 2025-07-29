@@ -67,7 +67,6 @@ class PickupItem extends Component
 
         $this->items = $this->order->restaurant
             ->items()
-            ->where('is_active', 0)
             ->with(['variants', 'discounts'])
             ->get();
         $this->categories = $this->items->pluck('category')->unique('id')->values();

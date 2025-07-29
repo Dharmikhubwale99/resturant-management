@@ -17,9 +17,13 @@
                         x-transition:leave-start="transform opacity-100 scale-100"
                         x-transition:leave-end="transform opacity-0 scale-95"
                         class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                        <div class="px-4 py-3 ">
+                        <div class="px-4 py-3 border-b">
                             <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->name }}</p>
                             <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                        </div>
+                        <div class="py-1">
+                            <a href="{{ route('logout') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
                         </div>
                     </div>
                 </div>
@@ -31,19 +35,13 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         @foreach ($plans as $plan)
             @php
-                $originalPrice = (float) $plan->price;
+                $originalPrice = $plan->price;
                 $finalPrice = $originalPrice;
-                $discount = 0;
-                $discountLabel = '';
 
                 if ($plan->type === 'fixed' && $plan->amount) {
-                    $discount = (float) $plan->amount;
-                    $finalPrice -= $discount;
-                    $discountLabel = '₹' . number_format($discount, 2);
+                    $finalPrice -= $plan->amount;
                 } elseif ($plan->type === 'percentage' && $plan->value) {
-                    $discount = ($originalPrice * (float) $plan->value) / 100;
-                    $finalPrice -= $discount;
-                    $discountLabel = $plan->value . '%';
+                    $finalPrice -= ($originalPrice * $plan->value) / 100;
                 }
 
                 $finalPrice = max(0, $finalPrice);
@@ -61,18 +59,14 @@
                         <div>
                             @if ($finalPrice < $originalPrice)
                                 <div>
-                                    <span class="text-sm line-through text-red-400">
-                                        ₹{{ number_format($originalPrice, 2) }}
-                                    </span>
-                                    <span class="text-lg font-bold text-green-600 ml-2">
-                                        ₹{{ number_format($finalPrice, 2) }}
-                                        ({{ $discountLabel }} off)
-                                    </span>
+                                    <span
+                                        class="text-sm line-through text-red-400">₹{{ number_format($originalPrice, 2) }}</span>
+                                    <span
+                                        class="text-lg font-bold text-green-600 ml-2">₹{{ number_format($finalPrice, 2) }}</span>
                                 </div>
                             @else
-                                <span class="text-lg font-bold text-gray-800">
-                                    ₹{{ number_format($finalPrice, 2) }}
-                                </span>
+                                <span
+                                    class="text-lg font-bold text-gray-800">₹{{ number_format($finalPrice, 2) }}</span>
                             @endif
                         </div>
                         <span class="text-sm text-gray-500">{{ $plan->duration_days }} Days</span>
@@ -88,7 +82,6 @@
             </div>
         @endforeach
     </div>
-
 </div>
 @push('scripts')
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>

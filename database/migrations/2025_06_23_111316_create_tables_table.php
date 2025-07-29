@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('restaurant_id');
             $table->foreignId('area_id')->nullable();
             $table->string('name');
-            $table->integer('capacity')->nullable();
+            $table->integer('capacity');
             $table->enum('status', ["available","occupied","reserved"])->default('available');
             $table->string('qr_token')->unique()->nullable();
             $table->boolean('qr_enabled')->default(true)->nullable();

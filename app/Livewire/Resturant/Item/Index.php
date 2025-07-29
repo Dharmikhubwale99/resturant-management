@@ -21,8 +21,6 @@ class Index extends Component
     public $importFile;
     public $showImportModal = false;
     public $importErrors = [];
-    public $confirmingBlock = false;
-    public $itemId = null;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -101,29 +99,5 @@ class Index extends Component
         } catch (\Exception $e) {
             $this->importErrors[] = ['row' => 'N/A', 'error' => $e->getMessage()];
         }
-    }
-
-    public function confirmBlock($id)
-    {
-        $this->itemId = $id;
-        $this->confirmingBlock = true;
-    }
-
-    public function cancelBlock()
-    {
-        $this->itemId = null;
-        $this->confirmingBlock = false;
-    }
-
-    public function toggleBlock()
-    {
-        $plan = Item::findOrFail($this->itemId);
-        $plan->is_active = !$plan->is_active;
-        $plan->save();
-
-        $status = $plan->is_active ? 'unblocked' : 'blocked';
-        session()->flash('message', "Item {$status} successfully.");
-
-        $this->cancelBlock();
     }
 }

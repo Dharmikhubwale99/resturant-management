@@ -25,6 +25,7 @@
 
             @if ($type === 'fixed')
                 <x-form.input name="minimum_amount" label="Minimum Order Amount" wireModel="minimum_amount" type="number" step="0.01" required />
+                <x-form.input name="maximum_discount" label="Maximum Discount Amount" wireModel="maximum_discount" type="number" step="0.01" required />
             @endif
 
             <x-form.input name="max_uses" label="Max Uses" wireModel="max_uses" type="number" placeholder="Optional" />
