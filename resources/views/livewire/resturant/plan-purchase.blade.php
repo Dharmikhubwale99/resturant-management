@@ -17,9 +17,13 @@
                         x-transition:leave-start="transform opacity-100 scale-100"
                         x-transition:leave-end="transform opacity-0 scale-95"
                         class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                        <div class="px-4 py-3 ">
+                        <div class="px-4 py-3 border-b">
                             <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->name }}</p>
                             <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                        </div>
+                        <div class="py-1">
+                            <a href="{{ route('logout') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
                         </div>
                     </div>
                 </div>
