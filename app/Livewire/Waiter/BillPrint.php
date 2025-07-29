@@ -5,12 +5,10 @@ namespace App\Livewire\Waiter;
 use Livewire\Component;
 use App\Models\Order;
 use Livewire\Attributes\Layout;
-use App\Models\Restaurant;
 
 class BillPrint extends Component
 {
     public Order $order;
-    public ?Restaurant $restaurant = null;
 
     public function mount(Order $order)
     {
@@ -20,7 +18,7 @@ class BillPrint extends Component
             'orderItems.variant',
             'table'
         ]);
-        $this->restaurant = Restaurant::find($order->restaurant_id);
+
     }
 
     #[Layout('components.layouts.resturant.app')]
