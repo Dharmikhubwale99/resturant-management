@@ -157,7 +157,7 @@ class RestoRegister extends Component
             [
                 'restaurant_name' => 'required|string|max:255',
                 'mobile' => ['regex:/^[0-9]{10}$/'],
-                'address' => 'nullable|string|max:255',
+                'address' => 'required|string|max:255',
                 'gst' => 'nullable|string|max:15',
                 'pincode' => 'required|digits:6',
                 'meta_title' => 'nullable|string|max:255',

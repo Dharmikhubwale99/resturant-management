@@ -36,7 +36,7 @@
                 oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" />
 
 
-            <x-form.input name="address" label="Address" type="textarea" wireModel="address" required/>
+            <x-form.input name="address" label="Address" type="textarea" wireModel="address" />
 
             <h3 class="text-lg font-semibold text-gray-700 mt-6">Bank Details <span>(optional)</span></h3>
 
