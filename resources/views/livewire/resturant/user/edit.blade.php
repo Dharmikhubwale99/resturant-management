@@ -11,28 +11,26 @@
             placeholder="Enter 10-digit mobile number" />
 
         <div class="mb-4">
-            <x-form.select name="role" label="Role" :options="$roles" wire:model="role" required
-                placeholder="Select Role" />
+            <x-form.select name="role" label="Role" :options="$roles" wire:model="role" required placeholder="Select Role" />
             @error('role')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>
 
         <div class="mb-4">
-            <x-form.checkbox-group name="permissions" :groups="$data['permissions']" :selected="$permissions" wireModel="permissions" />
-
+            <x-form.checkbox-group name="permissions" :groups="$data['permissions']" wireModel="permissions" />
         </div>
 
         <x-form.input name="password" label="Password" type="password" wireModel="password"
-            placeholder="Create a password" showToggle="true" />
+            placeholder="Create a password" showToggle="true"/>
 
         <x-form.input name="password_confirmation" label="Confirm Password" type="password"
-            wireModel="password_confirmation" placeholder="Confirm the password" showToggle="true" />
+            wireModel="password_confirmation" placeholder="Confirm the password" showToggle="true"/>
 
         <div class="flex flex-row text-center  space-x-3">
-            <x-form.button type="submit" title="Save" wireClick="submit" wireTarget="submit" />
-            <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
-                route="restaurant.users.index" />
-        </div>
+                <x-form.button type="submit" title="Save" wireClick="submit" wireTarget="submit" />
+                <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
+                    route="restaurant.users.index" />
+            </div>
     </form>
 </div>
