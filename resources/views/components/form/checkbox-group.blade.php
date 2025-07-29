@@ -33,11 +33,9 @@
         </div>
     @endforeach
 
-    <!-- Hidden field to sync with Livewire -->
-    <input type="hidden" name="{{ $name }}" id="permissions-hidden" wire:model.defer="permissions">
+    <!-- Hidden field bound to Livewire without JSON -->
+    <input type="hidden" id="permissions-hidden" wire:model.defer="{{ $wireModel }}">
 </div>
-
-
 
 @push('scripts')
 <script>
@@ -45,13 +43,12 @@ function initSelectAllLogic() {
     const globalSelectAll = document.getElementById('global-select-all');
     const hiddenField = document.getElementById('permissions-hidden');
 
-    // Helper to sync all checked values to hidden field
     function syncHiddenField() {
         const selectedValues = Array.from(document.querySelectorAll('.group-item:checked')).map(cb => cb.value);
-        hiddenField.value = JSON.stringify(selectedValues);
+        hiddenField.value = selectedValues;
+        hiddenField.dispatchEvent(new Event('input')); // crucial to trigger Livewire update
     }
 
-    // Global select all
     globalSelectAll.addEventListener('change', function () {
         const allItems = document.querySelectorAll('.group-item');
         const allGroupToggles = document.querySelectorAll('.select-all');
@@ -60,7 +57,6 @@ function initSelectAllLogic() {
         syncHiddenField();
     });
 
-    // Group select all
     document.querySelectorAll('.select-all').forEach(groupToggle => {
         groupToggle.addEventListener('change', function () {
             const groupName = this.dataset.group;
@@ -71,7 +67,6 @@ function initSelectAllLogic() {
         });
     });
 
-    // Individual checkbox
     document.querySelectorAll('.group-item').forEach(item => {
         item.addEventListener('change', function () {
             const groupName = this.closest('.group-checkboxes').dataset.group;
@@ -97,8 +92,7 @@ function initSelectAllLogic() {
         globalSelectAll.indeterminate = (checkedItems.length > 0 && checkedItems.length < allItems.length);
     }
 
-    // Initialize sync on page load
-    syncHiddenField();
+    syncHiddenField(); // On load
 }
 
 document.addEventListener('DOMContentLoaded', initSelectAllLogic);
