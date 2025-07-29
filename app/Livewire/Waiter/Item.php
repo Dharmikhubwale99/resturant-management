@@ -563,7 +563,7 @@ class Item extends Component
 
         $this->createOrderAndKot();
         $this->reset(['cart', 'showVariantModal']);
-        return redirect()->route('restaurant.dashboard')->with('success', 'Order placed!');
+        return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Order placed!');
     }
 
     public function placeOrderAndPrint()
@@ -583,13 +583,13 @@ class Item extends Component
                 $this->dispatch('printKot', kotId: $kot->id);
             }
 
-            return redirect()->route('restaurant.dashboard')->with('success', 'KOT updated & printed!');
+            return redirect()->route('restaurant.waiter.dashboard')->with('success', 'KOT updated & printed!');
         }
 
         $this->createOrderAndKot(true);
         $this->reset(['cart', 'showVariantModal', 'noteInput', 'currentNoteKey']);
 
-        return redirect()->route('restaurant.dashboard')->with('success', 'Order placed & KOT printed!');
+        return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Order placed & KOT printed!');
     }
 
     public function updateOrder()
@@ -655,7 +655,7 @@ class Item extends Component
         });
 
         session()->flash('success', 'KOT updated & sent to kitchen!');
-        return redirect()->route('restaurant.dashboard');
+        return redirect()->route('restaurant.waiter.dashboard');
     }
 
     public function save()
@@ -717,7 +717,7 @@ class Item extends Component
             ]);
         }
 
-        return redirect()->route('restaurant.dashboard')->with('success', 'Order Payment Complete!');
+        return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
 
 
@@ -781,7 +781,7 @@ class Item extends Component
         }
 
         $this->dispatch('printBill', billId: $order->id);
-        return redirect()->route('restaurant.dashboard')->with('success', 'Order Payment Complete!');
+        return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
 
     public function addSplit()
