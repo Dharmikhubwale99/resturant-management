@@ -20,7 +20,7 @@
             {{ \Carbon\Carbon::parse($toDate)->format('d/m/Y') }}
         </p>
         <p class="mt-1">Total Sales: {{ $orders->count() }}</p>
-        <p>Total Sale Quantity: {{ $orders->sum('total_qty') ?? 0 }}</p>
+        {{-- <p>Total Sale Quantity: {{ $orders->sum('total_qty') ?? 0 }}</p> --}}
         <p>Total Sale Amount: ₹{{ number_format($this->totalAmount, 2) }}</p>
     </div>
 
