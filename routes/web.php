@@ -69,11 +69,8 @@ use \App\Livewire\Resturant\{
     Discount\Edit as DiscountEdit,
 
     Kitchen\Dashboard as AdminKitchenDashboard,
-
-    Report\Index as ReportIndex,
-    Report\SalesReport,
-    Report\PaymentReport,
-    Report\StaffWise,
+    SalesReport,
+    PaymentReport,
 };
 
 use \App\Livewire\Kitchen\{
@@ -189,6 +186,8 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
         Route::get('/index', AdminKitchenDashboard::class)->name('index')->middleware('can:kitchen-dashboard');
     });
 
+    Route::get('/sales-report', SalesReport::class)->name('sales-report');
+    Route::get('/payment-report', PaymentReport::class)->name('payment-report');
 
     Route::get('/waiter-order', WaiterDashboard::class)->name('waiter.dashboard')->middleware('can:order');
 
@@ -198,11 +197,6 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/bill-print/{order}', BillPrint::class)->name('bill.print');
     Route::get('/pickup', PickupCreate::class)->name('pickup.create');
     Route::get('/pickup/item/{id}', PickupItem::class)->name('pickup.item');
-
-    Route::get('/report', ReportIndex::class)->name('report');
-    Route::get('/sales-report', SalesReport::class)->name('sales-report');
-    Route::get('/payment-report', PaymentReport::class)->name('payment-report');
-    Route::get('/staff-wise-report', StaffWise::class)->name('staffwise-report');
 });
 
 // Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {

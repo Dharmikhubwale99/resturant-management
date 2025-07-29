@@ -7,7 +7,6 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Spatie\Permission\Models\Role;
 use App\Traits\HasRolesAndPermissions;
-use Spatie\Permission\Models\Permission;
 
 class Edit extends Component
 {
@@ -94,16 +93,10 @@ class Edit extends Component
         $this->user->update($data);
         $this->user->syncRoles([$this->role]);
         if (!empty($this->permissions)) {
-            $permissionList = is_array($this->permissions)
-                ? $this->permissions
-                : explode(',', $this->permissions);
-
-            $validPermissions = Permission::whereIn('name', $permissionList)
-                ->pluck('name')
-                ->toArray();
-
-            $this->user->syncPermissions($validPermissions);
+            $this->user->syncPermissions($this->permissions);
         }
+
+
         return redirect()->route('restaurant.users.index');
     }
 
