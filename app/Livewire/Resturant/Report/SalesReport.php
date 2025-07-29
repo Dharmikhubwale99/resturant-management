@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Resturant;
+namespace App\Livewire\Resturant\Report;
 
 use App\Models\Order;
 use Livewire\Component;
@@ -17,15 +17,16 @@ class SalesReport extends Component
 
     public $fromDate;
     public $toDate;
-    public $filterType = 'today'; 
+    public $filterType = 'today';
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
-        return view('livewire.resturant.sales-report', [
+        return view('livewire.resturant.report.sales-report', [
             'orders' => $this->orders,
         ]);
     }
+
     public function mount()
     {
         $this->setDefaultDates();
@@ -116,4 +117,3 @@ class SalesReport extends Component
         }, 'sales_report.pdf');
     }
 }
-

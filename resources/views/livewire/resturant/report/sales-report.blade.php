@@ -1,0 +1,74 @@
+<div class="p-4 max-w-7xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Sales Report</h1>
+
+    <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 mb-4">
+        <select wire:model.live="filterType" class="p-2 border rounded w-full sm:w-auto">
+            <option value="today">Today</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="custom">Custom</option>
+        </select>
+        @if ($filterType === 'custom')
+            <input type="date" wire:model.live="fromDate" class="p-2 border rounded w-full sm:w-auto">
+            <input type="date" wire:model.live="toDate" class="p-2 border rounded w-full sm:w-auto">
+        @endif
+    </div>
+
+    <div class="bg-white border border-blue-500 rounded-md shadow p-4 mb-4 w-full max-w-xl mx-auto text-center">
+        <p class="text-sm font-medium text-gray-700">
+            <strong>Duration :</strong> From {{ \Carbon\Carbon::parse($fromDate)->format('d/m/Y') }} to
+            {{ \Carbon\Carbon::parse($toDate)->format('d/m/Y') }}
+        </p>
+        <p class="mt-1">Total Sales: {{ $orders->count() }}</p>
+        <p>Total Sale Quantity: {{ $orders->sum('total_qty') ?? 0 }}</p>
+        <p>Total Sale Amount: ₹{{ number_format($this->totalAmount, 2) }}</p>
+    </div>
+
+    <button wire:click="exportExcel" class="bg-green-500 text-white px-4 py-2 rounded mb-4">
+        Export to Excel
+    </button>
+    <button wire:click="exportPdf" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
+        Export to PDF
+    </button>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
+            <thead class="bg-orange-400 text-black">
+                <tr>
+                    <th class="px-4 py-2 text-sm font-semibold">Sr No</th>
+                    <th class="px-4 py-2 text-sm font-semibold">Date</th>
+                    <th class="px-4 py-2 text-sm font-semibold">Receipt No</th>
+                    <th class="px-4 py-2 text-sm font-semibold">Party Name</th>
+                    <th class="px-4 py-2 text-sm font-semibold">Party Phone</th>
+                    <th class="px-4 py-2 text-sm font-semibold">Total Quantity</th>
+                    <th class="px-4 py-2 text-sm font-semibold">Total Amount (incl. taxes)</th>
+                    <th class="px-4 py-2 text-sm font-semibold">Created By</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @forelse($orders as $index => $order)
+                    <tr class="hover:bg-gray-50 text-sm">
+                        <td class="px-4 py-2">{{ $index + 1 }}</td>
+                        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($order->created_at)->format('d-m-Y') }}</td>
+                        <td class="px-4 py-2">{{ $order->order_number ?? '-' }}</td>
+                        <td class="px-4 py-2">
+                            {{ $order->customer_name ?? ($order->table->name ?? 'N/A') }}
+                        </td>
+                        <td class="px-4 py-2">{{ $order->mobile ?? '-' }}</td>
+                        <td class="px-4 py-2">{{ $order->total_qty ?? '-' }}</td>
+                        <td class="px-4 py-2">₹{{ number_format($order->total_amount, 2) }}</td>
+                        <td class="px-4 py-2">{{ $order->user->name ?? 'Admin' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="px-6 py-3 text-center text-sm text-gray-500">No sales records found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4">
+        {{ $orders->links() }}
+    </div>
+</div>
