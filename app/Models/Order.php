@@ -122,4 +122,14 @@ class Order extends Model
     return $this->hasMany(\App\Models\OrderItem::class);
 }
 
+public function paymentLogs()
+{
+    return $this->hasMany(\App\Models\RestaurantPaymentLog::class, 'order_id');
+}
+
+public function payment()
+{
+    return $this->hasOne(Payment::class)->latestOfMany();
+}
+
 }
