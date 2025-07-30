@@ -74,7 +74,7 @@ use \App\Livewire\Resturant\{
     Report\SalesReport,
     Report\PaymentReport,
     Report\StaffWise,
-    Report\MoneyIn,
+    Report\ExpenseReport,
 };
 
 use \App\Livewire\Kitchen\{
@@ -204,7 +204,7 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/sales-report', SalesReport::class)->name('sales-report');
     Route::get('/payment-report', PaymentReport::class)->name('payment-report');
     Route::get('/staff-wise-report', StaffWise::class)->name('staffwise-report');
-    Route::get('/money-in-report', MoneyIn::class)->name('moneyin-report');
+    Route::get('/expense-report', ExpenseReport::class)->name('expense-report');
 });
 
 // Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {

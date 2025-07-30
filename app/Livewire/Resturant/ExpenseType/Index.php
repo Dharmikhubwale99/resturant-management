@@ -29,7 +29,7 @@ class Index extends Component
 
     public function mount()
     {
-        if (!setting('expense-type-module')) {
+        if (!setting('expensetype')) {
             abort(403, 'You do not have access to this module.');
         }
     }

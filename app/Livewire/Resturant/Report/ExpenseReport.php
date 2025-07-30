@@ -2,28 +2,24 @@
 
 namespace App\Livewire\Resturant\Report;
 
-use App\Models\Order;
+use App\Models\Expense;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\SalesReportExport;
-use Barryvdh\DomPDF\Facade\Pdf;
 
-class SalesReport extends Component
+class ExpenseReport extends Component
 {
     use WithPagination;
 
     public $fromDate;
     public $toDate;
     public $filterType = 'today';
-
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
-        return view('livewire.resturant.report.sales-report', [
-            'orders' => $this->orders,
+        return view('livewire.resturant.report.expense-report', [
+            'expenses' => $this->expenses,
         ]);
     }
 
@@ -70,11 +66,11 @@ class SalesReport extends Component
         $this->resetPage();
     }
 
-    public function getOrdersProperty()
+    public function getExpensesProperty()
     {
         $restaurantId = Auth::user()->restaurants()->first()->id;
 
-        return Order::where('restaurant_id', $restaurantId)
+        return Expense::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
             ->latest()
             ->paginate(10);
@@ -84,36 +80,9 @@ class SalesReport extends Component
     {
         $restaurantId = Auth::user()->restaurants()->first()->id;
 
-        return Order::where('restaurant_id', $restaurantId)
+        return Expense::where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
-            ->sum('total_amount');
+            ->sum('amount');
     }
 
-    public function exportExcel()
-    {
-        $restaurantId = Auth::user()->restaurants()->first()->id;
-        return Excel::download(
-            new SalesReportExport($this->fromDate, $this->toDate, $restaurantId),
-            'sales_report.xlsx'
-        );
-    }
-
-    public function exportPdf()
-    {
-        $restaurantId = Auth::user()->restaurants()->first()->id;
-        $orders = Order::where('restaurant_id', $restaurantId)
-            ->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
-            ->get();
-
-        $totalAmount = $orders->sum('total_amount');
-
-        $pdf = Pdf::loadView('livewire.pdf.sales-report-pdf', [
-            'orders' => $orders,
-            'totalAmount' => $totalAmount,
-        ]);
-
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->stream();
-        }, 'sales_report.pdf');
-    }
 }
