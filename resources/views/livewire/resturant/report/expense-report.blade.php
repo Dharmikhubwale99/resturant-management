@@ -19,9 +19,8 @@
             <strong>Duration :</strong> From {{ \Carbon\Carbon::parse($fromDate)->format('d/m/Y') }} to
             {{ \Carbon\Carbon::parse($toDate)->format('d/m/Y') }}
         </p>
-        <p class="mt-1">Total Sales: {{ $orders->count() }}</p>
-        {{-- <p>Total Sale Quantity: {{ $orders->sum('total_qty') ?? 0 }}</p> --}}
-        <p>Total Sale Amount: ₹{{ number_format($this->totalAmount, 2) }}</p>
+        <p class="mt-1">Total Expenses: {{ $expenses->count() }}</p>
+        <p>Total Expense Amount: ₹{{ number_format($this->totalAmount, 2) }}</p>
     </div>
 
     <button wire:click="exportExcel" class="bg-green-500 text-white px-4 py-2 rounded mb-4">
@@ -33,37 +32,27 @@
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
-            <thead class="bg-orange-400 text-black text-center">
+            <thead class="bg-orange-300 text-black text-center">
                 <tr>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Sr No</th>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Date</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Receipt No</th>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Party Name</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Party Phone</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Total Quantity</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Total Amount (incl. taxes)</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Created By</th>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Expense Type</th>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Amount Paid</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
-                @forelse($orders as $index => $order)
-                    <tr class="hover:bg-gray-50 text-sm text-center">
+            <tbody class="divide-y divide-gray-200 text-center">
+                @forelse($expenses as $index => $expense)
+                    <tr class="hover:bg-gray-50 text-sm">
                         <td class="px-4 py-2 whitespace-nowrap">{{ $index + 1 }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">
-                            {{ \Carbon\Carbon::parse($order->created_at)->format('d-m-Y') }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->order_number ?? '-' }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">
-                            {{ $order->customer_name ?? ($order->table->name ?? 'N/A') }}
-                        </td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->mobile ?? '-' }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->total_qty ?? '-' }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">₹{{ number_format($order->total_amount, 2) }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->user->name ?? 'Admin' }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ \Carbon\Carbon::parse($expense->paid_at)->format('d-m-Y') }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $expense->name }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $expense->expenseType->name }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $expense->amount }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-3 text-center text-sm text-gray-500">No sales records found.
-                        </td>
+                        <td colspan="8" class="px-6 py-3 text-center text-sm text-gray-500">No sales records found.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -71,6 +60,6 @@
     </div>
 
     <div class="mt-4">
-        {{ $orders->links() }}
+        {{ $expenses->links() }}
     </div>
 </div>

@@ -24,18 +24,23 @@ class SalesReportExport implements FromCollection, WithHeadings, WithMapping
     */
     public function collection()
     {
-        return Order::where('restaurant_id', $this->restaurantId)
+         return Order::with(['user', 'table'])
+            ->where('restaurant_id', $this->restaurantId)
             ->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
-            ->get(['id', 'created_at', 'total_amount']);
+            ->get();
     }
 
     // Add this method for column headers
     public function headings(): array
     {
         return [
-            'Order No',
             'Date',
-            'Total Amount',
+            'Receipt No',
+            'Party Name',
+            'Party Phone',
+            'Total Quantity',
+            'Total Amount (incl. taxes)',
+            'Created By',
         ];
     }
 
@@ -43,9 +48,13 @@ class SalesReportExport implements FromCollection, WithHeadings, WithMapping
     public function map($order): array
     {
         return [
-            $order->id,
             \Carbon\Carbon::parse($order->created_at)->format('d-m-Y'),
-            $order->total_amount,
+            $order->order_number ?? '-',
+            $order->customer_name ?? ($order->table->name ?? 'N/A'),
+            $order->mobile ?? '-',
+            $order->total_qty ?? 0,
+            number_format($order->total_amount, 2),
+            $order->user->name ?? 'Admin',
         ];
     }
 }

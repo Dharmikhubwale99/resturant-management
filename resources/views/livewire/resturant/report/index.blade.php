@@ -17,7 +17,7 @@
             <x-form.button>Purchase Report</x-form.button>
             <x-form.button :route="'restaurant.moneyin-report'">Money In Report</x-form.button>
             <x-form.button>Money Out Report</x-form.button>
-            <x-form.button>Expense Report</x-form.button>
+            <x-form.button :route="'restaurant.expense-report'">Expense Report</x-form.button>
         </div>
     </div>
     <div>
