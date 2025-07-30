@@ -33,7 +33,7 @@
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
-            <thead class="bg-orange-400 text-black">
+            <thead class="bg-orange-400 text-black text-center">
                 <tr>
                     <th class="px-4 py-2 text-sm font-semibold">Sr No</th>
                     <th class="px-4 py-2 text-sm font-semibold">Date</th>
@@ -47,7 +47,7 @@
             </thead>
             <tbody class="divide-y divide-gray-200">
                 @forelse($orders as $index => $order)
-                    <tr class="hover:bg-gray-50 text-sm">
+                    <tr class="hover:bg-gray-50 text-sm text-center">
                         <td class="px-4 py-2">{{ $index + 1 }}</td>
                         <td class="px-4 py-2">{{ \Carbon\Carbon::parse($order->created_at)->format('d-m-Y') }}</td>
                         <td class="px-4 py-2">{{ $order->order_number ?? '-' }}</td>
