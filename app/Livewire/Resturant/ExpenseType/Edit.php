@@ -18,7 +18,7 @@ class Edit extends Component
 
     public function mount($id)
     {
-        if (!setting('expense-type-module')) {
+        if (!setting('expensetype')) {
             abort(403, 'You do not have access to this module.');
         }
 

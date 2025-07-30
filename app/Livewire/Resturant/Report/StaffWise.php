@@ -53,12 +53,11 @@ class StaffWise extends Component
 
     public function updatingSearch()
     {
-        $this->resetPage();
+        $this->resetPage(); // reset pagination on new search
     }
 
     public function showDetails($userId)
-{
-    $this->selectedUserId = $this->selectedUserId === $userId ? null : $userId;
-}
-
+    {
+        $this->selectedUserId = $userId;
+    }
 }
