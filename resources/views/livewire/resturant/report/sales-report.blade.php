@@ -24,12 +24,12 @@
         <p>Total Sale Amount: ₹{{ number_format($this->totalAmount, 2) }}</p>
     </div>
 
-    <button wire:click="exportExcel" class="bg-green-500 text-white px-4 py-2 rounded mb-4">
-        Export to Excel
-    </button>
-    <button wire:click="exportPdf" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
-        Export to PDF
-    </button>
+    <div class="flex space-x-2 mb-4">
+        <x-form.button type="button" title="Export to Excel" wireClick="exportExcel" wireTarget="exportExcel"
+            class="bg-green-500 text-white px-4 py-2 rounded" />
+        <x-form.button type="button" title="Export to PDF" wireClick="exportPdf" wireTarget="exportPdf"
+            class="bg-blue-500 text-white px-4 py-2 rounded" />
+    </div>
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
