@@ -21,7 +21,7 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-                        @if (setting('expensetype'))
+                        @if (setting('expense-type-module'))
                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Expense-Type</th>
                         @endif
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
@@ -35,7 +35,7 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 text-sm text-gray-900">{{ $loop->iteration }}</td>
 
-                            @if (setting('expensetype'))
+                            @if (setting('expense-type-module'))
                                 <td class="px-6 text-sm text-gray-900">{{ $expense->expenseType->name ?? '' }}</td>
                             @endif
                             <td class="px-6 text-sm text-gray-900">{{ $expense->name }}</td>

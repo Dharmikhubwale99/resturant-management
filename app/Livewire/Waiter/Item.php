@@ -823,7 +823,7 @@ class Item extends Component
         $payment = Payment::create([
             'order_id' => $order->id,
             'amount' => $order->total_amount,
-            'method' => $this->paymentMethod,
+            'method' => 'part',
         ]);
 
         foreach ($this->splits as $split) {
@@ -866,7 +866,7 @@ class Item extends Component
 
         $this->reset(['splits', 'paymentMethod', 'showSplitModal', 'customerName', 'mobile']);
 
-        return redirect()->route('waiter.dashboard')->with('success', 'Order split payment recorded!');
+        return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Order split payment recorded!');
     }
 
     public function confirmDuoPayment()
@@ -911,7 +911,7 @@ class Item extends Component
         $payment = Payment::create([
             'order_id' => $order->id,
             'amount' => $order->total_amount,
-            'method' => $this->duoMethod,
+            'method' => 'duo',
         ]);
 
         $remainingAmount = $order->total_amount - $this->duoAmount;
@@ -938,7 +938,7 @@ class Item extends Component
             'paymentMethod'
         ]);
 
-        return redirect()->route('waiter.dashboard')->with('success', 'Duo Payment Completed!');
+        return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Duo Payment Completed!');
     }
 
 

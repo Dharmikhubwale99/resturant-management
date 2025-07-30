@@ -21,7 +21,7 @@ class Create extends Component
 
     public function mount()
     {
-        if (!setting('expensetype')) {
+        if (!setting('expense-type-module')) {
             abort(403, 'You do not have access to this module.');
         }
     }

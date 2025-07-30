@@ -18,7 +18,7 @@ class Show extends Component
 
     public function mount($id)
     {
-        if (!setting('expenses')) {
+        if (!setting('expense')) {
             abort(403, 'You do not have access to this module.');
         }
 

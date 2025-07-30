@@ -4,7 +4,7 @@
         <x-form.error />
         <form wire:submit.prevent="submit" class="space-y-4" enctype="multipart/form-data">
 
-            @if (setting('expensetype'))
+            @if (setting('expense-type-module'))
             <x-form.select name="expense_type_id" label="Expense Type" wireModel="expense_type_id" required :options="$expenseTypes" />
             @endif
 
