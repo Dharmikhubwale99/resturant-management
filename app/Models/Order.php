@@ -18,29 +18,7 @@ class Order extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'order_number',
-        'restaurant_id',
-        'table_id',
-        'user_id',
-        'customer_id',
-        'discount_id',
-        'order_type',
-        'status',
-        'sub_total',
-        'discount_amount',
-        'tax_amount',
-        'total_amount',
-        'notes',
-        'customer_name',
-        'mobile',
-        'service_charge',
-        'transport_name',
-        'transport_address',
-        'transport_distance',
-        'vehicle_number',
-        'transport_charge'
-    ];
+    protected $fillable = ['order_number', 'restaurant_id', 'table_id', 'user_id', 'customer_id', 'discount_id', 'order_type', 'status', 'sub_total', 'discount_amount', 'tax_amount', 'total_amount', 'notes', 'customer_name', 'mobile', 'service_charge', 'transport_name', 'transport_address', 'transport_distance', 'vehicle_number', 'transport_charge'];
 
     /**
      * Get the attributes that should be cast.
@@ -118,18 +96,22 @@ class Order extends Model
     }
 
     public function items()
-{
-    return $this->hasMany(\App\Models\OrderItem::class);
-}
+    {
+        return $this->hasMany(\App\Models\OrderItem::class);
+    }
 
-public function paymentLogs()
-{
-    return $this->hasMany(\App\Models\RestaurantPaymentLog::class, 'order_id');
-}
+    public function paymentLogs()
+    {
+        return $this->hasMany(\App\Models\RestaurantPaymentLog::class, 'order_id');
+    }
 
-public function payment()
-{
-    return $this->hasOne(Payment::class)->latestOfMany();
-}
+    public function payment()
+    {
+        return $this->hasOne(Payment::class)->latestOfMany();
+    }
 
+    public function paymentGroups()
+    {
+        return $this->hasMany(\App\Models\PaymentGroup::class, 'order_id');
+    }
 }
