@@ -15,13 +15,15 @@ class StaffWise extends Component
 
     public $selectedUserId = null;
     public $search = '';
+    public $fromDate;
+    public $toDate;
+    public $dateFilter = 'today';
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
         $restaurantId = Auth::user()->restaurants()->first()->id;
 
-        // Staff list with search and pagination
         $staffList = User::where('restaurant_id', $restaurantId)
             ->where(function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
@@ -38,12 +40,23 @@ class StaffWise extends Component
         $orders = [];
 
         if ($this->selectedUserId) {
-            $orders = Order::where('user_id', $this->selectedUserId)
-            ->where('restaurant_id', $restaurantId)
-            ->with('items.item')
-            ->latest()
-            ->get();
+            $ordersQuery = Order::where('user_id', $this->selectedUserId)
+                ->where('restaurant_id', $restaurantId)
+                ->with(['items.item', 'table']);
+
+            if ($this->dateFilter === 'today') {
+                $ordersQuery->whereDate('created_at', now()->toDateString());
+            } elseif ($this->dateFilter === 'weekly') {
+                $ordersQuery->whereBetween('created_at', [now()->subWeek(), now()]);
+            } elseif ($this->dateFilter === 'monthly') {
+                $ordersQuery->whereMonth('created_at', now()->month);
+            } elseif ($this->dateFilter === 'custom' && $this->fromDate && $this->toDate) {
+                $ordersQuery->whereBetween('created_at', [$this->fromDate, $this->toDate]);
+            }
+
+            $orders = $ordersQuery->latest()->get();
         }
+
 
         return view('livewire.resturant.report.staff-wise', [
             'staffList' => $staffList,

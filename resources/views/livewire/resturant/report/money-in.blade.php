@@ -1,8 +1,8 @@
-<div class="p-4">
-    <!-- Filters -->
-    <div class="flex flex-wrap gap-4 mb-4">
-        <!-- Date Filter -->
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+    <h1 class="text-2xl font-bold mb-4">Money In Report</h1>
+    <div class="flex justify-end gap-4 mb-4">
         <select wire:model.live="dateFilter" class="border p-2 rounded">
+            <option value="today">Today</option>
             <option value="weekly">Weekly</option>
             <option value="monthly">Monthly</option>
             <option value="custom">Custom</option>
@@ -13,7 +13,7 @@
             <input type="date" wire:model.live="toDate" class="border p-2 rounded">
         @endif
 
-        <!-- Method Filter -->
+
         <select wire:model="methodFilter" class="border p-2 rounded">
             <option value="">All Methods</option>
             <option value="cash">Cash</option>
@@ -24,90 +24,66 @@
         </select>
     </div>
 
-    <!-- Orders Table -->
-    <table class="w-full border-collapse border">
-        <thead>
-            <tr class="bg-gray-100">
-                <th class="border p-2">Order ID</th>
-                <th class="border p-2">Status</th>
-                <th class="border p-2">Total</th>
-                <th class="border p-2">Payment</th>
-                <th class="border p-2">Details</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($orders as $order)
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 border border-gray-300 mb-6">
+            <thead class="bg-orange-400 text-black text-center">
                 <tr>
-                    <td class="border p-2">{{ $order->order_id }}</td>
-                    <td class="border p-2">{{ ucfirst($order->status) }}</td>
-                    <td class="border p-2">₹{{ $order->total_amount }}</td>
-                    <td class="border p-2">
-                        @php
-                            $logs = $order->paymentLogs;
-                            $paid = $logs->sum('amount');
-                        @endphp
-                        @if ($logs->isEmpty())
-                            <span class="text-red-500">Complete Payment</span>
-                        @else
-                            @foreach ($logs->groupBy('method') as $method => $group)
-                                <div>{{ ucfirst($method) }}: ₹{{ $group->sum('paid_amount') }}</div>
-                            @endforeach
-                        @endif
-                    </td>
-                    <td class="border p-2">
-                        @if (optional($order->payment)->method === 'duo')
-                            <button wire:click="toggleDetails({{ $order->id }})"
-                                class="bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                                {{ $selectedOrderId === $order->id ? 'Hide' : 'Details' }}
-                            </button>
-                        @else
-                            <span class="text-gray-400">-</span>
-                        @endif
-
-                    </td>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Sr No</th>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Order ID</th>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Status</th>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Total</th>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Payment Type</th>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Payment</th>
                 </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @forelse ($orders as $index => $order)
+                    <tr class="hover:bg-gray-50 text-sm text-center">
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $index + 1 }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->order_number }}</1td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ ucfirst($order->status) }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">₹{{ $order->total_amount }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->payment->method ?? ''}}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">
+                            @php
+                                $logs = $order->paymentLogs;
+                                $paid = $logs->sum('amount');
+                                $method = optional($order->payment)->method;
+                            @endphp
 
-                @if ($selectedOrderId === $order->id)
-                    <tr>
-                        <td colspan="5" class="bg-gray-100 p-4">
-                            <h2 class="text-md font-semibold mb-2 text-gray-800">Payment Breakdown</h2>
-                            @if ($order->paymentLogs->count())
-                                <table class="w-full table-auto border text-sm">
-                                    <thead class="bg-gray-200 text-gray-700">
-                                        <tr>
-                                            <th class="px-3 py-2">Method</th>
-                                            <th class="px-3 py-2">Amount</th>
-                                            <th class="px-3 py-2">Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-center">
-                                        @foreach ($order->paymentLogs as $log)
-                                            <tr>
-                                                <td class="px-3 py-1 capitalize">{{ $log->method }}</td>
-                                                <td class="px-3 py-1">₹{{ $log->amount + $log->paid_amount }}</td>
-                                                <td class="px-3 py-1">
-                                                    {{ \Carbon\Carbon::parse($log->created_at)->format('d-m-Y H:i') }}
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                                <div class="text-right mt-2">
-                                    <strong>Total Paid:</strong> ₹{{ $order->paymentLogs->sum('paid_amount') }}<br>
-                                    <strong>Due:</strong>
-                                    ₹{{ $order->paymentLogs->sum('amount') }}
-                                </div>
+                            @if ($method === 'part' && $order->paymentGroups->count())
+                                <span class="text-green-600">
+                                    {{
+                                        $order->paymentGroups
+                                            ->groupBy('method')
+                                            ->map(fn($group, $m) => ucfirst($m) . ': ₹' . $group->sum('amount'))
+                                            ->implode(' | ')
+                                    }}
+                                </span>
+
+                            @elseif ($logs->isNotEmpty())
+                                @foreach ($logs->groupBy('method') as $logMethod => $group)
+                                    <div>
+                                        <span class="text-green-600">{{ ucfirst($logMethod) }}: ₹{{ $group->sum('paid_amount') }}</span> |
+                                        <span class="text-red-400">₹{{ $group->sum('amount') }}</span>
+                                    </div>
+                                @endforeach
+
                             @else
-                                <p class="text-red-600">No payment logs available.</p>
+                                <span class="text-green-600">{{ ucfirst($method) ?? '-' }} : ₹{{ $order->total_amount }}</span>
                             @endif
                         </td>
                     </tr>
-                @endif
-            @endforeach
-        </tbody>
-
-    </table>
-
+                @empty
+                    <tr>
+                        <td colspan="8" class="px-6 py-3 text-center text-sm text-gray-500">
+                            No sales records found.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
     <div class="mt-4">
         {{ $orders->links() }}
     </div>
