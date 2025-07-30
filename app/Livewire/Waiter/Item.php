@@ -846,6 +846,8 @@ class Item extends Component
             ]);
 
             $order->update([
+                'customer_name' => $this->customerName,
+                'mobile' => $this->mobile,
                 'status' => 'served',
             ]);
 
@@ -899,7 +901,12 @@ class Item extends Component
         $orderItems = OrderItem::where('order_id', $order->id)->get();
         $table = Table::findOrFail($this->table_id);
 
-        $order->update(['status' => 'served']);
+        $order->update([
+            'customer_name' => $this->duoCustomerName,
+            'mobile' => $this->duoMobile,
+            'status' => 'served'
+        ]);
+
         $orderItems->each(fn($item) => $item->update(['status' => 'served']));
         $table->update(['status' => 'available']);
 
@@ -992,6 +999,12 @@ class Item extends Component
         ]);
 
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
+
+        $order->update([
+            'customer_name' => $this->followupCustomer_name,
+            'mobile' => $this->followupCustomer_mobile,
+        ]);
+
         $coustomer = Customer::where('order_id', $order->id)->first();
         if(!$coustomer) {
             $coustomer->create([
