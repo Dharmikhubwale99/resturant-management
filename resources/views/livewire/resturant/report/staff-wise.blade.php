@@ -1,29 +1,14 @@
 <div class="p-6 max-w-7xl mx-auto space-y-6">
     <h1 class="text-2xl font-bold mb-4">Staff Wise Sales Report</h1>
 
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-        <div class="flex items-center gap-2">
-            <select wire:model.live="dateFilter" class="border p-2 rounded">
-                <option value="today">Today</option>
-                <option value="weekly">This Week</option>
-                <option value="monthly">This Month</option>
-                <option value="custom">Custom</option>
-            </select>
-
-            @if ($dateFilter === 'custom')
-                <input type="date" wire:model.live="fromDate" class="border p-2 rounded">
-                <span class="text-gray-600">to</span>
-                <input type="date" wire:model.live="toDate" class="border p-2 rounded">
-            @endif
-        </div>
-
+    <div class="flex justify-end mb-4">
         <input type="text" wire:model.debounce.500ms="search" placeholder="Search by name or phone"
             class="border p-2 rounded w-full sm:w-1/3" />
     </div>
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 border border-gray-300 mb-6">
-            <thead class="bg-orange-600 text-white text-center">
+            <thead class="bg-orange-600 text-white">
                 <tr>
                     <th class="px-4 py-2 text-sm font-semibold">#</th>
                     <th class="px-4 py-2 text-sm font-semibold">Name</th>
@@ -36,7 +21,7 @@
             <tbody class="divide-y divide-gray-100">
 
                 @forelse($staffList as $staff)
-                    <tr class="text-center">
+                    <tr>
                         <td class="px-4 py-2">{{ $loop->iteration }}</td>
                         <td class="px-4 py-2">{{ $staff->name }}</td>
                         <td class="px-4 py-2">{{ $staff->mobile ?? '-' }}</td>
@@ -52,7 +37,7 @@
 
                     @if ($selectedUserId === $staff->id && count($orders))
                         <tr>
-                            <td colspan="5" class="items-center bg-gray-100 p-4 text-center">
+                            <td colspan="5" class="bg-gray-100 p-4">
                                 <h2 class="text-md font-semibold mb-2 text-gray-800">Order Details</h2>
                                 <table class="w-full table-auto border">
                                     <thead class="bg-gray-200 text-gray-700 text-sm">
@@ -64,7 +49,7 @@
                                             <th class="px-3 py-2">Amount</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="text-sm text-center">
+                                    <tbody class="text-sm">
                                         @foreach ($orders as $order)
                                             <tr class="border-t hover:bg-gray-50">
                                                 <td class="px-3 py-2">{{ $order->order_number }}</td>

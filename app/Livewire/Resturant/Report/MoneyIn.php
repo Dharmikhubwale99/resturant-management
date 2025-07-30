@@ -13,10 +13,11 @@ class MoneyIn extends Component
 {
     use WithPagination;
 
-    public $dateFilter = 'today';
+    public $dateFilter = '';
     public $fromDate;
     public $toDate;
     public $methodFilter = '';
+    public $selectedOrderId = null;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -37,26 +38,27 @@ class MoneyIn extends Component
         }
     }
 
+    public function toggleDetails($orderId)
+    {
+        $this->selectedOrderId = $this->selectedOrderId === $orderId ? null : $orderId;
+    }
+
     public function getFilteredOrders()
     {
-        $query = Order::query()->with(['payments', 'paymentLogs']);
+        $query = Order::query()
+            ->with(['payments', 'paymentLogs'])
+            ->whereBetween('created_at', [$this->fromDate, $this->toDate]);
 
-        if ($this->dateFilter === 'today') {
-            $this->fromDate = now()->startOfDay()->format('Y-m-d');
-            $this->toDate = now()->endOfDay()->format('Y-m-d');
-            $query->whereDate('created_at', now()->toDateString());
-        } elseif ($this->dateFilter === 'weekly') {
-            $this->fromDate = now()->subWeek()->format('Y-m-d');
-            $this->toDate = now()->format('Y-m-d');
+        // Date Filter
+        if ($this->dateFilter === 'weekly') {
             $query->whereBetween('created_at', [now()->subWeek(), now()]);
         } elseif ($this->dateFilter === 'monthly') {
-            $this->fromDate = now()->startOfMonth()->format('Y-m-d');
-            $this->toDate = now()->endOfMonth()->format('Y-m-d');
             $query->whereMonth('created_at', now()->month);
         } elseif ($this->dateFilter === 'custom' && $this->fromDate && $this->toDate) {
             $query->whereBetween('created_at', [$this->fromDate, $this->toDate]);
         }
 
+        // Method Filter
         if ($this->methodFilter) {
             $query->whereHas('paymentLogs', function ($q) {
                 $q->where('method', $this->methodFilter);

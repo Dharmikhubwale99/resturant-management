@@ -20,18 +20,31 @@ class ExpenseExport implements FromCollection, WithHeadings, WithMapping
 
     public function collection()
     {
-        return Expense::where('restaurant_id', $this->restaurantId)
-            ->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
-            ->get(['id', 'created_at', 'total_amount']);
+        return Expense::with('expenseType')
+            ->where('restaurant_id', $this->restaurantId)
+            ->whereBetween('paid_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
+            ->get();
     }
 
     public function headings(): array
     {
         return [
-            'Order No',
+            'Sr No',
             'Date',
-            'Total Amount',
+            'Party Name',
+            'Expense Type',
+            'Amount Paid',
         ];
     }
 
+    public function map($expense): array
+    {
+        return [
+            $expense->id,
+            \Carbon\Carbon::parse($expense->paid_at)->format('d-m-Y'),
+            $expense->name,
+            $expense->expenseType->name ?? '-',
+            number_format($expense->amount, 2),
+        ];
+    }
 }

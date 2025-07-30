@@ -7,6 +7,10 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ExpenseExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Exp;
 
 class ExpenseReport extends Component
 {
@@ -71,7 +75,7 @@ class ExpenseReport extends Component
         $restaurantId = Auth::user()->restaurants()->first()->id;
 
         return Expense::where('restaurant_id', $restaurantId)
-            ->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
+            ->whereBetween('paid_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
             ->latest()
             ->paginate(10);
     }
@@ -81,8 +85,39 @@ class ExpenseReport extends Component
         $restaurantId = Auth::user()->restaurants()->first()->id;
 
         return Expense::where('restaurant_id', $restaurantId)
-            ->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
+            ->whereBetween('paid_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
             ->sum('amount');
     }
 
+    public function exportExcel()
+    {
+        $restaurantId = Auth::user()->restaurants()->first()->id;
+        return Excel::download(
+            new ExpenseExport($this->fromDate, $this->toDate, $restaurantId),
+            'expense_report.xlsx'
+        );
+    }
+
+    public function exportPdf()
+    {
+        $restaurantId = Auth::user()->restaurants()->first()->id;
+
+        $expenses = Expense::with('expenseType')
+            ->where('restaurant_id', $restaurantId)
+            ->whereBetween('paid_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
+            ->get();
+
+        $totalAmount = $expenses->sum('amount'); // Fix this line
+
+        $pdf = Pdf::loadView('livewire.pdf.expense-report-pdf', [
+            'expenses' => $expenses,
+            'totalAmount' => $totalAmount,
+            'fromDate' => $this->fromDate,
+            'toDate' => $this->toDate,
+        ]);
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->stream();
+        }, 'expense_report.pdf');
+    }
 }
