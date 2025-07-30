@@ -52,7 +52,6 @@ class SalesReport extends Component
                 $this->toDate = now()->endOfMonth()->format('Y-m-d');
                 break;
             case 'custom':
-                // Keep manual input active
                 break;
             default:
                 $this->setDefaultDates();

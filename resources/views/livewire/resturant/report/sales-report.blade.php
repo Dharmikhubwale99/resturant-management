@@ -20,7 +20,7 @@
             {{ \Carbon\Carbon::parse($toDate)->format('d/m/Y') }}
         </p>
         <p class="mt-1">Total Sales: {{ $orders->count() }}</p>
-        <p>Total Sale Quantity: {{ $orders->sum('total_qty') ?? 0 }}</p>
+        {{-- <p>Total Sale Quantity: {{ $orders->sum('total_qty') ?? 0 }}</p> --}}
         <p>Total Sale Amount: ₹{{ number_format($this->totalAmount, 2) }}</p>
     </div>
 
@@ -33,7 +33,7 @@
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
-            <thead class="bg-orange-300 text-black">
+            <thead class="bg-orange-400 text-black text-center">
                 <tr>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Sr No</th>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Date</th>
@@ -47,7 +47,7 @@
             </thead>
             <tbody class="divide-y divide-gray-200">
                 @forelse($orders as $index => $order)
-                    <tr class="hover:bg-gray-50 text-sm">
+                    <tr class="hover:bg-gray-50 text-sm text-center">
                         <td class="px-4 py-2 whitespace-nowrap">{{ $index + 1 }}</td>
                         <td class="px-4 py-2 whitespace-nowrap">
                             {{ \Carbon\Carbon::parse($order->created_at)->format('d-m-Y') }}</td>
