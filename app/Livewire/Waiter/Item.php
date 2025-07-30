@@ -725,7 +725,7 @@ class Item extends Component
     {
         $this->validate(
             [
-                'paymentMethod' => 'required|in:cash,card,duo,other,part',
+                'paymentMethod' => 'required|in:cash,card,duo,upi,part',
             ],
             [
                 'paymentMethod.required' => 'Please choose a payment method.',
