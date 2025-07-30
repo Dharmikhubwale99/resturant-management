@@ -38,13 +38,13 @@
             <x-form.button>Item Details Report</x-form.button>
         </div>
     </div>
-    <div>
+    {{-- <div>
         <h2 class="text-lg font-bold text-gray-700 mb-2">BUSINESS REPORTS</h2>
         <div class="flex flex-wrap gap-2">
             <x-form.button>Day Book Report</x-form.button>
             <x-form.button>All Profiles Day Book Report</x-form.button>
             <x-form.button>Cut Off Day Report</x-form.button>
         </div>
-    </div>
+    </div> --}}
 
 </div>
