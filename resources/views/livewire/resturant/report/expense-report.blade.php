@@ -1,5 +1,5 @@
 <div class="p-4 max-w-7xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Sales Report</h1>
+    <h1 class="text-2xl font-bold mb-4">Expense Report</h1>
 
     <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 mb-4">
         <select wire:model.live="filterType" class="p-2 border rounded w-full sm:w-auto">
@@ -23,16 +23,16 @@
         <p>Total Expense Amount: ₹{{ number_format($this->totalAmount, 2) }}</p>
     </div>
 
-    <button wire:click="exportExcel" class="bg-green-500 text-white px-4 py-2 rounded mb-4">
-        Export to Excel
-    </button>
-    <button wire:click="exportPdf" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
-        Export to PDF
-    </button>
+    <div class="flex space-x-2 mb-4">
+        <x-form.button type="button" title="Export to Excel" wireClick="exportExcel" wireTarget="exportExcel"
+            class="bg-green-500 text-white px-4 py-2 rounded" />
+        <x-form.button type="button" title="Export to PDF" wireClick="exportPdf" wireTarget="exportPdf"
+            class="bg-blue-500 text-white px-4 py-2 rounded" />
+    </div>
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
-            <thead class="bg-orange-300 text-black text-center">
+            <thead class="bg-orange-400 text-black text-center">
                 <tr>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Sr No</th>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Date</th>
