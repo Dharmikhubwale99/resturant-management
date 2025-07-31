@@ -57,24 +57,20 @@
 
                         <div class="block md:hidden ">
 
-                            <a href="{{ route('superadmin.admin.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admins</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admins</a>
+
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Users</a>
 
                             <a href="{{ route('superadmin.settings') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
 
-                            <a href="{{ route('superadmin.plans.index') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Plan</a>
-
-                            <a href="{{ route('superadmin.plans.report') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Report</a>
-
                         </div>
 
                         <div class="py-1">
-                            {{-- <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View
                                 Profile</a>
                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit
-                                Profile</a> --}}
+                                Profile</a>
 
                             {{-- @if (auth()->check() && auth()->user()->refer_code)
                                 <input type="text" id="referralLink"
