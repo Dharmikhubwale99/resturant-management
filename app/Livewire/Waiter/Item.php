@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Restaurant ,Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer};
+use App\Models\{Restaurant, Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer, SalesSummaries};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -66,7 +66,6 @@ class Item extends Component
     public string $customer_dob = '';
     public string $customer_anniversary = '';
 
-
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
@@ -100,14 +99,11 @@ class Item extends Component
     {
         $order = Order::where('table_id', $table_id)->where('status', 'pending')->first();
 
-        $kots = Kot::where('order_id', $order->id)
-            ->where('status', 'pending')
-            ->orderBy('created_at')
-            ->get();
+        $kots = Kot::where('order_id', $order->id)->where('status', 'pending')->orderBy('created_at')->get();
 
         $coustomer = Customer::where('order_id', $order->id)->first();
 
-        if($coustomer) {
+        if ($coustomer) {
             $this->followupCustomer_name = $coustomer->name;
             $this->followupCustomer_mobile = $coustomer->mobile;
             $this->followupCustomer_email = $coustomer->email;
@@ -123,18 +119,14 @@ class Item extends Component
                 $key = $kotItem->variant_id ? 'v' . $kotItem->variant_id : $kotItem->item_id;
                 $this->originalKotItemKeys[] = $key;
 
-                $name = $kotItem->variant_id
-                    ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')'
-                    : $kotItem->item->name;
+                $name = $kotItem->variant_id ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')' : $kotItem->item->name;
 
                 if (!isset($this->cart[$key])) {
                     $this->cart[$key] = [
                         'id' => $key,
                         'item_id' => $kotItem->item_id,
                         'name' => $name,
-                        'price' => $kotItem->variant_id
-                            ? $kotItem->item->price + $kotItem->variant->price
-                            : $kotItem->item->price,
+                        'price' => $kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price,
                         'qty' => $kotItem->quantity,
                         'note' => $kotItem->special_notes ?? '',
                         'kot_number' => $kot->kot_number,
@@ -151,16 +143,18 @@ class Item extends Component
 
     public function getFilteredItems()
     {
-        $collection = $this->selectedCategory
-            ? $this->items->where('category_id', $this->selectedCategory)
-            : $this->items;
+        $collection = $this->selectedCategory ? $this->items->where('category_id', $this->selectedCategory) : $this->items;
 
         if ($this->search !== '') {
             $searchLower = str($this->search)->lower();
             $collection = $collection->filter(function ($i) use ($searchLower) {
-                return str($i->name)->lower()->contains($searchLower)
-                    || str($i->code ?? '')->lower()->contains($searchLower)
-                    || str($i->short_name ?? '')->lower()->contains($searchLower);
+                return str($i->name)->lower()->contains($searchLower) ||
+                    str($i->code ?? '')
+                        ->lower()
+                        ->contains($searchLower) ||
+                    str($i->short_name ?? '')
+                        ->lower()
+                        ->contains($searchLower);
             });
         }
 
@@ -181,7 +175,7 @@ class Item extends Component
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
         $service = $this->serviceCharge ?? 0;
-        return $subtotal + $service ;
+        return $subtotal + $service;
     }
 
     public function getSubtotal()
@@ -676,9 +670,11 @@ class Item extends Component
             $this->createOrderAndKot();
             $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
         } else {
-            $newItemsExist = collect($this->cart)->reject(function ($item, $key) {
-                return in_array($key, $this->originalKotItemKeys);
-            })->isNotEmpty();
+            $newItemsExist = collect($this->cart)
+                ->reject(function ($item, $key) {
+                    return in_array($key, $this->originalKotItemKeys);
+                })
+                ->isNotEmpty();
 
             if ($newItemsExist) {
                 $this->updateOrder();
@@ -715,11 +711,11 @@ class Item extends Component
                 'amount' => $amount,
                 'method' => $this->paymentMethod,
             ]);
+            $this->totalSale($order->restaurant_id, $order->total_amount);
         }
 
         return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
-
 
     public function saveAndPrint()
     {
@@ -739,9 +735,11 @@ class Item extends Component
             $this->createOrderAndKot();
             $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
         } else {
-            $newItemsExist = collect($this->cart)->reject(function ($item, $key) {
-                return in_array($key, $this->originalKotItemKeys);
-            })->isNotEmpty();
+            $newItemsExist = collect($this->cart)
+                ->reject(function ($item, $key) {
+                    return in_array($key, $this->originalKotItemKeys);
+                })
+                ->isNotEmpty();
 
             if ($newItemsExist) {
                 $this->updateOrder();
@@ -778,6 +776,7 @@ class Item extends Component
                 'amount' => $amount,
                 'method' => $this->paymentMethod,
             ]);
+            $this->totalSale($order->restaurant_id, $order->total_amount);
         }
 
         $this->dispatch('printBill', billId: $order->id);
@@ -859,11 +858,9 @@ class Item extends Component
                 $kot->update(['status' => 'ready']);
             });
 
-
             $kotItems->each(function ($item) {
                 $item->update(['status' => 'served']);
             });
-
         }
 
         $this->reset(['splits', 'paymentMethod', 'showSplitModal', 'customerName', 'mobile']);
@@ -887,10 +884,7 @@ class Item extends Component
             $order = $this->createOrderAndKot();
         }
 
-        $pendingKOTs = Kot::where('table_id', $this->table_id)
-            ->where('order_id', $order->id)
-            ->where('status', 'pending')
-            ->get();
+        $pendingKOTs = Kot::where('table_id', $this->table_id)->where('order_id', $order->id)->where('status', 'pending')->get();
 
         foreach ($pendingKOTs as $kot) {
             $kotItems = KOTItem::where('kot_id', $kot->id)->get();
@@ -904,7 +898,7 @@ class Item extends Component
         $order->update([
             'customer_name' => $this->duoCustomerName,
             'mobile' => $this->duoMobile,
-            'status' => 'served'
+            'status' => 'served',
         ]);
 
         $orderItems->each(fn($item) => $item->update(['status' => 'served']));
@@ -935,19 +929,10 @@ class Item extends Component
             'issue' => $this->duoIssue,
         ]);
 
-        $this->reset([
-            'showDuoPaymentModal',
-            'duoCustomerName',
-            'duoMobile',
-            'duoAmount',
-            'duoMethod',
-            'duoIssue',
-            'paymentMethod'
-        ]);
+        $this->reset(['showDuoPaymentModal', 'duoCustomerName', 'duoMobile', 'duoAmount', 'duoMethod', 'duoIssue', 'paymentMethod']);
 
         return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Duo Payment Completed!');
     }
-
 
     public function confirmRemove()
     {
@@ -974,7 +959,6 @@ class Item extends Component
                 ]);
 
             KOTItem::where('kot_id', $kot->id)->where('item_id', $itemId)->when($variantId, fn($q) => $q->where('variant_id', $variantId))->delete();
-
         });
 
         unset($this->cart[$key]);
@@ -1006,7 +990,7 @@ class Item extends Component
         ]);
 
         $coustomer = Customer::where('order_id', $order->id)->first();
-        if(!$coustomer) {
+        if (!$coustomer) {
             $coustomer->create([
                 'order_id' => $order->id,
                 'name' => $this->followupCustomer_name,
@@ -1018,13 +1002,29 @@ class Item extends Component
             ]);
 
             $order->update([
-                'customer_id' => $coustomer->id
+                'customer_id' => $coustomer->id,
             ]);
         }
-
 
         $this->showCustomerModal = false;
 
         session()->flash('success', 'Customer added and linked to order!');
+    }
+
+    protected function totalSale($restaurantId = null, $amount)
+    {
+        $sale = SalesSummaries::where('restaurant_id', $restaurantId)->first();
+        if ($sale->summary_date != now()->format('Y-m-d')) {
+            SalesSummaries::create([
+                'restaurant_id' => $restaurantId,
+                'total_sale' => $amount,
+                'summary_date' => now(),
+            ]);
+        } else {
+            $sale->update([
+                'total_sale' => $sale->total_sale + $amount,
+                'summary_date' => now(),
+            ]);
+        }
     }
 }
