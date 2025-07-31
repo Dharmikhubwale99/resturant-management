@@ -24,18 +24,21 @@ class StaffWise extends Component
     {
         $restaurantId = Auth::user()->restaurants()->first()->id;
 
-        $staffList = User::where('restaurant_id', $restaurantId)
-            ->where(function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('mobile', 'like', '%' . $this->search . '%');
-            })
-            ->withCount(['orders as total_orders' => function ($query) use ($restaurantId) {
-                $query->where('restaurant_id', $restaurantId);
-            }])
-            ->withSum(['orders as total_sales' => function ($query) use ($restaurantId) {
-                $query->where('restaurant_id', $restaurantId);
-            }], 'total_amount')
-            ->paginate(10);
+        $staffList = User::whereHas('orders', function ($query) use ($restaurantId) {
+            $query->where('restaurant_id', $restaurantId);
+        })
+        ->where(function ($query) {
+            $query->where('name', 'like', '%' . $this->search . '%')
+                  ->orWhere('mobile', 'like', '%' . $this->search . '%');
+        })
+        ->withCount(['orders as total_orders' => function ($query) use ($restaurantId) {
+            $query->where('restaurant_id', $restaurantId);
+        }])
+        ->withSum(['orders as total_sales' => function ($query) use ($restaurantId) {
+            $query->where('restaurant_id', $restaurantId);
+        }], 'total_amount')
+        ->paginate(10);
+
 
         $orders = [];
 
