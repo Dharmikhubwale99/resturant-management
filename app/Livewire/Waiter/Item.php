@@ -1014,15 +1014,15 @@ class Item extends Component
     protected function totalSale($restaurantId = null, $amount)
     {
         $sale = SalesSummaries::where('restaurant_id', $restaurantId)->first();
-        if ($sale) {
-            $sale->update([
-                'total_sale' => $sale->total_sale + $amount,
-                'summary_date' => now(),
-            ]);
-        } else {
+        if ($sale->summary_date != now()->format('Y-m-d')) {
             SalesSummaries::create([
                 'restaurant_id' => $restaurantId,
                 'total_sale' => $amount,
+                'summary_date' => now(),
+            ]);
+        } else {
+            $sale->update([
+                'total_sale' => $sale->total_sale + $amount,
                 'summary_date' => now(),
             ]);
         }

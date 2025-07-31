@@ -12,6 +12,7 @@ class SalesSummaries extends Model
         'restaurant_id',
         'summary_date',
         'total_sale',
+        'total_expances'
     ];
 
     public function restaurant()

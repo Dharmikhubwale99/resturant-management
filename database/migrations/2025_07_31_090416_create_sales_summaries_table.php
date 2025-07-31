@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('restaurant_id');
             $table->date('summary_date')->nullable();
             $table->decimal('total_sale', 10, 2)->default(0);
+            $table->decimal('total_expances', 10, 2)->default(0);
             $table->timestamps();
         });
     }
