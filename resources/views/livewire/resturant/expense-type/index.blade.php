@@ -1,7 +1,7 @@
     <div class="p-6 bg-white rounded shadow">
 
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">Expense List</h2>
+            <h2 class="text-xl font-bold">Expense-Type List</h2>
             <div class="flex items-center gap-4">
                 <x-form.input name="search" placeholder="Search by name" wireModelLive="search" wrapperClass="mb-0"
                     inputClass="w-72" />

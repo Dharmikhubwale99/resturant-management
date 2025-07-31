@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Resturant\Expenses;
 
-use App\Models\{Expense, SalesSummaries};
+use App\Models\Expense;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -15,7 +15,6 @@ class Create extends Component
     public $description;
     public $expenseTypes;
     public $paid_at;
-    public $expense_total;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -36,8 +35,6 @@ class Create extends Component
                                 ->orderBy('name')
                                 ->pluck('name', 'id')
                                 ->toArray();
-
-        $this->expense_total = SalesSummaries::where('restaurant_id', $this->restaurant->id)->first();
     }
 
 
@@ -64,19 +61,6 @@ class Create extends Component
             'paid_at' =>$this->paid_at,
             'description' => $this->description,
         ]);
-
-        if ($this->expense_total->summary_date != now()->format('Y-m-d')) {
-            SalesSummaries::create([
-                'restaurant_id' => $this->restaurant->id,
-                'total_sale' => $this->amount,
-                'summary_date' => now(),
-            ]);
-        } else {
-            $this->expense_total->update([
-                'total_sale' => $this->expense_total->total_sale + $this->amount,
-                'summary_date' => now(),
-            ]);
-        }
 
         return redirect()->route('restaurant.expenses.index')->with('success', 'Expense created successfully.');
     }
