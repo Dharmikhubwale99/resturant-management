@@ -49,7 +49,7 @@
             <x-form.input name="favicon" label="Favicon Image" type="file" wireModel="favicon" />
 
             <x-form.select name="plan_id" label="Select Plan" :options="$plans" wireModel="plan_id"
-                placeholder="-- Select Plan --" required />
+                placeholder="-- Select Plan --" />
 
             <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Save" wireTarget="submit" />
