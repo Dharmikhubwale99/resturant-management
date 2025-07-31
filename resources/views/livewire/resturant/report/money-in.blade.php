@@ -14,13 +14,13 @@
         @endif
 
 
-        <select wire:model="methodFilter" class="border p-2 rounded">
+        <select wire:model.live="methodFilter" class="border p-2 rounded">
             <option value="">All Methods</option>
             <option value="cash">Cash</option>
             <option value="upi">UPI</option>
             <option value="card">Card</option>
             <option value="part">Part</option>
-            <option value="due">Due</option>
+            <option value="duo">Due</option>
         </select>
     </div>
 

@@ -58,7 +58,7 @@ class MoneyIn extends Component
         }
 
         if ($this->methodFilter) {
-            $query->whereHas('paymentLogs', function ($q) {
+            $query->whereHas('payment', function ($q) {
                 $q->where('method', $this->methodFilter);
             });
         }
