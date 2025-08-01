@@ -16,7 +16,7 @@
             <x-form.button>Sale Wise Profit & Loss Statement</x-form.button>
             <x-form.button>Purchase Report</x-form.button>
             <x-form.button :route="'restaurant.moneyin-report'">Money In Report</x-form.button>
-            <x-form.button>Money Out Report</x-form.button>
+            <x-form.button :route="'restaurant.moneyout-report'">Money Out Report</x-form.button>
             <x-form.button :route="'restaurant.expense-report'">Expense Report</x-form.button>
         </div>
     </div>
