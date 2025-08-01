@@ -861,7 +861,6 @@ class Item extends Component
             $kotItems->each(function ($item) {
                 $item->update(['status' => 'served']);
             });
-            $this->totalSale($order->restaurant_id, $order->total_amount);
         }
 
         $this->reset(['splits', 'paymentMethod', 'showSplitModal', 'customerName', 'mobile']);
@@ -915,7 +914,6 @@ class Item extends Component
             'amount' => $order->total_amount,
             'method' => 'duo',
         ]);
-        $this->totalSale($order->restaurant_id, $order->total_amount);
 
         $remainingAmount = $order->total_amount - $this->duoAmount;
 

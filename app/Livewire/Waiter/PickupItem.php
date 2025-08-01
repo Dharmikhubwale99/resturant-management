@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Restaurant, Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer, SalesSummaries};
+use App\Models\{Restaurant, Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -721,7 +721,6 @@ class PickupItem extends Component
                 'amount' => $amount,
                 'method' => $this->paymentMethod,
             ]);
-            $this->totalSale($order->restaurant_id, $order->total_amount);
         }
 
         return redirect()->route('restaurant.pickup.create')->with('success', 'Order Payment Complete!');
@@ -782,7 +781,6 @@ class PickupItem extends Component
                 'amount' => $amount,
                 'method' => $this->paymentMethod,
             ]);
-            $this->totalSale($order->restaurant_id, $order->total_amount);
         }
 
         $this->dispatch('printBill', billId: $order->id);
@@ -864,7 +862,6 @@ class PickupItem extends Component
             $kotItems->each(function ($item) {
                 $item->update(['status' => 'served']);
             });
-            $this->totalSale($order->restaurant_id, $order->total_amount);
         }
 
         $this->reset(['splits', 'paymentMethod', 'showSplitModal', 'customerName', 'mobile']);
@@ -908,7 +905,6 @@ class PickupItem extends Component
             'amount' => $order->total_amount,
             'method' => 'duo',
         ]);
-        $this->totalSale($order->restaurant_id, $order->total_amount);
 
         $remainingAmount = $order->total_amount - $this->duoAmount;
         if (auth()->user()->restaurant_id) {
@@ -1012,22 +1008,5 @@ class PickupItem extends Component
         $this->showCustomerModal = false;
 
         session()->flash('success', 'Customer added and linked to order!');
-    }
-
-    protected function totalSale($restaurantId = null, $amount)
-    {
-        $sale = SalesSummaries::where('restaurant_id', $restaurantId)->first();
-        if ($sale->summary_date != now()->format('Y-m-d')) {
-            SalesSummaries::create([
-                'restaurant_id' => $restaurantId,
-                'total_sale' => $amount,
-                'summary_date' => now(),
-            ]);
-        } else {
-            $sale->update([
-                'total_sale' => $sale->total_sale + $amount,
-                'summary_date' => now(),
-            ]);
-        }
     }
 }
