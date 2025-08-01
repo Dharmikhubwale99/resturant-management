@@ -52,6 +52,8 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
+
+                
                 @forelse ($orders as $index => $order)
                     <tr class="hover:bg-gray-50 text-sm text-center">
                         <td class="px-4 py-2 whitespace-nowrap">{{ $index + 1 }}</td>
