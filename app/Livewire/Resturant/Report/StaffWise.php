@@ -8,6 +8,9 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
+use App\Exports\StaffWiseExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class StaffWise extends Component
 {
@@ -88,5 +91,47 @@ class StaffWise extends Component
             $this->fromDate = now()->startOfMonth()->format('Y-m-d');
             $this->toDate = now()->endOfMonth()->format('Y-m-d');
         }
+    }
+
+    public function exportExcel()
+    {
+        $restaurantId = Auth::user()->restaurants()->first()->id;
+        $from = $this->fromDate ?? now()->format('Y-m-d');
+        $to = $this->toDate ?? now()->format('Y-m-d');
+
+        return Excel::download(
+            new StaffWiseExport($from, $to, $restaurantId),
+            'staff_wise_sales_report.xlsx'
+        );
+    }
+
+    public function exportPdf()
+    {
+        $restaurantId = Auth::user()->restaurants()->first()->id;
+        $from = $this->fromDate ?? now()->format('Y-m-d');
+        $to = $this->toDate ?? now()->format('Y-m-d');
+
+        $staffList = User::whereHas('orders', function ($query) use ($restaurantId) {
+                $query->where('restaurant_id', $restaurantId);
+            })
+            ->withCount(['orders as total_orders' => function ($query) use ($restaurantId, $from, $to) {
+                $query->where('restaurant_id', $restaurantId)
+                    ->whereBetween('created_at', [$from, $to]);
+            }])
+            ->withSum(['orders as total_sales' => function ($query) use ($restaurantId, $from, $to) {
+                $query->where('restaurant_id', $restaurantId)
+                    ->whereBetween('created_at', [$from, $to]);
+            }], 'total_amount')
+            ->get();
+
+        $pdf = Pdf::loadView('livewire.pdf.staff-wise-report-pdf', [
+            'staffList' => $staffList,
+            'fromDate' => $from,
+            'toDate' => $to,
+        ]);
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->stream();
+        }, 'staff_wise_sales_report.pdf');
     }
 }
