@@ -24,9 +24,10 @@
         <div class="flex flex-col gap-3 sm:gap-4 mb-3 sm:mb-4">
             <div class="flex justify-between items-center">
                 <h3 class="text-base sm:text-lg font-semibold">Purchases</h3>
-                <button wire:click="export" class="bg-green-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs sm:text-sm flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <button wire:click="export" wire:loading.attr="disabled" class="bg-green-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded text-xs sm:text-sm flex items-center gap-1">
+                    <svg wire:loading wire:target="export" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                     </svg>
                     <span class="hidden sm:inline">Export</span>
                 </button>
