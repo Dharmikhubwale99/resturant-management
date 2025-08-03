@@ -126,7 +126,7 @@ class Order extends Model
     {
         do {
             // Example: BILL-20250803-XYZ123
-            $billNumber = 'BILL-' . now()->format('Ymd') . '-' . Str::upper(Str::random(6));
+            $billNumber = 'BILL-' . Str::upper(Str::random(6));
         } while (self::where('bill_number', $billNumber)->where('restaurant_id', $restaurantId)->exists());
 
         return $billNumber;
