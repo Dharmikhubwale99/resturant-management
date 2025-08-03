@@ -17,6 +17,7 @@
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Plan Expiry Date</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                 </tr>
             </thead>
@@ -27,6 +28,8 @@
                         <td class="px-6 text-sm text-gray-900">{{ $user->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->mobile }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->role }}</td>
+
+                        <td class="px-6 text-sm text-gray-900"> {{ \Carbon\Carbon::parse($user->plan_expiry_at)->format('d-m-Y') ?? 'N/A' }}</td>
                         <td class="px-6 text-sm text-gray-900">
                             <div class="flex flex-row items-center space-x-3">
                                 <x-form.button title=""
