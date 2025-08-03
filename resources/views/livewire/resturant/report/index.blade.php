@@ -32,8 +32,8 @@
         <h2 class="text-lg font-bold text-gray-700 mb-2">ITEM/STOCK REPORTS</h2>
         <div class="flex flex-wrap gap-2">
             <x-form.button>Stock Summary Report</x-form.button>
-            <x-form.button :route="'restaurant.item-sale-report'">Item Sale Report</x-form.button>
-            <x-form.button :route="'restaurant.item-sale-payment-report'">Item Sale Payment Report</x-form.button>
+            <x-form.button>Item Sale Report</x-form.button>
+            <x-form.button>Item Sale Payment Report</x-form.button>
             <x-form.button>Item Report</x-form.button>
             <x-form.button>Item Details Report</x-form.button>
         </div>

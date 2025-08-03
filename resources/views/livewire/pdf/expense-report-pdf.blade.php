@@ -1,39 +1,16 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <title>Expense Report</title>
     <style>
-        body {
-            font-family: DejaVu Sans, sans-serif;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 12px;
-        }
-
-        th,
-        td {
-            border: 1px solid #333;
-            padding: 6px;
-            text-align: center;
-        }
-
-        th {
-            background: #eee;
-        }
-
-        h2,
-        p {
-            text-align: center;
-        }
+        body { font-family: DejaVu Sans, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+        th, td { border: 1px solid #333; padding: 6px; text-align: center; }
+        th { background: #eee; }
+        h2, p { text-align: center; }
     </style>
 </head>
-
 <body>
 
     <h2><strong>Expense Report</strong></h2>
@@ -53,7 +30,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($expenses as $index => $expense)
+            @foreach($expenses as $index => $expense)
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ \Carbon\Carbon::parse($expense->paid_at)->format('d-m-Y') }}</td>
@@ -72,5 +49,4 @@
     </table>
 
 </body>
-
 </html>

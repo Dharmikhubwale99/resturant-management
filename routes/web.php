@@ -71,6 +71,8 @@ use \App\Livewire\Resturant\{
     Kitchen\Dashboard as AdminKitchenDashboard,
 
     Transaction\MoneyIn as MoneyMaintain,
+    Transaction\MoneyOutForm as MoneyMainOut,
+    Transaction\MoneyOutIndex as MoneyOutIndex,
 
     Report\Index as ReportIndex,
     Report\SalesReport,
@@ -79,8 +81,6 @@ use \App\Livewire\Resturant\{
     Report\MoneyIn,
     Report\MoneyOut,
     Report\ExpenseReport,
-    Report\ItemSaleReport,
-    Report\ItemSalePaymentReport
 };
 
 use \App\Livewire\Kitchen\{
@@ -213,10 +213,11 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/money-in-report', MoneyIn::class)->name('moneyin-report');
     Route::get('/money-out-report', MoneyOut::class)->name('moneyout-report');
     Route::get('/expense-report', ExpenseReport::class)->name('expense-report');
-    Route::get('/item-sale-report', ItemSaleReport::class)->name('item-sale-report');
-    Route::get('/item-sale-payment-report', ItemSalePaymentReport::class)->name('item-sale-payment-report');
+
 
     Route::get('/money-maintain', MoneyMaintain::class)->name('money-maintain');
+    Route::get('/money-out-create', MoneyMainOut::class)->name('money-out.create');
+    Route::get('/money-out-index', MoneyOutIndex::class)->name('money-out');
 });
 
 // Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {

@@ -67,6 +67,16 @@
                                 </svg>
                             </button>
 
+                            <button wire:click.stop="printTableBill({{ $table->id }})"
+                                class="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                title="Print Bill">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2V9a2 2 0 012-2h16a2 2 0 012 2v7a2 2 0 01-2 2h-2m-4 0h-4" />
+                                </svg>
+                            </button>
+
                             <div class="bg-white px-2 py-1 rounded-full flex items-center gap-1">
                                 <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -117,3 +127,13 @@
     @endif
 
 </div>
+
+@push('scripts')
+<script>
+    Livewire.on('printBill', ({ billId }) => {
+        const url = `{{ url('/restaurant/bill-print') }}/${billId}`;
+        const printWindow = window.open(url, '_blank');
+        printWindow.focus();
+    });
+</script>
+@endpush

@@ -43,7 +43,7 @@ class MoneyIn extends Component
 
     public function getFilteredOrders()
     {
-                $restaurantId = Auth::user()->restaurants()->first()->id;
+        $restaurantId = Auth::user()->restaurants()->first()->id;
 
         $query = Order::query()->where('restaurant_id', $restaurantId)->with(['payments', 'paymentLogs']);
 

@@ -32,17 +32,19 @@
                 <tr>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Sr No</th>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Date</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Money In</th>
-                    {{-- <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Money Out</th> --}}
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Customer Name</th>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Money Out</th>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Description</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
                 @forelse ($sales as $index => $order)
                     <tr class="hover:bg-gray-50 text-sm text-center">
                         <td class="px-4 py-2 whitespace-nowrap">{{ $index + 1 }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->summary_date }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->total_sale }}</td>
-                        {{-- <td class="px-4 py-2 whitespace-nowrap">₹{{ $order->total_expances }}</td> --}}
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->date }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->party_name }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->amount }}</td>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->description }}</td>
                     </tr>
                 @empty
                     <tr>
