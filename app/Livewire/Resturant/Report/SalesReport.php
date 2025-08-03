@@ -19,6 +19,8 @@ class SalesReport extends Component
     public $toDate;
     public $filterType = 'today';
 
+    public $selectedOrderId = null;
+
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
@@ -30,6 +32,11 @@ class SalesReport extends Component
     public function mount()
     {
         $this->setDefaultDates();
+    }
+
+    public function toggleOrderDetails($orderId)
+    {
+        $this->selectedOrderId = $this->selectedOrderId === $orderId ? null : $orderId;
     }
 
     public function setDefaultDates()
@@ -73,7 +80,8 @@ class SalesReport extends Component
     {
         $restaurantId = Auth::user()->restaurants()->first()->id;
 
-        return Order::where('restaurant_id', $restaurantId)
+        return Order::with(['items.item', 'table'])
+            ->where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$this->fromDate . ' 00:00:00', $this->toDate . ' 23:59:59'])
             ->latest()
             ->paginate(10);
