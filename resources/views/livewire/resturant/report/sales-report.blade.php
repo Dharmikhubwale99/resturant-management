@@ -43,6 +43,7 @@
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Total Quantity</th>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Total Amount (incl. taxes)</th>
                     <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Created By</th>
+                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -59,12 +60,49 @@
                         <td class="px-4 py-2 whitespace-nowrap">{{ $order->total_qty ?? '-' }}</td>
                         <td class="px-4 py-2 whitespace-nowrap">₹{{ number_format($order->total_amount, 2) }}</td>
                         <td class="px-4 py-2 whitespace-nowrap">{{ $order->user->name ?? 'Admin' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="px-6 py-3 text-center text-sm text-gray-500">No sales records found.
+                        <td class="px-4 py-2 whitespace-nowrap">
+                            <button wire:click="toggleOrderDetails({{ $order->id }})"
+                                class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">
+                                {{ $selectedOrderId === $order->id ? 'Hide' : 'View Details' }}
+                            </button>
                         </td>
                     </tr>
+                    @if ($selectedOrderId === $order->id)
+                        <tr>
+                            <td colspan="8" class="p-0">
+                                <table class="w-full border-t text-sm bg-gray-100">
+                                    <thead class="bg-gray-200 text-left">
+                                        <tr>
+                                            <th class="px-4 py-2">#</th>
+                                            <th class="px-4 py-2">Item Name</th>
+                                            <th class="px-4 py-2">Qty</th>
+                                            <th class="px-4 py-2">Unit Price</th>
+                                            <th class="px-4 py-2">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($order->items as $key => $item)
+                                            <tr class="border-t">
+                                                <td class="px-4 py-2">{{ $key + 1 }}</td>
+                                                <td class="px-4 py-2">{{ $item->item->name ?? 'N/A' }}</td>
+                                                <td class="px-4 py-2">{{ $item->quantity ?? 0 }}</td>
+                                                <td class="px-4 py-2">₹{{ number_format($item->base_price ?? 0, 2) }}
+                                                </td>
+                                                <td class="px-4 py-2">
+                                                    ₹{{ number_format($item->total_price ?? $item->quantity * $item->base_price, 2) }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    @endif
+                @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-gray-500">No sales records found.</td>
+                    </tr>
+
                 @endforelse
             </tbody>
         </table>

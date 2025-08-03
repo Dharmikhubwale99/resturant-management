@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Expense Report</title>
+    <title>Item Sale Report</title>
     <style>
         body {
             font-family: DejaVu Sans, sans-serif;
@@ -36,7 +36,7 @@
 
 <body>
 
-    <h2><strong>Expense Report</strong></h2>
+    <h2><strong>Item Sale Report</strong></h2>
     <p>
         From {{ \Carbon\Carbon::parse($fromDate)->format('d/m/Y') }}
         to {{ \Carbon\Carbon::parse($toDate)->format('d/m/Y') }}
@@ -46,26 +46,35 @@
         <thead>
             <tr>
                 <th>Sr No</th>
-                <th>Date</th>
-                <th>Party Name</th>
-                <th>Expense Type</th>
-                <th>Amount Paid</th>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Total Sale Quantity</th>
+                <th>Total Sale Amount</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($expenses as $index => $expense)
+            @php
+                $totalQty = 0;
+                $totalAmount = 0;
+            @endphp
+            @foreach ($data as $index => $item)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ \Carbon\Carbon::parse($expense->paid_at)->format('d-m-Y') }}</td>
-                    <td>{{ $expense->name ?? '-' }}</td>
-                    <td>{{ $expense->expenseType->name ?? '-' }}</td>
-                    <td>₹{{ number_format($expense->amount, 2) }}</td>
+                    <td>{{ $item->item_name }}</td>
+                    <td>{{ $item->category_name ?? 'N/A' }}</td>
+                    <td>{{ $item->total_qty }}</td>
+                    <td>₹{{ number_format($item->total_amount, 2) }}</td>
                 </tr>
+                @php
+                    $totalQty += $item->total_qty;
+                    $totalAmount += $item->total_amount;
+                @endphp
             @endforeach
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="4" style="text-align: right;"><strong>Total</strong></td>
+                <td colspan="3" style="text-align: right;"><strong>Total</strong></td>
+                <td><strong>{{ $totalQty }}</strong></td>
                 <td><strong>₹{{ number_format($totalAmount, 2) }}</strong></td>
             </tr>
         </tfoot>
