@@ -21,6 +21,11 @@ class BillPrint extends Component
             'table'
         ]);
         $this->restaurant = Restaurant::find($order->restaurant_id);
+
+        if (empty($this->order->bill_number)) {
+            $this->order->bill_number = Order::generateBillNumber($this->order->restaurant_id);
+            $this->order->save();
+        }
     }
 
     #[Layout('components.layouts.resturant.app')]
