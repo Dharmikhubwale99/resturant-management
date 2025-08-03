@@ -16,7 +16,6 @@ class Dashboard extends Component
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
-        // Group tables by area name (or 'No Area' if null)
         $tablesByArea = $this->tables->groupBy(function ($table) {
             return $table->area->name ?? 'No Area';
         });
@@ -57,5 +56,19 @@ class Dashboard extends Component
             'mode'     => 'edit'
         ]);
     }
+
+    public function printTableBill($tableId)
+{
+    $order = Order::where('table_id', $tableId)
+        ->where('status', 'pending')
+        ->latest()
+        ->first();
+
+    if ($order) {
+        $this->dispatch('printBill', billId: $order->id);
+    } else {
+        session()->flash('error', 'No active order found for this table.');
+    }
+}
 
 }

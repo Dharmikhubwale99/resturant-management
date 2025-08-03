@@ -800,7 +800,12 @@ class Item extends Component
 
         $kots = Kot::where('order_id', $order->id)->where('status', 'pending')->get();
 
-        $restaurantId = Auth::user()->restaurant_id;
+        if (auth()->user()->restaurant_id) {
+            $restaurantId = auth()->user()->restaurant_id;
+        } else {
+            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
+        }
+
 
         $orderItems = OrderItem::where('order_id', $order->id)->get();
 
@@ -813,12 +818,15 @@ class Item extends Component
             'splits.*.amount' => 'required|numeric|min:0.01',
         ]);
 
-        $total = collect($this->splits)->sum('amount');
+        $total = round(collect($this->splits)->sum('amount'), 2);
+        $orderTotal = round($order->total_amount, 2);
 
-        if (bccomp($total, $order->total_amount, 2) !== 0) {
-            session()->flash('error', 'Split amounts must equal the order total (₹' . number_format($order->total_amount, 2) . ').');
+        if (bccomp($total, $orderTotal, 2) !== 0) {
+            $diff = number_format(abs($orderTotal - $total), 2);
+            session()->flash('error', "Split amounts must match the order total (₹{$orderTotal}). Difference: ₹{$diff}");
             return;
         }
+
         $payment = Payment::create([
             'order_id' => $order->id,
             'amount' => $order->total_amount,
@@ -880,6 +888,11 @@ class Item extends Component
         ]);
 
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+        if (auth()->user()->restaurant_id) {
+            $restaurantId = auth()->user()->restaurant_id;
+        } else {
+            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
+        }
 
         if (!$order) {
             $order = $this->createOrderAndKot();
@@ -920,7 +933,7 @@ class Item extends Component
         $remainingAmount = $order->total_amount - $this->duoAmount;
 
         RestaurantPaymentLog::create([
-            'restaurant_id' => Auth::user()->restaurant_id,
+            'restaurant_id' => $restaurantId,
             'payment_id' => $payment->id,
             'order_id' => $order->id,
             'customer_name' => $this->duoCustomerName,
@@ -1015,18 +1028,21 @@ class Item extends Component
 
     protected function totalSale($restaurantId = null, $amount)
     {
-        $sale = SalesSummaries::where('restaurant_id', $restaurantId)->first();
-        if ($sale->summary_date != now()->format('Y-m-d')) {
+        $today = now()->format('Y-m-d');
+
+        $sale = SalesSummaries::where('restaurant_id', $restaurantId)->latest('summary_date')->first();
+
+        if (!$sale || $sale->summary_date !== $today) {
             SalesSummaries::create([
                 'restaurant_id' => $restaurantId,
                 'total_sale' => $amount,
-                'summary_date' => now(),
+                'summary_date' => $today,
             ]);
         } else {
             $sale->update([
                 'total_sale' => $sale->total_sale + $amount,
-                'summary_date' => now(),
             ]);
         }
     }
+
 }
