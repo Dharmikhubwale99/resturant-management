@@ -119,6 +119,10 @@ class Item extends Component
                 $key = $kotItem->variant_id ? 'v' . $kotItem->variant_id : $kotItem->item_id;
                 $this->originalKotItemKeys[] = $key;
 
+                $orderItem = OrderItem::where('order_id', $order->id)->where('item_id', $kotItem->item_id)->when($kotItem->variant_id, fn($q) => $q->where('variant_id', $kotItem->variant_id))->latest()->first();
+
+                $price = $orderItem?->final_price ?? ($kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price);
+
                 $name = $kotItem->variant_id ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')' : $kotItem->item->name;
 
                 if (!isset($this->cart[$key])) {
@@ -126,7 +130,7 @@ class Item extends Component
                         'id' => $key,
                         'item_id' => $kotItem->item_id,
                         'name' => $name,
-                        'price' => $kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price,
+                        'price' => $price,
                         'qty' => $kotItem->quantity,
                         'note' => $kotItem->special_notes ?? '',
                         'kot_number' => $kot->kot_number,
@@ -405,14 +409,13 @@ class Item extends Component
         $this->currentPriceKey = $key;
         $item = $this->cart[$key];
 
-        // Only base price is editable, variant & addons excluded
         $editablePrice = $item['base_price'] ?? $item['price'];
 
         $this->priceInput = $editablePrice;
         $this->originalPrice = $editablePrice;
         $this->priceItemName = $item['name'];
         $this->discountType = 'percentage';
-        $this->discountValue = 0;
+        $this->discountValue = $this->discountValue ?? 0;
         $this->showPriceModal = true;
     }
 
@@ -456,8 +459,8 @@ class Item extends Component
                 $this->cart[$this->currentPriceKey]['discount_value'] = floatval($this->discountValue);
             }
         }
-
-        $this->reset(['showPriceModal', 'priceInput', 'currentPriceKey', 'originalPrice', 'priceItemName', 'discountType', 'discountValue']);
+        $this->showPriceModal = false;
+        // $this->reset(['showPriceModal', 'priceInpu t', 'currentPriceKey', 'originalPrice', 'priceItemName', 'discountType', 'discountValue']);
     }
 
     public function selectOrderType(string $type)
@@ -806,7 +809,6 @@ class Item extends Component
             $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
         }
 
-
         $orderItems = OrderItem::where('order_id', $order->id)->get();
 
         $kotItems = KOTItem::whereIn('kot_id', $kots->pluck('id'))->get();
@@ -1044,5 +1046,4 @@ class Item extends Component
             ]);
         }
     }
-
 }
