@@ -16,10 +16,8 @@
                 wrapperClass="mb-0"
                 inputClass="border border-gray-300 focus:ring focus:ring-blue-300" />
 
-            @can('money-out-create')
                 <x-form.button title="+ Add" route="restaurant.money-out.create"
                     class="bg-blue-600 hover:bg-blue-700 text-white" />
-            @endcan
         </div>
     </div>
 

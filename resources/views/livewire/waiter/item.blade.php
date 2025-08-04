@@ -196,7 +196,6 @@
             <!-- Cart Section - Responsive -->
             <div
                 class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200">
-
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
                 @if (count($cartItems))
                     <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
@@ -604,13 +603,37 @@
                     <input type="number" step="0.01" wire:model.live="serviceCharge"
                         class="w-full border rounded p-2" />
                 </div>
+                <div class="flex flex-row justify-between gap-2">
+                    <div class="mb-3">
+                        <label class="block text-sm font-semibold">Discount Type</label>
+                        <select wire:model.live="cartDiscountType" class="w-full border rounded p-2">
+                            <option value="percentage">Percentage (%)</option>
+                            <option value="fixed">Fixed (₹)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="block text-sm font-semibold">Discount Value</label>
+                        <input type="number" min="0" step="0.01" wire:model.live="cartDiscountValue"
+                            class="w-full border rounded p-2" placeholder="e.g. 10 or 100" />
+                    </div>
+                </div>
 
                 <!-- Totals -->
                 <div class="mb-4 text-sm text-gray-700">
                     <p>Subtotal: ₹{{ number_format($this->getSubtotal(), 2) }}</p>
-                    <p>Service: ₹{{ number_format($serviceCharge, 2) }}</p>
+                    <p>Service Charge: ₹{{ number_format($serviceCharge, 2) }}</p>
+                    <p>
+                        Discount:
+                        @if ($cartDiscountType === 'percentage')
+                            {{ $cartDiscountValue }}%
+                        @else
+                            ₹{{ number_format($cartDiscountValue, 2) }}
+                        @endif
+                    </p>
                     <p class="font-bold text-blue-600">Total: ₹{{ number_format($this->getCartTotal(), 2) }}</p>
                 </div>
+
 
                 <div class="flex justify-end gap-2">
                     <button wire:click="$set('showCartDetailModal', false)" class="px-4 py-2 bg-gray-200 rounded">
