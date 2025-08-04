@@ -9,9 +9,12 @@ use Illuminate\Support\Facades\{DB, Auth};
 use App\Enums\{OrderType, PaymentMethod};
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Log;
+use App\Traits\TransactionTrait;
 
 class Item extends Component
 {
+    use TransactionTrait;
+
     public $items,
         $categories,
         $selectedCategory = null,
@@ -65,6 +68,9 @@ class Item extends Component
     public string $followupCustomer_email = '';
     public string $customer_dob = '';
     public string $customer_anniversary = '';
+    public string $cartDiscountType = 'percentage';
+    public float|string $cartDiscountValue = 0;
+
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -119,6 +125,10 @@ class Item extends Component
                 $key = $kotItem->variant_id ? 'v' . $kotItem->variant_id : $kotItem->item_id;
                 $this->originalKotItemKeys[] = $key;
 
+                $orderItem = OrderItem::where('order_id', $order->id)->where('item_id', $kotItem->item_id)->when($kotItem->variant_id, fn($q) => $q->where('variant_id', $kotItem->variant_id))->latest()->first();
+
+                $price = $orderItem?->final_price ?? ($kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price);
+
                 $name = $kotItem->variant_id ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')' : $kotItem->item->name;
 
                 if (!isset($this->cart[$key])) {
@@ -126,7 +136,7 @@ class Item extends Component
                         'id' => $key,
                         'item_id' => $kotItem->item_id,
                         'name' => $name,
-                        'price' => $kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price,
+                        'price' => $price,
                         'qty' => $kotItem->quantity,
                         'note' => $kotItem->special_notes ?? '',
                         'kot_number' => $kot->kot_number,
@@ -174,9 +184,21 @@ class Item extends Component
     private function getCartTotal()
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
+
+        // Calculate cart discount
+        $discount = 0;
+        if ($this->cartDiscountType === 'percentage') {
+            $discount = ($subtotal * floatval($this->cartDiscountValue)) / 100;
+        } elseif ($this->cartDiscountType === 'fixed') {
+            $discount = floatval($this->cartDiscountValue);
+        }
+
+        $discount = min($discount, $subtotal); // ensure not more than subtotal
         $service = $this->serviceCharge ?? 0;
-        return $subtotal + $service;
+
+        return $subtotal - $discount + $service;
     }
+
 
     public function getSubtotal()
     {
@@ -405,14 +427,13 @@ class Item extends Component
         $this->currentPriceKey = $key;
         $item = $this->cart[$key];
 
-        // Only base price is editable, variant & addons excluded
         $editablePrice = $item['base_price'] ?? $item['price'];
 
         $this->priceInput = $editablePrice;
         $this->originalPrice = $editablePrice;
         $this->priceItemName = $item['name'];
         $this->discountType = 'percentage';
-        $this->discountValue = 0;
+        $this->discountValue = $this->discountValue ?? 0;
         $this->showPriceModal = true;
     }
 
@@ -456,8 +477,8 @@ class Item extends Component
                 $this->cart[$this->currentPriceKey]['discount_value'] = floatval($this->discountValue);
             }
         }
-
-        $this->reset(['showPriceModal', 'priceInput', 'currentPriceKey', 'originalPrice', 'priceItemName', 'discountType', 'discountValue']);
+        $this->showPriceModal = false;
+        // $this->reset(['showPriceModal', 'priceInpu t', 'currentPriceKey', 'originalPrice', 'priceItemName', 'discountType', 'discountValue']);
     }
 
     public function selectOrderType(string $type)
@@ -806,7 +827,6 @@ class Item extends Component
             $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
         }
 
-
         $orderItems = OrderItem::where('order_id', $order->id)->get();
 
         $kotItems = KOTItem::whereIn('kot_id', $kots->pluck('id'))->get();
@@ -1025,24 +1045,4 @@ class Item extends Component
 
         session()->flash('success', 'Customer added and linked to order!');
     }
-
-    protected function totalSale($restaurantId = null, $amount)
-    {
-        $today = now()->format('Y-m-d');
-
-        $sale = SalesSummaries::where('restaurant_id', $restaurantId)->latest('summary_date')->first();
-
-        if (!$sale || $sale->summary_date !== $today) {
-            SalesSummaries::create([
-                'restaurant_id' => $restaurantId,
-                'total_sale' => $amount,
-                'summary_date' => $today,
-            ]);
-        } else {
-            $sale->update([
-                'total_sale' => $sale->total_sale + $amount,
-            ]);
-        }
-    }
-
 }
