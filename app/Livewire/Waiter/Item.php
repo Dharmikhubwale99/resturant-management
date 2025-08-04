@@ -9,9 +9,12 @@ use Illuminate\Support\Facades\{DB, Auth};
 use App\Enums\{OrderType, PaymentMethod};
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Log;
+use App\Traits\TransactionTrait;
 
 class Item extends Component
 {
+    use TransactionTrait;
+
     public $items,
         $categories,
         $selectedCategory = null,
@@ -65,6 +68,9 @@ class Item extends Component
     public string $followupCustomer_email = '';
     public string $customer_dob = '';
     public string $customer_anniversary = '';
+    public string $cartDiscountType = 'percentage';
+    public float|string $cartDiscountValue = 0;
+
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -178,9 +184,21 @@ class Item extends Component
     private function getCartTotal()
     {
         $subtotal = collect($this->cart)->sum(fn($item) => $item['qty'] * $item['price']);
+
+        // Calculate cart discount
+        $discount = 0;
+        if ($this->cartDiscountType === 'percentage') {
+            $discount = ($subtotal * floatval($this->cartDiscountValue)) / 100;
+        } elseif ($this->cartDiscountType === 'fixed') {
+            $discount = floatval($this->cartDiscountValue);
+        }
+
+        $discount = min($discount, $subtotal); // ensure not more than subtotal
         $service = $this->serviceCharge ?? 0;
-        return $subtotal + $service;
+
+        return $subtotal - $discount + $service;
     }
+
 
     public function getSubtotal()
     {
@@ -1026,24 +1044,5 @@ class Item extends Component
         $this->showCustomerModal = false;
 
         session()->flash('success', 'Customer added and linked to order!');
-    }
-
-    protected function totalSale($restaurantId = null, $amount)
-    {
-        $today = now()->format('Y-m-d');
-
-        $sale = SalesSummaries::where('restaurant_id', $restaurantId)->latest('summary_date')->first();
-
-        if (!$sale || $sale->summary_date !== $today) {
-            SalesSummaries::create([
-                'restaurant_id' => $restaurantId,
-                'total_sale' => $amount,
-                'summary_date' => $today,
-            ]);
-        } else {
-            $sale->update([
-                'total_sale' => $sale->total_sale + $amount,
-            ]);
-        }
     }
 }
