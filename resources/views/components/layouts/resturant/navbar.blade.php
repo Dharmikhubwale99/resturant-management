@@ -5,6 +5,7 @@
     visible: 5,
     menuLinks: [
         { text: 'Money In', href: '{{ route('restaurant.money-maintain') }}' },
+        { text: 'Money Out', href: '{{ route('restaurant.money-out') }}' },
         @if (setting('user'))
             @can('user-index')
                 { text: 'User', href: '{{ route('restaurant.users.index') }}' },

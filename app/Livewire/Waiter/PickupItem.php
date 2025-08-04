@@ -8,9 +8,11 @@ use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
 use App\Enums\{OrderType, PaymentMethod};
 use Illuminate\Validation\Rules\Enum;
+use App\Traits\TransactionTrait;
 
 class PickupItem extends Component
 {
+    use TransactionTrait;
     public $items, $order, $categories, $selectedCategory = null, $search = '';
     public $cart = [], $showVariantModal = false, $currentItem = null, $variantOptions = [];
     public $selectedVariantId = null, $showNoteModal = false, $noteInput = '', $currentNoteKey = null;
@@ -113,18 +115,18 @@ class PickupItem extends Component
                 $key = $kotItem->variant_id ? 'v' . $kotItem->variant_id : $kotItem->item_id;
                 $this->originalKotItemKeys[] = $key;
 
-                $name = $kotItem->variant_id
-                    ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')'
-                    : $kotItem->item->name;
+                $orderItem = OrderItem::where('order_id', $order->id)->where('item_id', $kotItem->item_id)->when($kotItem->variant_id, fn($q) => $q->where('variant_id', $kotItem->variant_id))->latest()->first();
+
+                $price = $orderItem?->final_price ?? ($kotItem->variant_id ? $kotItem->item->price + $kotItem->variant->price : $kotItem->item->price);
+
+                $name = $kotItem->variant_id ? $kotItem->item->name . ' (' . $kotItem->variant->name . ')' : $kotItem->item->name;
 
                 if (!isset($this->cart[$key])) {
                     $this->cart[$key] = [
                         'id' => $key,
                         'item_id' => $kotItem->item_id,
                         'name' => $name,
-                        'price' => $kotItem->variant_id
-                            ? $kotItem->item->price + $kotItem->variant->price
-                            : $kotItem->item->price,
+                        'price' => $price,
                         'qty' => $kotItem->quantity,
                         'note' => $kotItem->special_notes ?? '',
                         'kot_number' => $kot->kot_number,
@@ -133,6 +135,7 @@ class PickupItem extends Component
                 }
             }
         }
+
         if ($order) {
             $this->order_type = $order->order_type;
             $this->transport_name = $order->transport_name ?? '';
@@ -1012,22 +1015,5 @@ class PickupItem extends Component
         $this->showCustomerModal = false;
 
         session()->flash('success', 'Customer added and linked to order!');
-    }
-
-    protected function totalSale($restaurantId = null, $amount)
-    {
-        $sale = SalesSummaries::where('restaurant_id', $restaurantId)->first();
-        if ($sale->summary_date != now()->format('Y-m-d')) {
-            SalesSummaries::create([
-                'restaurant_id' => $restaurantId,
-                'total_sale' => $amount,
-                'summary_date' => now(),
-            ]);
-        } else {
-            $sale->update([
-                'total_sale' => $sale->total_sale + $amount,
-                'summary_date' => now(),
-            ]);
-        }
     }
 }

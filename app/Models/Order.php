@@ -18,7 +18,30 @@ class Order extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_number', 'restaurant_id', 'table_id', 'user_id', 'customer_id', 'discount_id', 'order_type', 'status', 'sub_total', 'discount_amount', 'tax_amount', 'total_amount', 'notes', 'customer_name', 'mobile', 'service_charge', 'transport_name', 'transport_address', 'transport_distance', 'vehicle_number', 'transport_charge'];
+    protected $fillable = [
+        'order_number',
+        'restaurant_id',
+        'table_id',
+        'user_id',
+        'customer_id',
+        'discount_id',
+        'order_type',
+        'status',
+        'sub_total',
+        'discount_amount',
+        'tax_amount',
+        'total_amount',
+        'notes',
+        'customer_name',
+        'mobile',
+        'service_charge',
+        'transport_name',
+        'transport_address',
+        'transport_distance',
+        'vehicle_number',
+        'transport_charge',
+        'bill_number'
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -90,9 +113,23 @@ class Order extends Model
     {
         static::creating(function ($order) {
             if (empty($order->order_number)) {
-                $order->order_number = 'ORD-' . now()->format('Ymd') . Str::upper(Str::random(6));
+                do {
+                    $orderNumber = 'ORD-' . now()->format('Ymd') . '-' . Str::upper(Str::random(6));
+                } while (self::where('order_number', $orderNumber)->exists());
+
+                $order->order_number = $orderNumber;
             }
         });
+    }
+
+    public static function generateBillNumber($restaurantId): string
+    {
+        do {
+            // Example: BILL-20250803-XYZ123
+            $billNumber = 'BILL-' . Str::upper(Str::random(6));
+        } while (self::where('bill_number', $billNumber)->where('restaurant_id', $restaurantId)->exists());
+
+        return $billNumber;
     }
 
     public function items()
