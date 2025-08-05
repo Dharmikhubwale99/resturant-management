@@ -207,11 +207,11 @@
                 <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
                     <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
                         <h3 class="text-lg font-semibold mb-4 text-yellow-600">
-                            {{ optional(\App\Models\Plan::find($itemId))->is_active ? 'Confirm Block' : 'Confirm Unblock' }}
+                            {{ optional(\App\Models\Item::find($itemId))->is_active ? 'Confirm Unblock' : 'Confirm Block' }}
                         </h3>
                         <p class="text-gray-700 mb-6">
                             Are you sure you want to
-                            {{ optional(\App\Models\Plan::find($itemId))->is_active ? 'block' : 'unblock' }} this
+                            {{ optional(\App\Models\Item::find($itemId))->is_active ? 'unblock' : 'block' }} this
                             Item?
                         </p>
 
@@ -220,7 +220,7 @@
                                 class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
                             <button wire:click="toggleBlock"
                                 class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
-                                {{ optional(\App\Models\Plan::find($itemId))->is_active ? 'Block' : 'Unblock' }}
+                                {{ optional(\App\Models\Item::find($itemId))->is_active ? 'UnBlock' : 'Block' }}
                             </button>
                         </div>
                     </div>
