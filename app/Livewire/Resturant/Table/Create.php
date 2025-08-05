@@ -25,7 +25,8 @@ class Create extends Component
         }
 
         $restaurant = auth()->user()->restaurants()->first();
-        $this->areas = $restaurant->areas()->pluck('name', 'id')->toArray();
+        // Only show areas where is_active = 1
+        $this->areas = $restaurant->areas()->where('is_active', 0)->pluck('name', 'id')->toArray();
     }
 
     public function render()

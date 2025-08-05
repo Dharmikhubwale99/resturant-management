@@ -15,6 +15,8 @@ class Index extends Component
     public $statusFilter = '';
     public $confirmingDelete = false;
     public $tableToDelete = null;
+    public $confirmingBlock = false;
+    public $tableId = null;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -79,5 +81,29 @@ class Index extends Component
             session()->flash('error', 'Table not found.');
         }
         $this->cancelDelete();
+    }
+
+    public function confirmBlock($id)
+    {
+        $this->tableId = $id;
+        $this->confirmingBlock = true;
+    }
+
+    public function cancelBlock()
+    {
+        $this->tableId = null;
+        $this->confirmingBlock = false;
+    }
+
+    public function toggleBlock()
+    {
+        $table = Table::findOrFail($this->tableId);
+        $table->is_active = !$table->is_active;
+        $table->save();
+
+        $status = $table->is_active ? 'unblocked' : 'blocked';
+        session()->flash('message', "Table {$status} successfully.");
+
+        $this->cancelBlock();
     }
 }
