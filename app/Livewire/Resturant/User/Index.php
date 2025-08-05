@@ -13,7 +13,8 @@ class Index extends Component
     public $confirmingDelete = false;
     public $userToDelete = null;
     public $search = '';
-
+    public $userId = null;
+    public $confirmingBlock = false;
     public string $role = 'all';
      protected $queryString = [
         'search' => ['except' => ''],
@@ -85,5 +86,29 @@ class Index extends Component
         }
 
         $this->cancelDelete();
+    }
+
+    public function confirmBlock($id)
+    {
+        $this->userId = $id;
+        $this->confirmingBlock = true;
+    }
+
+    public function cancelBlock()
+    {
+        $this->userId = null;
+        $this->confirmingBlock = false;
+    }
+
+    public function toggleBlock()
+    {
+        $user = User::findOrFail($this->userId);
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        $status = $user->is_active ? 'unblocked' : 'blocked';
+        session()->flash('message', "User {$status} successfully.");
+
+        $this->cancelBlock();
     }
 }

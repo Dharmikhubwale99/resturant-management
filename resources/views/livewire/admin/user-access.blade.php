@@ -1,4 +1,4 @@
-<div class="p-4 bg-white shadow rounded mt-4 border">
+{{-- <div class="p-4 bg-white shadow rounded mt-4 border">
 
     <h3 class="text-lg font-bold mb-4">Module Access for User #{{ $userId }}</h3>
 
@@ -16,6 +16,42 @@
             Access</button>
     </form>
 
+    @if (session()->has('success'))
+        <div class="mt-2 text-green-600">{{ session('success') }}</div>
+    @endif
+
+</div> --}}
+
+
+<div class="p-4 bg-white shadow rounded mt-4 border">
+
+    <h3 class="text-lg font-bold mb-4">Module Access for User #{{ $userId }}</h3>
+
+    <form wire:submit.prevent="updateAccess">
+        <!-- Select All Checkbox -->
+        <div class="flex items-center space-x-3 mb-2">
+            <input type="checkbox" wire:model="selectAll" wire:change="toggleSelectAll" id="selectAll">
+            <label for="selectAll" class="font-semibold">Select All</label>
+        </div>
+
+        <!-- Individual Module Checkboxes -->
+        <div class="space-y-2">
+            @foreach ($modules as $module)
+                <div class="flex items-center space-x-3" wire:key="module-{{ $module->id }}">
+                    <input type="checkbox" wire:model="access.{{ $module->id }}">
+                    <label>{{ $module->key }}</label>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="flex flex-row text-center  space-x-3">
+            <x-form.button title="Save Access" type="submit" />
+            <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
+                route="superadmin.admin.index" />
+        </div>
+    </form>
+
+    <!-- Success Message -->
     @if (session()->has('success'))
         <div class="mt-2 text-green-600">{{ session('success') }}</div>
     @endif
