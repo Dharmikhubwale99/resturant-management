@@ -17,7 +17,6 @@
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Created At</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Plan Expiry Date</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                 </tr>
@@ -29,15 +28,8 @@
                         <td class="px-6 text-sm text-gray-900">{{ $user->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->mobile }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->role }}</td>
-                        
-                        <td class="px-6 text-sm text-gray-900">
-                            {{ $user->restaurant_created_at ? \Carbon\Carbon::parse($user->restaurant_created_at)->format('d-m-Y') : '' }}
-                        </td>
 
-                        <td class="px-6 text-sm text-gray-900">
-                            {{ $user->plan_expiry_at ? \Carbon\Carbon::parse($user->plan_expiry_at)->format('d-m-Y') : '' }}
-                        </td>
-
+                        <td class="px-6 text-sm text-gray-900"> {{ \Carbon\Carbon::parse($user->plan_expiry_at)->format('d-m-Y') ?? 'N/A' }}</td>
                         <td class="px-6 text-sm text-gray-900">
                             <div class="flex flex-row items-center space-x-3">
                                 <x-form.button title=""
@@ -54,15 +46,6 @@
                                     <img src="{{ asset('icon/access.png') }}" alt="Access"
                                         class="w-6 h-6 object-contain" />
                                 </x-form.button>
-
-                                <x-form.button title=""
-                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                    wire:click="confirmDelete({{ $user->id }})">
-                                    <span class="w-5 h-1 flex items-center justify-center">
-                                        {!! file_get_contents(public_path('icon/delete.svg')) !!}
-                                    </span>
-                                </x-form.button>
-
                             </div>
 
                         </td>
@@ -76,7 +59,7 @@
 
         <div class="mt-4">
 
-            @if ($confirmingDelete)
+            {{-- @if ($confirmingDelete)
             <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
                 <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
                     <h3 class="text-lg font-semibold mb-4 text-red-600">Confirm Delete</h3>
@@ -86,11 +69,11 @@
                     <div class="flex justify-end space-x-3">
                         <button wire:click="cancelDelete"
                             class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
-                        <button wire:click="deleteUser"
+                        <button wire:click="deleteLead"
                             class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
                     </div>
                 </div>
             </div>
-        @endif
+        @endif --}}
         </div>
     </div>

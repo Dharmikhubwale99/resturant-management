@@ -6,7 +6,6 @@ use App\Models\{Restaurant, User, Country, State, City, District, PinCode, Setti
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Hash;
 
 class EditProfile extends Component
 {
@@ -14,7 +13,6 @@ class EditProfile extends Component
 
     // Step 1 - Personal Info
     public $personal_name, $personal_email, $personal_mobile, $personal_address;
-    public $password, $confirm_password;
 
     // Step 2 - Restaurant Info
     public $restaurant_name, $restaurant_email, $restaurant_mobile, $restaurant_address, $restaurant, $gst;
@@ -146,22 +144,12 @@ class EditProfile extends Component
             ]);
 
             $user = Auth::user();
-            if ($this->password) {
-                $this->validate(['password' => 'required|min:6',
-                'confirm_password' => 'required|min:6|same:password',
-            ]);
-                $hashPass = Hash::make($this->password);
-            } else {
-                $hashPass = $user->password;
-            }
-          
             $user->update([
                 'name' => $this->personal_name,
                 'email' => $this->personal_email,
                 'mobile' => $this->personal_mobile,
                 'address' => $this->personal_address,
                 'pin_code_id' => $this->pincode_id,
-                'password' => $hashPass
             ]);
         }
 
@@ -219,21 +207,4 @@ class EditProfile extends Component
         session()->flash('success', 'Profile updated successfully!');
         return redirect()->route('restaurant.dashboard');
     }
-
-    // public function updatePassword()
-    // {
-    //     $this->validate([
-    //         'password' => 'nullable|string|min:6',
-    //         'confirm_password' => 'nullable|same:password',
-    //     ]);
-
-    //     $user = Auth::user();
-    //     $user->update([
-    //         'password' => Hash::make($this->password),
-    //     ]);
-
-    //     $this->reset(['password', 'confirm_password']);
-    //     session()->flash('success', 'Password updated successfully!');
-    //     return redirect()->route('restaurant.dashboard');
-    // }
 }

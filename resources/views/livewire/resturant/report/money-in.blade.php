@@ -1,107 +1,139 @@
-<div class="p-6 max-w-7xl mx-auto space-y-6">
+<div class="p-6">
     <h1 class="text-2xl font-bold mb-4">Money In Report</h1>
 
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 flex-wrap">
-        <div class="flex flex-col sm:flex-row gap-2 flex-wrap">
-            <select wire:model.live="dateFilter" class="border border-gray-300 p-2 rounded w-full sm:w-auto">
+    <div class="flex flex-wrap items-center gap-4 mb-6">
+        <div>
+            <label class="block text-sm mb-1 font-medium">Date Filter</label>
+            <select wire:model="dateFilter" wire:change="updatedDateFilter" class="border px-3 py-1 rounded text-sm">
                 <option value="today">Today</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
+                <option value="weekly">This Week</option>
+                <option value="monthly">This Month</option>
                 <option value="custom">Custom</option>
             </select>
+        </div>
 
-            @if ($dateFilter === 'custom')
-                <input type="date" wire:model.live="fromDate"
-                    class="border border-gray-300 p-2 rounded w-full sm:w-auto">
-                <input type="date" wire:model.live="toDate"
-                    class="border border-gray-300 p-2 rounded w-full sm:w-auto">
-            @endif
+        @if ($dateFilter === 'custom')
+            <div>
+                <label class="block text-sm mb-1 font-medium">From</label>
+                <input type="date" wire:model="fromDate" class="border px-3 py-1 rounded text-sm" />
+            </div>
 
+            <div>
+                <label class="block text-sm mb-1 font-medium">To</label>
+                <input type="date" wire:model="toDate" class="border px-3 py-1 rounded text-sm" />
+            </div>
+        @endif
 
-            <select wire:model.live="methodFilter" class="border border-gray-300 p-2 rounded w-full sm:w-auto">
-                <option value="">All Methods</option>
+        <div>
+            <label class="block text-sm mb-1 font-medium">Payment Method</label>
+            <select wire:model="methodFilter" class="border px-3 py-1 rounded text-sm">
+                <option value="">All</option>
                 <option value="cash">Cash</option>
                 <option value="upi">UPI</option>
                 <option value="card">Card</option>
+                <option value="duo">Duo</option>
                 <option value="part">Part</option>
-                <option value="duo">Due</option>
             </select>
         </div>
 
-
-        <div class="flex flex-wrap gap-2">
-            <x-form.button type="button" title="Export to Excel" wireClick="exportExcel" wireTarget="exportExcel"
-                class="bg-green-500 text-white px-4 py-2 rounded" />
-            <x-form.button type="button" title="Export to PDF" wireClick="exportPdf" wireTarget="exportPdf"
-                class="bg-blue-500 text-white px-4 py-2 rounded" />
+        <div class="ml-auto flex gap-2 mt-4 md:mt-0">
+            <button wire:click="exportExcel" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Export
+                Excel</button>
+            <button wire:click="exportPdf" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Export
+                PDF</button>
         </div>
     </div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 border border-gray-300 mb-6">
-            <thead class="bg-orange-400 text-black text-center">
+
+    <div class="overflow-auto bg-white shadow rounded-lg">
+        <table class="min-w-full text-sm text-left border">
+            <thead class="bg-gray-100 text-gray-700">
                 <tr>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Sr No</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Date</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Order ID</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Party Name</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Party Phone</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Status</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Total</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Payment Type</th>
-                    <th class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Payment</th>
+                    <th class="p-2">#</th>
+                    <th class="p-2">Order ID</th>
+                    <th class="p-2">Customer</th>
+                    <th class="p-2">Method</th>
+                    <th class="p-2">Amount</th>
+                    <th class="p-2">Paid Logs</th>
+                    <th class="p-2">Remaining</th>
+                    <th class="p-2">Action</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
-
-                
-                @forelse ($orders as $index => $order)
-                    <tr class="hover:bg-gray-50 text-sm text-center">
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $index + 1 }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->order_number }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">
-                            {{ $order->customer_name ?? ($order->table->name ?? 'N/A') }}
+            <tbody>
+                @forelse($payments as $index => $payment)
+                    @php
+                        $firstLog = $payment->logs->first();
+                        $remaining = $firstLog?->amount ?? 0;
+                    @endphp
+                    <tr class="border-t border-gray-300">
+                        <td class="p-2">{{ $loop->iteration }}</td>
+                        <td class="p-2">{{ $payment->order?->order_number ?? '-' }}</td>
+                        <td class="p-2">{{ $payment->customer->name ?? ($firstLog?->customer_name ?? '—') }}</td>
+                        <td class="p-2">{{ ucfirst($payment->method) }}</td>
+                        <td class="p-2">₹{{ $payment->amount }}</td>
+                        <td class="p-2">
+                            ₹{{ number_format($payment->logs->sum('paid_amount'), 2) }}
                         </td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->mobile ?? '-' }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ ucfirst($order->status) }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">₹{{ $order->total_amount }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">{{ $order->payment->method ?? '' }}</td>
-                        <td class="px-4 py-2 whitespace-nowrap">
-                            @php
-                                $logs = $order->paymentLogs;
-                                $paid = $logs->sum('amount');
-                                $method = optional($order->payment)->method;
-                            @endphp
-
-                            @if ($method === 'part' && $order->paymentGroups->count())
-                                <span class="text-green-600">
-                                    {{ $order->paymentGroups->groupBy('method')->map(fn($group, $m) => ucfirst($m) . ': ₹' . $group->sum('amount'))->implode(' | ') }}
-                                </span>
-                            @elseif ($logs->isNotEmpty())
-                                @foreach ($logs->groupBy('method') as $logMethod => $group)
-                                    <div>
-                                        <span class="text-green-600">{{ ucfirst($logMethod) }}:
-                                            ₹{{ $group->sum('paid_amount') }}</span> |
-                                        <span class="text-red-400">₹{{ $group->sum('amount') }}</span>
-                                    </div>
-                                @endforeach
-                            @else
-                                <span class="text-green-600">{{ ucfirst($method) ?? '-' }} :
-                                    ₹{{ $order->total_amount }}</span>
+                        <td class="px-6 py-3 text-sm text-red-500">
+                            ₹{{ number_format($remaining, 2) }}
+                        </td>
+                        <td class="p-2">
+                            @if ($payment->method === 'duo')
+                                <button wire:click="showPaymentLogs({{ $payment->id }})" wire:loading.attr="disabled"
+                                    class="text-blue-600 hover:underline text-sm">
+                                    {{ $showLogsForPaymentId === $payment->id ? 'Hide' : 'Show' }}
+                                </button>
                             @endif
                         </td>
                     </tr>
+
+                    @if ($showLogsForPaymentId === $payment->id)
+                        <tr class="bg-gray-100">
+                            <td colspan="7" class="p-3">
+                                @if (!empty($paymentLogs))
+                                    <table class="min-w-full text-sm text-left border border-gray-300 rounded">
+                                        <thead class="bg-white text-gray-700">
+                                            <tr>
+                                                <th class="border px-3 py-2">#</th>
+                                                <th class="border px-3 py-2">Paid Amount</th>
+                                                <th class="border px-3 py-2">Method</th>
+                                                <th class="border px-3 py-2">Created At</th>
+                                                <th class="border px-3 py-2">Issue</th>
+                                                {{-- <th class="border px-3 py-2">Mobile</th> --}}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($paymentLogs as $index => $log)
+                                                <tr class="bg-white">
+                                                    <td class="border px-3 py-2">{{ $index + 1 }}</td>
+                                                    <td class="border px-3 py-2 text-green-600 font-medium">
+                                                        ₹{{ $log['paid_amount'] }}</td>
+                                                    <td class="border px-3 py-2 capitalize">{{ $log['method'] }}</td>
+                                                    <td class="border px-3 py-2">
+                                                        {{ \Carbon\Carbon::parse($log['created_at'])->format('d M Y H:i') }}
+                                                    </td>
+                                                    <td class="border px-3 py-2">{{ $log['issue'] ?? '-' }}</td>
+                                                    {{-- <td class="border px-3 py-2">{{ $log['mobile'] ?? '-' }}</td> --}}
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @else
+                                    <div class="text-sm text-gray-600">No logs found.</div>
+                                @endif
+                            </td>
+                        </tr>
+                    @endif
+
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-3 text-center text-sm text-gray-500">
-                            No sales records found.
-                        </td>
+                        <td colspan="7" class="p-2 text-center">No records found.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+
     <div class="mt-4">
-        {{ $orders->links() }}
+        {{ $payments->links() }}
     </div>
 </div>
