@@ -32,7 +32,7 @@ class Create extends Component
 
     public function mount()
     {
-        $this->plans = Plan::all()->mapWithKeys(function ($plan) {
+        $this->plans = Plan::where('is_active', 0)->get()->mapWithKeys(function ($plan) {
             return [
                 $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days'
             ];
@@ -125,11 +125,14 @@ class Create extends Component
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
             'favicon' => 'nullable|file|max:1024',
-            'plan_id' => 'exists:plans,id',
+            'plan_id' => 'nullable|exists:plans,id',
         ]);
 
-        $selectedPlan = Plan::find($this->plan_id);
-        $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
+        // $selectedPlan = Plan::find($this->plan_id);
+        // $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
+
+        $selectedPlan = $this->plan_id ? Plan::find($this->plan_id) : null;
+        $expiryDate = $selectedPlan ? now()->addDays($selectedPlan->duration_days ?? 30) : null;
 
         $faviconPath = $this->oldFavicon;
 
@@ -159,7 +162,7 @@ class Create extends Component
             'name' => $this->restaurant_name,
             'address' => $this->restaurant_address,
             'gstin' => $this->gst_no,
-            'plan_id' => $selectedPlan->id,
+            'plan_id' => $selectedPlan?->id,
             'plan_expiry_at' => $expiryDate,
         ]);
 
@@ -171,7 +174,11 @@ class Create extends Component
             'favicon' => $faviconPath,
         ]);
 
-        $this->syncRestaurantFeatures($restaurant, $selectedPlan);
+        // $this->syncRestaurantFeatures($restaurant, $selectedPlan);
+        if ($selectedPlan) {
+            $this->syncRestaurantFeatures($restaurant, $selectedPlan);
+        }
+
         session()->flash('success', 'User Restaurant created successfully.');
         return redirect()->route('superadmin.admin.index');
     }
