@@ -65,7 +65,7 @@
             <!-- Logo -->
             <div class="flex items-center">
                 <a href="{{ route('restaurant.dashboard') }}" class="text-xl font-bold text-gray-800">
-                    <img src="{{ asset('icon/logo.png') }}" alt="Logo" class="h-10 w-auto">
+                    <img src="{{ asset('storage/' . ($siteSettings->favicon ?? 'icon/hubwalelogopng.png')) }}" alt="Logo" class="h-10 w-auto">
                 </a>
             </div>
 
