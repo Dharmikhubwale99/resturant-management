@@ -49,6 +49,6 @@ class MoneyOutForm extends Component
 
         session()->flash('success', 'Money Out entry saved.');
         $this->reset(['party_name', 'amount', 'description', 'date']);
-        // return redirect()->route('resturant.transaction.money-out.index');
+        return redirect()->route('resturant.transaction.money-out');
     }
 }

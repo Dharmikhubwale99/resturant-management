@@ -32,7 +32,7 @@ class Create extends Component
     {
         $this->validate([
             'name' => 'required|string|max:255',
-            'mobile' => 'nullable|numeric|max:10',
+            'mobile' => 'required|numeric',
         ]);
 
         Customer::create([

@@ -65,15 +65,15 @@ class Edit extends Component
             'description' => $this->description,
         ]);
 
-        if ($this->expense_total->summary_date != now()->format('Y-m-d')) {
+        if (!$this->expense_total || $this->expense_total->summary_date != now()->format('Y-m-d')) {
             SalesSummaries::create([
                 'restaurant_id' => $this->restaurant->id,
-                'total_sale' => $this->amount,
+                'total_expances' => $this->amount,
                 'summary_date' => now(),
             ]);
         } else {
             $this->expense_total->update([
-                'total_sale' => $this->expense_total->total_sale + $this->amount,
+                'total_expances' => $this->expense_total->total_sale + $this->amount,
                 'summary_date' => now(),
             ]);
         }

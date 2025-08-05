@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('mobile', 20)->nullable();
             $table->decimal('amount', 10, 2)->default(0);
             $table->decimal('paid_amount', 10, 2)->default(0);
-            $table->enum('method', ['cash', 'card', 'upi', 'duo', 'part']);
+            $table->enum('method', ['cash', 'card', 'upi', 'duo', 'part'])->nullable();
             $table->text('issue')->nullable();
             $table->timestamps();
             $table->softDeletes();

@@ -794,6 +794,7 @@ class Item extends Component
             $amount = $this->getCartTotal();
 
             Payment::create([
+                'restaurant_id' => $order->restaurant_id,
                 'order_id' => $order->id,
                 'amount' => $amount,
                 'method' => $this->paymentMethod,
@@ -849,6 +850,7 @@ class Item extends Component
         }
 
         $payment = Payment::create([
+            'restaurant_id' => $order->restaurant_id,
             'order_id' => $order->id,
             'amount' => $order->total_amount,
             'method' => 'part',
@@ -903,8 +905,12 @@ class Item extends Component
         $this->validate([
             'duoCustomerName' => 'required|string|max:100',
             'duoMobile' => 'required|string|max:20',
-            'duoAmount' => 'required|numeric|min:0.01',
-            'duoMethod' => ['required', new Enum(PaymentMethod::class)],
+            'duoAmount' => 'nullable|numeric|min:0',
+            'duoMethod' => ['nullable', function ($attribute, $value, $fail) {
+                if (!is_null($value) && !PaymentMethod::tryFrom($value)) {
+                    $fail("The selected payment method is invalid.");
+                }
+            }],
             'duoIssue' => 'nullable|string|max:255',
         ]);
 
@@ -945,6 +951,7 @@ class Item extends Component
         }
 
         $payment = Payment::create([
+            'restaurant_id' => $order->restaurant_id,
             'order_id' => $order->id,
             'amount' => $order->total_amount,
             'method' => 'duo',
@@ -961,7 +968,7 @@ class Item extends Component
             'mobile' => $this->duoMobile,
             'paid_amount' => $this->duoAmount,
             'amount' => $remainingAmount,
-            'method' => $this->duoMethod,
+            'method' => $this->duoMethod ?: 'cash',
             'issue' => $this->duoIssue,
         ]);
 
