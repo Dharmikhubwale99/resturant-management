@@ -728,6 +728,7 @@ class Item extends Component
             $amount = $this->getCartTotal();
 
             Payment::create([
+                'restaurant_id' => $order->restaurant_id,
                 'order_id' => $order->id,
                 'amount' => $amount,
                 'method' => $this->paymentMethod,

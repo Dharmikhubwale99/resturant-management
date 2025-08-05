@@ -14,7 +14,7 @@ class UserAccess extends Component
     public $userId;
     public $restaurantId;
     public $access = [];
-
+    public $selectAll = false;
     protected $listeners = ['openAccess' => 'loadAccess'];
 
     #[Layout('components.layouts.admin.app')]
@@ -68,5 +68,10 @@ class UserAccess extends Component
         return redirect()->route('superadmin.admin.index');
     }
 
-
+    public function toggleSelectAll()
+    {
+        foreach (AppConfiguration::all() as $module) {
+            $this->access[$module->id] = $this->selectAll;
+        }
+    }
 }

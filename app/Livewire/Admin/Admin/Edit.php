@@ -185,6 +185,17 @@ class Edit extends Component
                 'plan_id' => $selectedPlan->id,
                 'plan_expiry_at' => $expiryDate,
             ]);
+        } else {
+            $restaurant = Restaurant::create([
+            'user_id' => $user->id,
+            'name' => $this->restaurant_name,
+            'address' => $this->restaurant_address,
+            'gstin' => $this->gst_no,
+            'pin_code_id' => $this->pincode_id,
+            'plan_id' => $selectedPlan->id,
+            'plan_expiry_at' => $expiryDate,
+        ]);
+        $this->restaurant_id = $restaurant->id;
         }
 
         $faviconPath = $this->oldFavicon;
