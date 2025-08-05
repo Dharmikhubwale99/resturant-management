@@ -68,9 +68,13 @@ use \App\Livewire\Resturant\{
     Discount\Create as DiscountCreate,
     Discount\Edit as DiscountEdit,
 
+    Party\Index as PartyIndex,
+    Party\Create as PartyCreate,
+
     Kitchen\Dashboard as AdminKitchenDashboard,
 
-    Transaction\MoneyIn as MoneyMaintain,
+    Transaction\MoneyIn\MoneyIn as MoneyMaintain,
+    Transaction\MoneyIn\Create as MoneyInCreate,
     Transaction\MoneyOutForm as MoneyMainOut,
     Transaction\MoneyOutIndex as MoneyOutIndex,
 
@@ -219,8 +223,14 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/item-sale-payment-report', ItemSalePaymentReport::class)->name('item-sale-payment-report');
 
     Route::get('/money-maintain', MoneyMaintain::class)->name('money-maintain');
+    Route::get('/money-in-create', MoneyInCreate::class)->name('money-in.create');
+
     Route::get('/money-out-create', MoneyMainOut::class)->name('money-out.create');
     Route::get('/money-out-index', MoneyOutIndex::class)->name('money-out');
+
+    Route::get('/party', PartyIndex::class)->name('party');
+    Route::get('/party/create', PartyCreate::class)->name('party.create');
+
 });
 
 // Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {
