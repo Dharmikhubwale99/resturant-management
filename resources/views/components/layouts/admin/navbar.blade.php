@@ -72,9 +72,9 @@
 
                         <div class="py-1">
                             {{-- <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View
-                                Profile</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit
                                 Profile</a> --}}
+                            <a href="{{ route('superadmin.edit-profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit
+                                Profile</a>
 
                             {{-- @if (auth()->check() && auth()->user()->refer_code)
                                 <input type="text" id="referralLink"
