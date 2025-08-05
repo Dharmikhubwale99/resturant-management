@@ -29,6 +29,8 @@ class Item extends Model implements HasMedia
         'description',
         'price',
         'is_active',
+        'tax_id',
+        'is_tax_inclusive',
     ];
 
     /**
@@ -81,7 +83,6 @@ class Item extends Model implements HasMedia
         $this->addMediaCollection('images');
     }
 
-    //frontent color show
     public function getTypeColorClassAttribute(): string
     {
         return match ($this->item_type) {
@@ -104,5 +105,10 @@ class Item extends Model implements HasMedia
     {
         return $this->belongsToMany(Discount::class, 'discount_item');
     }
+
+    public function taxSetting()
+{
+    return $this->belongsTo(\App\Models\TaxSetting::class, 'tax_id');
+}
 
 }

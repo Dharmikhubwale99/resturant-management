@@ -12,14 +12,21 @@ class BillPrint extends Component
     public Order $order;
     public ?Restaurant $restaurant = null;
 
+    #[Layout('components.layouts.resturant.app')]
+    public function render()
+    {
+        return view('livewire.waiter.bill-print');
+    }
+
     public function mount(Order $order)
     {
         $this->order = $order->load([
             'orderItems',
-            'orderItems.item',
+            'orderItems.item.taxSetting',
             'orderItems.variant',
             'table'
         ]);
+
         $this->restaurant = Restaurant::find($order->restaurant_id);
 
         if (empty($this->order->bill_number)) {
@@ -28,10 +35,5 @@ class BillPrint extends Component
         }
     }
 
-    #[Layout('components.layouts.resturant.app')]
-    public function render()
-    {
-        return view('livewire.waiter.bill-print');
-    }
 }
 
