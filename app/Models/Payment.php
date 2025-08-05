@@ -19,12 +19,9 @@ class Payment extends Model
      */
     protected $fillable = [
         'order_id',
-        'customer_id',
         'method',
         'amount',
         'split_group',
-        'payment_date',
-        'restaurant_id'
     ];
 
     /**
@@ -46,11 +43,6 @@ class Payment extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class);
-    }
-
     public function restaurantPaymentLogs():HasMany
     {
         return $this->hasMany(RestaurantPaymentLog::class);
@@ -60,10 +52,4 @@ class Payment extends Model
     {
         return $this->hasMany(RestaurantPaymentLog::class, 'payment_id');
     }
-
-    public function logs()
-    {
-        return $this->hasMany(RestaurantPaymentLog::class);
-    }
-
 }

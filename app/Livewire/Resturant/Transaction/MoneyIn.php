@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Resturant\Transaction\MoneyIn;
+namespace App\Livewire\Resturant\Transaction;
 
 use App\Models\{Order, Restaurant, RestaurantPaymentLog};
 use App\Models\Payment;
@@ -25,13 +25,13 @@ class MoneyIn extends Component
     {
         $restaurantId = auth()->user()->restaurant_id ?: Restaurant::where('user_id', auth()->id())->value('id');
 
-        $this->logs = Payment::whereIn('method', ['duo', 'part', 'cash', 'card', 'upi'])
+        $this->logs = RestaurantPaymentLog::whereHas('payment', fn($q) => $q->where('method', 'duo'))
             ->where('restaurant_id', $restaurantId)
-            ->with(['order','customer', 'logs' => fn($q) => $q->latest()])
+            ->with(['payment', 'order'])
             ->latest()
             ->get();
 
-        return view('livewire.resturant.transaction.money-in.money-in');
+        return view('livewire.resturant.transaction.money-in');
     }
 
     public function openPaymentModal($logId)
@@ -79,4 +79,5 @@ class MoneyIn extends Component
 
         session()->flash('success', 'Follow-up payment saved!');
     }
+
 }

@@ -11,6 +11,7 @@ use \App\Livewire\Admin\{
     Dashboard,
     Settings,
     Admin\Index,
+    EditProfile as AdminEditProfile,
 
     Admin\Create,
     Admin\Edit,
@@ -68,13 +69,9 @@ use \App\Livewire\Resturant\{
     Discount\Create as DiscountCreate,
     Discount\Edit as DiscountEdit,
 
-    Party\Index as PartyIndex,
-    Party\Create as PartyCreate,
-
     Kitchen\Dashboard as AdminKitchenDashboard,
 
-    Transaction\MoneyIn\MoneyIn as MoneyMaintain,
-    Transaction\MoneyIn\Create as MoneyInCreate,
+    Transaction\MoneyIn as MoneyMaintain,
     Transaction\MoneyOutForm as MoneyMainOut,
     Transaction\MoneyOutIndex as MoneyOutIndex,
 
@@ -119,6 +116,7 @@ Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFr
  Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
     Route::get('/settings', Settings::class)->name('settings');
+    Route::get('/edit-profile', AdminEditProfile::class)->name('edit-profile');
 
     Route::prefix('admin')->as('admin.')->group(function () {
 
@@ -223,14 +221,8 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/item-sale-payment-report', ItemSalePaymentReport::class)->name('item-sale-payment-report');
 
     Route::get('/money-maintain', MoneyMaintain::class)->name('money-maintain');
-    Route::get('/money-in-create', MoneyInCreate::class)->name('money-in.create');
-
     Route::get('/money-out-create', MoneyMainOut::class)->name('money-out.create');
     Route::get('/money-out-index', MoneyOutIndex::class)->name('money-out');
-
-    Route::get('/party', PartyIndex::class)->name('party');
-    Route::get('/party/create', PartyCreate::class)->name('party.create');
-
 });
 
 // Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {

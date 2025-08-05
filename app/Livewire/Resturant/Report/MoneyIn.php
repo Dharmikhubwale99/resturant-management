@@ -2,14 +2,16 @@
 
 namespace App\Livewire\Resturant\Report;
 
+use App\Models\Order;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\{Restaurant, Payment, RestaurantPaymentLog};
 use App\Exports\MoneyInExport;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\DB;
+use App\Models\RestaurantPaymentLog;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
-use Livewire\Attributes\Layout;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MoneyIn extends Component
 {
@@ -19,14 +21,12 @@ class MoneyIn extends Component
     public $fromDate;
     public $toDate;
     public $methodFilter = '';
-    public $showLogsForPaymentId = null;
-    public $paymentLogs = [];
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
         return view('livewire.resturant.report.money-in', [
-            'payments' => $this->getFilteredPayments(),
+            'orders' => $this->getFilteredOrders(),
         ]);
     }
 
@@ -41,79 +41,67 @@ class MoneyIn extends Component
         }
     }
 
-    public function getFilteredPayments()
+    public function getFilteredOrders()
     {
-        $restaurantId = auth()->user()->restaurant_id
-            ?: Restaurant::where('user_id', auth()->id())->value('id');
+        $restaurantId = Auth::user()->restaurants()->first()->id;
 
-        $query = Payment::whereIn('method', ['duo', 'part', 'cash', 'card', 'upi'])
-            ->where('restaurant_id', $restaurantId)
-            ->with(['order', 'customer', 'logs' => fn($q) => $q->latest()]);
+        $query = Order::query()->where('restaurant_id', $restaurantId)->with(['payments', 'paymentLogs']);
 
         if ($this->dateFilter === 'today') {
+            $this->fromDate = now()->startOfDay()->format('Y-m-d');
+            $this->toDate = now()->endOfDay()->format('Y-m-d');
             $query->whereDate('created_at', now()->toDateString());
         } elseif ($this->dateFilter === 'weekly') {
+            $this->fromDate = now()->subWeek()->format('Y-m-d');
+            $this->toDate = now()->format('Y-m-d');
             $query->whereBetween('created_at', [now()->subWeek(), now()]);
         } elseif ($this->dateFilter === 'monthly') {
+            $this->fromDate = now()->startOfMonth()->format('Y-m-d');
+            $this->toDate = now()->endOfMonth()->format('Y-m-d');
             $query->whereMonth('created_at', now()->month);
         } elseif ($this->dateFilter === 'custom' && $this->fromDate && $this->toDate) {
             $query->whereBetween('created_at', [$this->fromDate, $this->toDate]);
         }
 
         if ($this->methodFilter) {
-            $query->where('method', $this->methodFilter);
+            $query->whereHas('payment', function ($q) {
+                $q->where('method', $this->methodFilter);
+            });
         }
 
         return $query->paginate(15);
     }
 
-    public function showPaymentLogs($paymentId)
-    {
-        if ($this->showLogsForPaymentId === $paymentId) {
-            $this->showLogsForPaymentId = null;
-            $this->paymentLogs = [];
-        } else {
-            $this->showLogsForPaymentId = $paymentId;
-            $this->paymentLogs = RestaurantPaymentLog::where('payment_id', $paymentId)
-                ->orderByDesc('created_at')
-                ->get()
-                ->toArray();
-        }
-    }
-
     public function exportExcel()
     {
-        $restaurantId = auth()->user()->restaurant_id
-            ?: Restaurant::where('user_id', auth()->id())->value('id');
-
+        $restaurantId = Auth::user()->restaurants()->first()->id;
         $from = $this->fromDate ?? now()->format('Y-m-d');
         $to = $this->toDate ?? now()->format('Y-m-d');
 
         return Excel::download(
-            new MoneyInExport($from, $to, $restaurantId, $this->methodFilter),
+            new MoneyInExport($from, $to, $restaurantId,$this->methodFilter),
             'money_in_report.xlsx'
         );
     }
 
     public function exportPdf()
     {
-        $restaurantId = auth()->user()->restaurant_id
-            ?: Restaurant::where('user_id', auth()->id())->value('id');
-
+        $restaurantId = Auth::user()->restaurants()->first()->id;
         $from = $this->fromDate ?? now()->format('Y-m-d');
         $to = $this->toDate ?? now()->format('Y-m-d');
 
-        $payments = Payment::whereIn('method', ['duo', 'part', 'cash', 'card', 'upi'])
+        $orders = Order::with(['payment', 'paymentLogs', 'paymentGroups', 'table', 'payment'])
             ->where('restaurant_id', $restaurantId)
             ->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
             ->when($this->methodFilter, function ($query) {
-                $query->where('method', $this->methodFilter);
+                $query->whereHas('payment', function ($q) {
+                    $q->where('method', $this->methodFilter);
+                });
             })
-            ->with(['order', 'customer', 'logs' => fn($q) => $q->latest()])
             ->get();
 
         $pdf = Pdf::loadView('livewire.pdf.money-in-report-pdf', [
-            'payments' => $payments,
+            'orders' => $orders,
             'fromDate' => $from,
             'toDate' => $to,
         ]);
