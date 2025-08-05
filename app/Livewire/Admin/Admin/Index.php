@@ -20,9 +20,10 @@ class Index extends Component
     public function render()
     {
         $users = User::role(['admin', 'superadmin'])
-        ->leftJoin('restaurants', 'users.id', '=', 'restaurants.user_id')
-        ->select('users.*', 'restaurants.plan_expiry_at', 'restaurants.created_at as restaurant_created_at')
-        ->paginate(10);
+    ->leftJoin('restaurants', 'users.id', '=', 'restaurants.user_id')
+    ->select('users.*', 'restaurants.id as restaurant_id', 'restaurants.plan_expiry_at', 'restaurants.created_at as restaurant_created_at')
+    ->paginate(10);
+
 
         return view('livewire.admin.admin.index', [
             'users' => $users,

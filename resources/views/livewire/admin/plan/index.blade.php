@@ -126,7 +126,7 @@
                                 class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
                             <button wire:click="toggleBlock"
                                 class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
-                                {{ optional(\App\Models\Plan::find($blockId))->is_active ? 'Block' : 'Unblock' }}
+                                {{ optional(\App\Models\Plan::find($blockId))->is_active ? 'UnBlock' : 'Block' }}
                             </button>
                         </div>
                     </div>
