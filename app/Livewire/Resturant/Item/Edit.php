@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Resturant\Item;
 
-use App\Models\Item;
+use App\Models\{Item, TaxSetting};
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Enums\ItemType;
@@ -32,6 +32,10 @@ class Edit extends Component
     public $restaurant;
     public $variants = [];
     public $addons = [];
+    public $tax_id;
+    public $is_tax_inclusive;
+    public $taxOptions = [];
+
 
      public function render()
     {
@@ -52,6 +56,9 @@ class Edit extends Component
         $this->code = $this->item->code;
         $this->description = $this->item->description;
         $this->price = $this->item->price;
+        $this->tax_id = $this->item->tax_id;
+        $this->is_tax_inclusive = $this->item->is_tax_inclusive;
+
 
         $restaurant = auth()->user()->restaurants()->first();
         $this->restaurant = $restaurant;
@@ -75,6 +82,11 @@ class Edit extends Component
                 'price' => $addon->price,
             ];
         })->toArray();
+
+        $this->taxOptions = TaxSetting::where('is_active', 0)
+            ->orderBy('rate')
+            ->pluck('name', 'id')
+            ->toArray();
     }
 
     public function addVariant()
@@ -118,6 +130,8 @@ class Edit extends Component
             'code' => 'nullable|unique:items,code,'. $this->item->id . ',id,restaurant_id,' . $this->item->restaurant_id,
             'description' => 'nullable',
             'price' => 'required|numeric',
+            'tax_id' => 'nullable|exists:tax_settings,id',
+            'is_tax_inclusive' => 'nullable|boolean',
         ]);
 
         $isExists = Item::where([
@@ -140,6 +154,8 @@ class Edit extends Component
             'code' => $this->code,
             'description' => $this->description,
             'price' => $this->price,
+            'tax_id' => $this->tax_id,
+            'is_tax_inclusive' => $this->is_tax_inclusive,
         ]);
 
         foreach ($this->variants as $variant) {

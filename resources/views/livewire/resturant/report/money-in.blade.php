@@ -4,7 +4,7 @@
     <div class="flex flex-wrap items-center gap-4 mb-6">
         <div>
             <label class="block text-sm mb-1 font-medium">Date Filter</label>
-            <select wire:model="dateFilter" wire:change="updatedDateFilter" class="border px-3 py-1 rounded text-sm">
+            <select wire:model.live="dateFilter" class="border px-3 py-1 rounded text-sm">
                 <option value="today">Today</option>
                 <option value="weekly">This Week</option>
                 <option value="monthly">This Month</option>
@@ -15,12 +15,12 @@
         @if ($dateFilter === 'custom')
             <div>
                 <label class="block text-sm mb-1 font-medium">From</label>
-                <input type="date" wire:model="fromDate" class="border px-3 py-1 rounded text-sm" />
+                <input type="date" wire:model.live="fromDate" class="border px-3 py-1 rounded text-sm" />
             </div>
 
             <div>
                 <label class="block text-sm mb-1 font-medium">To</label>
-                <input type="date" wire:model="toDate" class="border px-3 py-1 rounded text-sm" />
+                <input type="date" wire:model.live="toDate" class="border px-3 py-1 rounded text-sm" />
             </div>
         @endif
 

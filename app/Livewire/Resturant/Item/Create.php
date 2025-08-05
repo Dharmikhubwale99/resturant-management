@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Resturant\Item;
 
-use App\Models\{Item, Category, Addon};
+use App\Models\{Item, Category, Addon, TaxSetting};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Enums\ItemType;
@@ -26,6 +26,10 @@ class Create extends Component
     public $itemTypes = [];
     public $variants = [];
     public $addons = [];
+    public $tax_id = null;
+    public $is_tax_inclusive = null;
+    public $taxOptions = [];
+    public $calculated_price = 0;
 
     #[Layout('components.layouts.resturant.app')]
 
@@ -45,22 +49,50 @@ class Create extends Component
 
         $this->restaurant = auth()->user()->restaurants()->first();
 
-        // associative array: [id => name]
         $this->categories = $this->restaurant
                                 ->categories()
                                 ->orderBy('name')
                                 ->pluck('name', 'id')
                                 ->toArray();
 
-        // enum → array: ['non_veg' => 'Non-Veg', …]
         $this->itemTypes  = collect(ItemType::cases())
                             ->mapWithKeys(fn ($c) => [$c->value => $c->label()])
                             ->toArray();
+
+        $this->taxOptions = TaxSetting::where('is_active', 0)
+            ->orderBy('rate')
+            ->pluck('name', 'id')
+            ->toArray();
     }
 
     public function getRestaurantFolder(): string
     {
         return Str::slug($this->restaurant->name);
+    }
+
+    public function updated($propertyName)
+    {
+        if (in_array($propertyName, ['price', 'tax_id', 'is_tax_inclusive'])) {
+            $this->calculateFinalPrice();
+        }
+    }
+
+    public function calculateFinalPrice()
+    {
+        $tax = TaxSetting::find($this->tax_id);
+        $rate = $tax?->rate ?? 0;
+
+        if ($this->price && is_numeric($this->price)) {
+            if ($this->is_tax_inclusive) {
+                $base = $this->price / (1 + ($rate / 100));
+                $this->calculated_price = round($base, 2);
+            } else {
+                $total = $this->price * (1 + ($rate / 100));
+                $this->calculated_price = round($total, 2);
+            }
+        } else {
+            $this->calculated_price = 0;
+        }
     }
 
     public function submit()
@@ -78,6 +110,8 @@ class Create extends Component
             'code' => 'nullable|unique:items,code,null,id,restaurant_id,' . $this->restaurant->id,
             'description' => 'nullable',
             'price' => 'required|numeric',
+            'tax_id' => 'nullable|exists:tax_settings,id',
+            'is_tax_inclusive' => 'nullable|boolean',
         ]);
 
         $isExists = Item::where([
@@ -104,6 +138,8 @@ class Create extends Component
             'code'          => $this->code ?? null,
             'description'   => $this->description,
             'price'         => $this->price,
+            'tax_id'            => $this->tax_id,
+            'is_tax_inclusive'  => $this->is_tax_inclusive,
         ]);
 
         foreach ($this->images as $image) {
