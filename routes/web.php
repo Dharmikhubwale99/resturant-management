@@ -76,8 +76,8 @@ use \App\Livewire\Resturant\{
 
     Transaction\MoneyIn\MoneyIn as MoneyMaintain,
     Transaction\MoneyIn\Create as MoneyInCreate,
-    Transaction\MoneyOutForm as MoneyMainOut,
-    Transaction\MoneyOutIndex as MoneyOutIndex,
+    Transaction\MoneyOut\MoneyOutForm as MoneyMainOut,
+    Transaction\MoneyOut\MoneyOutIndex as MoneyOutIndex,
 
     Report\Index as ReportIndex,
     Report\SalesReport,
