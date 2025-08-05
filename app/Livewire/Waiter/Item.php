@@ -868,6 +868,13 @@ class Item extends Component
             ]);
         }
 
+        Customer::create([
+            'restaurant_id' => $this->restaurantId,
+            'order_id' => $order->id,
+            'name' => $this->customerName,
+            'mobile' => $this->mobile,
+        ]);
+
         if ($order) {
             $table = Table::findOrFail($this->table_id);
 
@@ -970,6 +977,13 @@ class Item extends Component
             'amount' => $remainingAmount,
             'method' => $this->duoMethod ?: 'cash',
             'issue' => $this->duoIssue,
+        ]);
+
+        Customer::create([
+            'restaurant_id' => $restaurantId,
+            'order_id' => $order->id,
+            'name' => $this->duoCustomerName,
+            'mobile' => $this->duoMobile,
         ]);
 
         $this->reset(['showDuoPaymentModal', 'duoCustomerName', 'duoMobile', 'duoAmount', 'duoMethod', 'duoIssue', 'paymentMethod']);
