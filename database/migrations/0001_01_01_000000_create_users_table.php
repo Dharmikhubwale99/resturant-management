@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('restaurant_id')->nullable();
             $table->string('name');
             $table->string('mobile');
-            $table->string('email');
+            $table->string('email')->unique();
             $table->string('password');
             $table->unsignedBigInteger('otp')->nullable();
             $table->dateTime('otp_expires_at')->nullable();

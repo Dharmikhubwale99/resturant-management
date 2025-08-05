@@ -7,8 +7,6 @@
             <div>
                 <x-form.input name="personal_name" label="Name" wireModel="personal_name" required />
                 <x-form.input name="personal_email" label="Email" type="email" wireModel="personal_email" required />
-                <x-form.input name="password" label="Password" type="password" wireModel="password" showToggle="true"/>
-                <x-form.input name="confirm_password" label="Confirm Password" type="password" wireModel="confirm_password" showToggle="true"  />
                 <x-form.input name="personal_mobile" label="Mobile" wireModel="personal_mobile" required />
                 <x-form.input name="personal_address" label="Address" wireModel="personal_address" />
                 <x-form.input name="pincode" label="Pincode" type="text" wireModelLive="pincode" required />

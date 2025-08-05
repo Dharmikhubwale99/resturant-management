@@ -9,7 +9,6 @@ use App\Notifications\SendOtpNotification;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\WhatsappTrait;
-use Illuminate\Validation\Rule;
 
 class Register extends Component
 {
@@ -28,19 +27,15 @@ class Register extends Component
     public function register()
     {
         $this->validate([
-           'mobile' => [
-                'required',
-                'numeric',
-                Rule::unique('users', 'mobile')->whereNull('deleted_at'),
-            ],
+            'mobile' => 'required|numeric|unique:users,mobile',
             'name' => 'required|string|max:255',
             'password' => 'required|string|min:6',
             'confirm_password' => 'required|same:password',
             'email' => [
                 'required',
                 'email',
+                'unique:users,email',
                 'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
-                Rule::unique('users', 'email')->whereNull('deleted_at'),
             ],
         ], [
             'email.regex' => 'Only .com email addresses are allowed.',

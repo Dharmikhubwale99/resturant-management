@@ -11,7 +11,6 @@ use \App\Livewire\Admin\{
     Dashboard,
     Settings,
     Admin\Index,
-    EditProfile as AdminEditProfile,
 
     Admin\Create,
     Admin\Edit,
@@ -120,7 +119,6 @@ Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFr
  Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
     Route::get('/settings', Settings::class)->name('settings');
-    Route::get('/edit-profile', AdminEditProfile::class)->name('edit-profile');
 
     Route::prefix('admin')->as('admin.')->group(function () {
 
