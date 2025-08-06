@@ -23,7 +23,11 @@ class ModuleSeeder extends Seeder
             'table',
             'discount',
             'kitchen',
-            'order'
+            'order',
+            'report',
+            'moneyIn',
+            'moneyOut',
+            'party'
         ];
 
         foreach ($modules as $key) {

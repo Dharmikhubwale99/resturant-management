@@ -136,69 +136,18 @@ class EditProfile extends Component
         $this->district_name = $district->name;
     }
 
-    public function nextStep()
-    {
-        if ($this->step === 1) {
-            $this->validate([
-                'personal_name' => 'required|string|max:255',
-                'personal_email' => 'required|email',
-                'personal_mobile' => 'required',
-            ]);
-
-            $user = Auth::user();
-            if ($this->password) {
-                $this->validate(['password' => 'required|min:6',
-                'confirm_password' => 'required|min:6|same:password',
-            ]);
-                $hashPass = Hash::make($this->password);
-            } else {
-                $hashPass = $user->password;
-            }
-          
-            $user->update([
-                'name' => $this->personal_name,
-                'email' => $this->personal_email,
-                'mobile' => $this->personal_mobile,
-                'address' => $this->personal_address,
-                'pin_code_id' => $this->pincode_id,
-                'password' => $hashPass
-            ]);
-        }
-
-        if ($this->step === 2) {
-            $this->validate([
-                'restaurant_name' => 'required|string|max:255',
-                'restaurant_email' => 'required|email',
-                'restaurant_mobile' => 'required',
-            ]);
-
-            $restaurant = Auth::user()->restaurant;
-            if ($restaurant) {
-                $restaurant->update([
-                    'name' => $this->restaurant_name,
-                    'email' => $this->restaurant_email,
-                    'mobile' => $this->restaurant_mobile,
-                    'address' => $this->restaurant_address,
-                    'gstin' => $this->gst,
-                ]);
-            }
-        }
-
-        if ($this->step < 3) {
-            $this->step++;
-        }
-    }
-
-    public function previousStep()
-    {
-        if ($this->step > 1) {
-            $this->step--;
-        }
-    }
 
     public function updateProfile()
     {
         $this->validate([
+            'personal_name' => 'required|string|max:255',
+            'personal_email' => 'required|email',
+            'personal_mobile' => 'required',
+
+            'restaurant_name' => 'required|string|max:255',
+            'restaurant_email' => 'required|email',
+            'restaurant_mobile' => 'required',
+
             'bank_name' => 'nullable|string|max:255',
             'ifsc' => 'nullable|string|max:20',
             'holder_name' => 'nullable|string|max:255',
@@ -207,14 +156,41 @@ class EditProfile extends Component
             'account_number' => 'nullable|string|max:50',
         ]);
 
-        $this->restaurant->update([
-            'bank_name' => $this->bank_name,
-            'ifsc' => $this->ifsc,
-            'holder_name' => $this->holder_name,
-            'account_type' => $this->account_type,
-            'upi_id' => $this->upi_id,
-            'account_number' => $this->account_number,
+        $user = Auth::user();
+
+        $hashedPassword = $user->password;
+        if ($this->password) {
+            $this->validate([
+                'password' => 'required|min:6',
+                'confirm_password' => 'required|same:password',
+            ]);
+            $hashedPassword = Hash::make($this->password);
+        }
+
+        $user->update([
+            'name' => $this->personal_name,
+            'email' => $this->personal_email,
+            'mobile' => $this->personal_mobile,
+            'address' => $this->personal_address,
+            'pin_code_id' => $this->pincode_id,
+            'password' => $hashedPassword
         ]);
+
+        if ($this->restaurant) {
+            $this->restaurant->update([
+                'name' => $this->restaurant_name,
+                'email' => $this->restaurant_email,
+                'mobile' => $this->restaurant_mobile,
+                'address' => $this->restaurant_address,
+                'gstin' => $this->gst,
+                'bank_name' => $this->bank_name,
+                'ifsc' => $this->ifsc,
+                'holder_name' => $this->holder_name,
+                'account_type' => $this->account_type,
+                'upi_id' => $this->upi_id,
+                'account_number' => $this->account_number,
+            ]);
+        }
 
         session()->flash('success', 'Profile updated successfully!');
         return redirect()->route('restaurant.dashboard');

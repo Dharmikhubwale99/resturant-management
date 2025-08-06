@@ -33,6 +33,7 @@ class Create extends Component
 
         $this->expenseTypes = $this->restaurant
                                 ->expenseTypes()
+                                ->where('is_active', 0)
                                 ->orderBy('name')
                                 ->pluck('name', 'id')
                                 ->toArray();

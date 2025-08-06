@@ -12,8 +12,12 @@
             <x-form.input type="date" name="to_date" wireModelLive="to_date" wrapperClass="mb-0"
                 inputClass="border border-gray-300 focus:ring focus:ring-blue-300" />
 
-            <x-form.button title="+ Add" route="restaurant.money-out.create"
-                class="bg-blue-600 hover:bg-blue-700 text-white" />
+            @can('moneyout-create')
+                @if (setting('moneyOut'))
+                    <x-form.button title="+ Add" route="restaurant.money-out.create"
+                        class="bg-blue-600 hover:bg-blue-700 text-white" />
+                @endif
+            @endcan
         </div>
     </div>
 

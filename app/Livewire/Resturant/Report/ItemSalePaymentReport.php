@@ -18,6 +18,10 @@ class ItemSalePaymentReport extends Component
 
     public function mount()
     {
+        if (!setting('report')) {
+            abort(403, 'You do not have access to this module.');
+        }
+
         $this->applyDefaultDateFilter();
         $this->categories = DB::table('categories')->pluck('name', 'id')->toArray();
     }

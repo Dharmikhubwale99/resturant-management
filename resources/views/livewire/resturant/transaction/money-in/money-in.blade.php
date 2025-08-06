@@ -1,9 +1,13 @@
 <div class="p-6 bg-white rounded shadow">
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold mb-4">Money In</h1>
-        <x-form.button :route="'restaurant.money-in.create'">
-            + Add
-        </x-form.button>
+        @can('party-create')
+            @if (setting('moneyIn'))
+                <x-form.button :route="'restaurant.money-in.create'">
+                    + Add
+                </x-form.button>
+            @endif
+        @endcan
     </div>
     <x-form.error />
     <div class="overflow-x-auto">

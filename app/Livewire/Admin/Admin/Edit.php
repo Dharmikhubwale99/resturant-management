@@ -5,13 +5,16 @@ namespace App\Livewire\Admin\Admin;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Hash;
-use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting, Plan};
+use App\Models\{User, Restaurant, Country, State, City, District, PinCode, Setting, Plan, AppConfiguration, RestaurantConfiguration};
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Permission;
+use App\Traits\HasRolesAndPermissions;
 
 class Edit extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, HasRolesAndPermissions;
 
     public $user_id, $restaurant_id, $setting_id;
     public $user_name, $email, $mobile, $password, $password_confirmation;
@@ -55,7 +58,7 @@ class Edit extends Component
             $this->plan_id = $restaurant->plan_id;
         }
 
-        if($setting) {
+        if ($setting) {
             $this->meta_title = $setting->meta_title;
             $this->meta_description = $setting->meta_description;
             $this->meta_keywords = $setting->meta_keywords;
@@ -65,7 +68,7 @@ class Edit extends Component
 
         $this->plans = Plan::where('is_active', 0)->get()->mapWithKeys(function ($plan) {
             return [
-            $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days'
+                  $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days',
             ];
         });
     }
@@ -84,7 +87,7 @@ class Edit extends Component
             $response = Http::retry(3, 200)
                 ->timeout(10)
                 ->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36'
+                    'User-Agent' => 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36',
                 ])
                 ->withOptions([
                     'curl' => [
@@ -92,7 +95,7 @@ class Edit extends Component
                         CURLOPT_FORBID_REUSE => true,
                         CURLOPT_FRESH_CONNECT => true,
                         CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
-                    ]
+                    ],
                 ])
                 ->get("https://api.postalpincode.in/pincode/{$value}");
 
@@ -114,7 +117,6 @@ class Edit extends Component
 
                     $this->pincode_id = $pincode->id;
                     $this->setLocationFromModels($country, $state, $city, $district);
-
                 } else {
                     session()->flash('message', 'Invalid pincode or no result found.');
                 }
@@ -122,7 +124,7 @@ class Edit extends Component
                 session()->flash('message', 'API request failed. Status: ' . $response->status());
             }
         } catch (\Illuminate\Http\Client\RequestException $e) {
-            logger()->error("Pincode API error: " . $e->getMessage());
+            logger()->error('Pincode API error: ' . $e->getMessage());
             session()->flash('message', 'Pincode service temporarily unavailable. Please try again later.');
         }
     }
@@ -165,10 +167,15 @@ class Edit extends Component
             $hashedPassword = $user->password;
         }
 
-        // $selectedPlan = Plan::find($this->plan_id);
-        // $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
-        $selectedPlan = $this->plan_id ? Plan::find($this->plan_id) : null;
-        $expiryDate = $selectedPlan ? now()->addDays($selectedPlan->duration_days ?? 30) : null;
+        if ($this->plan_id) {
+            $selectedPlan = Plan::find($this->plan_id);
+            $planId = $selectedPlan->id;
+            $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
+        } else {
+            $selectedPlan = null;
+            $planId = null;
+            $expiryDate = null;
+        }
 
         $user->update([
             'name' => $this->user_name,
@@ -184,30 +191,31 @@ class Edit extends Component
                 'address' => $this->restaurant_address,
                 'gstin' => $this->gst_no,
                 'pin_code_id' => $this->pincode_id,
-                'plan_id' => $selectedPlan?->id,
+                'plan_id' => $planId,
                 'plan_expiry_at' => $expiryDate,
             ]);
+            $restaurant = Restaurant::find($this->restaurant_id);
         } else {
             $restaurant = Restaurant::create([
-            'user_id' => $user->id,
-            'name' => $this->restaurant_name,
-            'address' => $this->restaurant_address,
-            'gstin' => $this->gst_no,
-            'pin_code_id' => $this->pincode_id,
-            'plan_id' => $selectedPlan?->id,
-            'plan_expiry_at' => $expiryDate,
-        ]);
-        $this->restaurant_id = $restaurant->id;
+                'user_id' => $user->id,
+                'name' => $this->restaurant_name,
+                'address' => $this->restaurant_address,
+                'gstin' => $this->gst_no,
+                'pin_code_id' => $this->pincode_id,
+                'plan_id' => $planId,
+                'plan_expiry_at' => $expiryDate,
+            ]);
+            $this->restaurant_id = $restaurant->id;
         }
 
         $faviconPath = $this->oldFavicon;
         if ($this->favicon && $this->favicon !== $this->oldFavicon) {
             $faviconPath = $this->favicon->store('icon', 'public');
-        } else if ($this->favicon === null) {
+        } elseif ($this->favicon === null) {
             $faviconPath = null;
         }
 
-        if($this->setting_id) {
+        if ($this->setting_id) {
             Setting::where('id', $this->setting_id)->update([
                 'meta_title' => $this->meta_title,
                 'meta_description' => $this->meta_description,
@@ -224,7 +232,43 @@ class Edit extends Component
             ]);
         }
 
+        if ($this->plan_id) {
+            $this->syncRestaurantFeatures($restaurant, $selectedPlan);
+        }
+
+        $permissions = $this->getAllPermissions();
+        foreach ($permissions as $perm) {
+            Permission::firstOrCreate(['name' => $perm]);
+        }
+        $user->givePermissionTo($permissions);
+
         session()->flash('success', 'User & Restaurant updated successfully.');
         return redirect()->route('superadmin.admin.index');
+    }
+
+    protected function syncRestaurantFeatures($restaurant, $plan)
+    {
+        Log::info('Syncing restaurant features for plan: ' . $plan->name);
+        Log::info('Restaurant ID: ' . $restaurant->id);
+
+        $configMap = AppConfiguration::pluck('id', 'key')->toArray();
+
+        foreach ($plan->planFeatures as $feature) {
+            $configId = $configMap[$feature->feature] ?? null;
+
+            if ($configId) {
+                RestaurantConfiguration::updateOrCreate(
+                    [
+                        'restaurant_id' => $restaurant->id,
+                        'configuration_id' => $configId,
+                    ],
+                    [
+                        'value' => $feature->is_active ? 1 : 0,
+                    ],
+                );
+            } else {
+                Log::warning('No AppConfiguration found for feature: ' . $feature->feature);
+            }
+        }
     }
 }

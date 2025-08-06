@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Models\Restaurant;
 
 class Login extends Component
 {
@@ -66,13 +67,25 @@ class Login extends Component
             return to_route('superadmin.dashboard')->with('success', 'Login successfully.');
         }
 
-        if (in_array($user->role , ['admin','waiter','kitchen'])) {
+        if ($user->role === 'admin') {
+            $restaurant = Restaurant::where('user_id', $user->id)->first();
+        }  elseif (in_array($user->role, ['waiter', 'kitchen', 'manager'])) {
+            $restaurant = Restaurant::find($user->restaurant_id);
+        } else {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'login' => 'Unauthorized access.',
+            ]);
+        }
+
+        if (!$restaurant || (int) $restaurant->is_active !== 0) {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'login' => 'Your restaurant is inactive.',
+            ]);
+        } else {
             return to_route('restaurant.dashboard')->with('success', 'Login successfully.');
         }
 
-        Auth::logout();
-        throw ValidationException::withMessages([
-            'login' => 'Unauthorized access.',
-        ]);
     }
 }

@@ -7,6 +7,8 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Spatie\Permission\Models\Role;
 use App\Traits\HasRolesAndPermissions;
+use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Permission;
 
 class Create extends Component
 {
@@ -79,10 +81,19 @@ class Create extends Component
             $user->assignRole($this->role);
 
             if (!empty($this->permissions)) {
-                $user->syncPermissions($this->permissions);
+                $permissionList = is_array($this->permissions)
+                    ? $this->permissions
+                    : explode(',', $this->permissions);
+
+                $validPermissions = Permission::whereIn('name', $permissionList)
+                    ->pluck('name')
+                    ->toArray();
+
+                $user->syncPermissions($validPermissions);
             }
 
-            $this->redirect(route('restaurant.users.index'));
+            session()->flash('success', 'User Created successfully!');
+            return redirect()->to(route('restaurant.users.index'));
         } catch (\Throwable $e) {
             report($e);
             $this->addError('server', 'An error occurred: ' . $e->getMessage());

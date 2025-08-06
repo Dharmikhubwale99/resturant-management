@@ -13,4 +13,11 @@ class PaymentReport extends Component
     {
         return view('livewire.resturant.report.payment-report');
     }
+
+    public function mount()
+    {
+        if (!setting('report')) {
+            abort(403, 'You do not have access to this module.');
+        }
+    }
 }

@@ -71,6 +71,7 @@ use \App\Livewire\Resturant\{
 
     Party\Index as PartyIndex,
     Party\Create as PartyCreate,
+    Party\Edit as PartyEdit,
 
     Kitchen\Dashboard as AdminKitchenDashboard,
 
@@ -214,7 +215,7 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/pickup', PickupCreate::class)->name('pickup.create');
     Route::get('/pickup/item/{id}', PickupItem::class)->name('pickup.item');
 
-    Route::get('/report', ReportIndex::class)->name('report');
+    Route::get('/report', ReportIndex::class)->name('report')->middleware('can:report-index');
     Route::get('/sales-report', SalesReport::class)->name('sales-report');
     Route::get('/payment-report', PaymentReport::class)->name('payment-report');
     Route::get('/staff-wise-report', StaffWise::class)->name('staffwise-report');
@@ -224,15 +225,15 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/item-sale-report', ItemSaleReport::class)->name('item-sale-report');
     Route::get('/item-sale-payment-report', ItemSalePaymentReport::class)->name('item-sale-payment-report');
 
-    Route::get('/money-maintain', MoneyMaintain::class)->name('money-maintain');
-    Route::get('/money-in-create', MoneyInCreate::class)->name('money-in.create');
+    Route::get('/money-maintain', MoneyMaintain::class)->name('money-maintain')->middleware('can:moneyin-index');
+    Route::get('/money-in-create', MoneyInCreate::class)->name('money-in.create')->middleware('can:moneyin-create');
 
-    Route::get('/money-out-create', MoneyMainOut::class)->name('money-out.create');
-    Route::get('/money-out-index', MoneyOutIndex::class)->name('money-out');
+    Route::get('/money-out-index', MoneyOutIndex::class)->name('money-out')->middleware('can:moneyout-index');
+    Route::get('/money-out-create', MoneyMainOut::class)->name('money-out.create')->middleware('can:moneyout-create');
 
-    Route::get('/party', PartyIndex::class)->name('party');
-    Route::get('/party/create', PartyCreate::class)->name('party.create');
-
+    Route::get('/party', PartyIndex::class)->name('party')->middleware('can:party-index');
+    Route::get('/party/create', PartyCreate::class)->name('party.create')->middleware('can:party-create');
+    Route::get('/party/edit/{id}', PartyEdit::class)->name('party.edit');
 });
 
 // Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {

@@ -79,4 +79,11 @@ class MoneyOutIndex extends Component
             'records' => $paginated,
         ]);
     }
+
+    public function mount()
+    {
+        if (!setting('moneyOut')) {
+            abort(403, 'You do not have access to this module.');
+        }
+    }
 }
