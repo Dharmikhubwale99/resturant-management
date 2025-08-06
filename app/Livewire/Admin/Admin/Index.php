@@ -15,6 +15,8 @@ class Index extends Component
 
     public $confirmingDelete = false;
     public $deleteId;
+    public $confirmingBlock = false;
+    public $blockId = null;
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -50,5 +52,34 @@ class Index extends Component
     {
         $this->confirmingDelete = false;
         $this->deleteId = null;
+    }
+
+    public function confirmBlock($id)
+    {
+        $this->blockId = $id;
+        $this->confirmingBlock = true;
+    }
+
+    public function cancelBlock()
+    {
+        $this->blockId = null;
+        $this->confirmingBlock = false;
+    }
+
+    public function toggleBlock()
+    {
+        $user = User::findOrFail($this->blockId);
+        $restaurant = Restaurant::where('user_id', $user->id)->first();
+
+        $user->is_active = !$user->is_active;
+        $user->save();
+        $restaurant->update([
+            'is_active' => $user->is_active
+        ]);
+
+        $status = $user->is_active ? 'unblocked' : 'blocked';
+        session()->flash('message', "Plan {$status} successfully.");
+
+        $this->cancelBlock();
     }
 }

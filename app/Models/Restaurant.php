@@ -34,6 +34,7 @@ class Restaurant extends Model
         'account_type',
         'upi_id',
         'account_number',
+        'is_active'
     ];
 
     /**
