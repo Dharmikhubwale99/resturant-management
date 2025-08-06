@@ -64,6 +64,17 @@ trait HasRolesAndPermissions
             'kitchen-dashboard',
 
             'order',
+
+            'party-index',
+            'party-create',
+
+            'moneyin-index',
+            'moneyin-create',
+
+            'moneyout-index',
+            'moneyout-create',
+
+            'report-index',
         ];
     }
 

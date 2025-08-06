@@ -5,13 +5,19 @@
     visible: 5,
     menuLinks: [
         @if (setting('moneyIn'))
-            { text: 'Money In', href: '{{ route('restaurant.money-maintain') }}' },
+            @can('moneyin-index')
+                { text: 'Money In', href: '{{ route('restaurant.money-maintain') }}' },
+            @endcan
         @endif
-        @if(setting('moneyOut'))
-            { text: 'Money Out', href: '{{ route('restaurant.money-out') }}' },
+        @if (setting('moneyOut'))
+            @can('moneyout-index')
+                { text: 'Money Out', href: '{{ route('restaurant.money-out') }}' },
+            @endcan
         @endif
         @if (setting('party'))
-            { text: 'Party', href: '{{ route('restaurant.party') }}' },
+            @can('party-index')
+                { text: 'Party', href: '{{ route('restaurant.party') }}' },
+            @endcan
         @endif
         @if (setting('user'))
             @can('user-index')
@@ -64,7 +70,9 @@
             @endcan
         @endif
         @if (setting('report'))
-            { text: 'Report', href: '{{ route('restaurant.report') }}' },
+            @can('report-index')
+                { text: 'Report', href: '{{ route('restaurant.report') }}' },
+            @endcan
         @endif
     ]
 }">
@@ -73,7 +81,8 @@
             <!-- Logo -->
             <div class="flex items-center">
                 <a href="{{ route('restaurant.dashboard') }}" class="text-xl font-bold text-gray-800">
-                    <img src="{{ asset('storage/' . ($siteSettings->favicon ?? 'icon/hubwalelogopng.png')) }}" alt="Logo" class="h-10 w-auto">
+                    <img src="{{ asset('storage/' . ($siteSettings->favicon ?? 'icon/hubwalelogopng.png')) }}"
+                        alt="Logo" class="h-10 w-auto">
                 </a>
             </div>
 
