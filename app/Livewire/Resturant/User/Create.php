@@ -82,7 +82,8 @@ class Create extends Component
                 $user->syncPermissions($this->permissions);
             }
 
-            $this->redirect(route('restaurant.users.index'));
+            session()->flash('success', 'User Created successfully!');
+            return redirect()->to(route('restaurant.users.index'));
         } catch (\Throwable $e) {
             report($e);
             $this->addError('server', 'An error occurred: ' . $e->getMessage());
