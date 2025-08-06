@@ -13,6 +13,8 @@ class Index extends Component
     public $confirmingDelete = false;
     public $categoryToDelete = null;
     public $search = '';
+    public $confirmingBlock = false;
+    public $categoryId = null;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -67,5 +69,29 @@ class Index extends Component
         }
 
         $this->cancelDelete();
+    }
+
+    public function confirmBlock($id)
+    {
+        $this->categoryId = $id;
+        $this->confirmingBlock = true;
+    }
+
+    public function cancelBlock()
+    {
+        $this->categoryId = null;
+        $this->confirmingBlock = false;
+    }
+
+    public function toggleBlock()
+    {
+        $category = Category::findOrFail($this->categoryId);
+        $category->is_active = !$category->is_active;
+        $category->save();
+
+        $status = $category->is_active ? 'unblocked' : 'blocked';
+        session()->flash('message', "Category {$status} successfully.");
+
+        $this->cancelBlock();
     }
 }
