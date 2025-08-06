@@ -26,6 +26,10 @@ class ItemSaleReport extends Component
     }
     public function mount()
     {
+        if (!setting('report')) {
+            abort(403, 'You do not have access to this module.');
+        }
+
         $this->setDefaultDates();
     }
 
@@ -57,7 +61,7 @@ class ItemSaleReport extends Component
         $restaurantId = Auth::user()->restaurants()->first()->id;
 
         $query = DB::table('order_items')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id') 
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('items', 'order_items.item_id', '=', 'items.id')
             ->leftJoin('categories', 'items.category_id', '=', 'categories.id')
             ->where('order_items.status', 'served')
@@ -72,7 +76,7 @@ class ItemSaleReport extends Component
             ->groupBy('item_id', 'items.name', 'categories.name')
             ->orderByDesc(DB::raw('SUM(order_items.quantity)'));
 
-            return $query->paginate(10);   
+            return $query->paginate(10);
     }
 
     public function exportExcel()

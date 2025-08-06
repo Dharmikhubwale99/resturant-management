@@ -22,4 +22,11 @@ class Index extends Component
 
         return view('livewire.resturant.party.index');
     }
+
+    public function mount()
+    {
+        if (!setting('party')) {
+            abort(403, 'You do not have access to this module.');
+        }
+    }
 }

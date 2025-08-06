@@ -96,6 +96,10 @@ trait HasRolesAndPermissions
             'discount' => 8,
             'kitchen' => 9,
             'order' => 10,
+            'report' => 11,
+            'moneyin' => 12,
+            'moneyout' => 13,
+            'party' => 14,
         ];
 
         return $mapping[strtolower($moduleName)] ?? null;

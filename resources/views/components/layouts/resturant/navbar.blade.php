@@ -4,9 +4,15 @@
     start: 0,
     visible: 5,
     menuLinks: [
-        { text: 'Money In', href: '{{ route('restaurant.money-maintain') }}' },
-        { text: 'Money Out', href: '{{ route('restaurant.money-out') }}' },
-        { text: 'Party', href: '{{ route('restaurant.party') }}' },
+        @if (setting('moneyIn'))
+            { text: 'Money In', href: '{{ route('restaurant.money-maintain') }}' },
+        @endif
+        @if(setting('moneyOut'))
+            { text: 'Money Out', href: '{{ route('restaurant.money-out') }}' },
+        @endif
+        @if (setting('party'))
+            { text: 'Party', href: '{{ route('restaurant.party') }}' },
+        @endif
         @if (setting('user'))
             @can('user-index')
                 { text: 'User', href: '{{ route('restaurant.users.index') }}' },
@@ -57,7 +63,9 @@
                 { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
             @endcan
         @endif
-        { text: 'Report', href: '{{ route('restaurant.report') }}' },
+        @if (setting('report'))
+            { text: 'Report', href: '{{ route('restaurant.report') }}' },
+        @endif
     ]
 }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

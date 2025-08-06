@@ -23,6 +23,10 @@ class Create extends Component
 
     public function mount()
     {
+        if (!setting('party')) {
+            abort(403, 'You do not have access to this module.');
+        }
+
         $this->restaurantId = auth()->user()->restaurant_id ?: Restaurant::where('user_id', auth()->id())->value('id');
         $this->customer = Customer::where('restaurant_id', $this->restaurantId)->get();
         $this->customerId = $this->customer->pluck('name','id')->toArray();

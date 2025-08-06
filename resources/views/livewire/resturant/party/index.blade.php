@@ -2,10 +2,12 @@
     <div class="p-6">
         <h1 class="text-2xl font-bold mb-4">Party / Customer List</h1>
         <div class="mb-4">
-            <a href="{{ route('restaurant.party.create') }}"
-               class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                Add New Customer
-            </a>
+            @if (setting('party'))
+                <a href="{{ route('restaurant.party.create') }}"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    Add New Customer
+                </a>
+            @endif
         @if ($parties->count())
             <table class="min-w-full border text-sm">
                 <thead class="bg-gray-100">
