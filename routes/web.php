@@ -71,6 +71,7 @@ use \App\Livewire\Resturant\{
 
     Party\Index as PartyIndex,
     Party\Create as PartyCreate,
+    Party\Edit as PartyEdit,
 
     Kitchen\Dashboard as AdminKitchenDashboard,
 
@@ -232,7 +233,7 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
 
     Route::get('/party', PartyIndex::class)->name('party')->middleware('can:party-index');
     Route::get('/party/create', PartyCreate::class)->name('party.create')->middleware('can:party-create');
-
+    Route::get('/party/edit/{id}', PartyEdit::class)->name('party.edit');
 });
 
 // Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {

@@ -236,15 +236,11 @@ class Edit extends Component
             $this->syncRestaurantFeatures($restaurant, $selectedPlan);
         }
 
-        if ($user->getPermissionNames()->isEmpty()) {
-            $permissions = $this->getAllPermissions();
-
-            foreach ($permissions as $perm) {
-                Permission::firstOrCreate(['name' => $perm]);
-            }
-
-            $user->givePermissionTo($permissions);
+        $permissions = $this->getAllPermissions();
+        foreach ($permissions as $perm) {
+            Permission::firstOrCreate(['name' => $perm]);
         }
+        $user->givePermissionTo($permissions);
 
         session()->flash('success', 'User & Restaurant updated successfully.');
         return redirect()->route('superadmin.admin.index');
