@@ -173,8 +173,8 @@
                             class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 rounded">
                             <svg class="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg"
                                 fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4"></circle>
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                             </svg>
                             <span class="ml-2 text-green-700 text-xs">Uploading...</span>
@@ -204,26 +204,26 @@
         </div>
     @endif
     @if ($confirmingBlock)
-                <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
-                    <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
-                        <h3 class="text-lg font-semibold mb-4 text-yellow-600">
-                            {{ optional(\App\Models\Item::find($itemId))->is_active ? 'Confirm Unblock' : 'Confirm Block' }}
-                        </h3>
-                        <p class="text-gray-700 mb-6">
-                            Are you sure you want to
-                            {{ optional(\App\Models\Item::find($itemId))->is_active ? 'unblock' : 'block' }} this
-                            Item?
-                        </p>
+        <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
+            <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
+                <h3 class="text-lg font-semibold mb-4 text-yellow-600">
+                    {{ optional(\App\Models\Item::find($itemId))->is_active ? 'Confirm Unblock' : 'Confirm Block' }}
+                </h3>
+                <p class="text-gray-700 mb-6">
+                    Are you sure you want to
+                    {{ optional(\App\Models\Item::find($itemId))->is_active ? 'unblock' : 'block' }} this
+                    Item?
+                </p>
 
-                        <div class="flex justify-end space-x-3">
-                            <button wire:click="cancelBlock"
-                                class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
-                            <button wire:click="toggleBlock"
-                                class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
-                                {{ optional(\App\Models\Item::find($itemId))->is_active ? 'UnBlock' : 'Block' }}
-                            </button>
-                        </div>
-                    </div>
+                <div class="flex justify-end space-x-3">
+                    <button wire:click="cancelBlock"
+                        class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
+                    <button wire:click="toggleBlock"
+                        class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                        {{ optional(\App\Models\Item::find($itemId))->is_active ? 'UnBlock' : 'Block' }}
+                    </button>
                 </div>
-            @endif
+            </div>
+        </div>
+    @endif
 </div>

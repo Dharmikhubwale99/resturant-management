@@ -62,7 +62,7 @@ class Edit extends Component
 
         $restaurant = auth()->user()->restaurants()->first();
         $this->restaurant = $restaurant;
-        $this->categories = $restaurant->categories()->orderBy('name')->pluck('name', 'id')->toArray();
+        $this->categories = $restaurant->categories()->where('is_active', 0)->orderBy('name')->pluck('name', 'id')->toArray();
         $this->itemTypes = collect(ItemType::cases())->mapWithKeys(fn ($c) => [$c->value => $c->label()])->toArray();
 
         // Load existing variants

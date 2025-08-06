@@ -35,6 +35,11 @@ class Dashboard extends Component
 
         $this->tables = Table::with('area')
             ->where('restaurant_id', $restaurantId)
+            ->where('is_active', 0)
+            ->where(function ($query) {
+                $query->whereNull('area_id') // tables with no area
+                    ->orWhereHas('area', fn($q) => $q->where('is_active', 0)); // or area is active
+            })
             ->get();
 
         $this->pickupOrders = Order::where('restaurant_id', $restaurantId)

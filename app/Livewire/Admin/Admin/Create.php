@@ -32,7 +32,7 @@ class Create extends Component
 
     public function mount()
     {
-        $this->plans = Plan::all()->mapWithKeys(function ($plan) {
+        $this->plans = Plan::where('is_active', 0)->get()->mapWithKeys(function ($plan) {
             return [
                 $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days'
             ];
@@ -137,6 +137,7 @@ class Create extends Component
             $planId = null;
             $expiryDate = null;
         }
+
         $faviconPath = $this->oldFavicon;
 
         if ($this->favicon) {
@@ -153,7 +154,7 @@ class Create extends Component
         ]);
 
         $user->assignRole('admin');
-        $permissions = $this->getAllPermissions(); // FIXED
+        $permissions = $this->getAllPermissions();
         foreach ($permissions as $perm) {
             Permission::firstOrCreate(['name' => $perm]);
         }
@@ -177,9 +178,11 @@ class Create extends Component
             'favicon' => $faviconPath,
         ]);
 
+
         if($this->plan_id) {
             $this->syncRestaurantFeatures($restaurant, $selectedPlan);
         }
+
         session()->flash('success', 'User Restaurant created successfully.');
         return redirect()->route('superadmin.admin.index');
     }

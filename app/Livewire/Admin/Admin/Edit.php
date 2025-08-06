@@ -66,9 +66,9 @@ class Edit extends Component
             $this->oldFavicon = $setting->favicon;
         }
 
-        $this->plans = Plan::all()->mapWithKeys(function ($plan) {
+        $this->plans = Plan::where('is_active', 0)->get()->mapWithKeys(function ($plan) {
             return [
-                $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days',
+                  $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days',
             ];
         });
     }
