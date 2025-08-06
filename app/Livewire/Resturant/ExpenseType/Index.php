@@ -13,6 +13,9 @@ class Index extends Component
     public $confirmingDelete = false;
     public $expensetypeToDelete = null;
     public $search = '';
+    public $confirmingBlock = false;
+    public $typeId = null;
+
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -57,5 +60,29 @@ class Index extends Component
         }
 
         $this->cancelDelete();
+    }
+
+    public function confirmBlock($id)
+    {
+        $this->typeId = $id;
+        $this->confirmingBlock = true;
+    }
+
+    public function cancelBlock()
+    {
+        $this->typeId = null;
+        $this->confirmingBlock = false;
+    }
+
+    public function toggleBlock()
+    {
+        $type = ExpenseType::findOrFail($this->typeId);
+        $type->is_active = !$type->is_active;
+        $type->save();
+
+        $status = $type->is_active ? 'unblocked' : 'blocked';
+        session()->flash('message', "Expense type {$status} successfully.");
+
+        $this->cancelBlock();
     }
 }
