@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Resturant\Transaction;
+namespace App\Livewire\Resturant\Transaction\MoneyOut;
 
 use Livewire\Component;
 use App\Models\{MoneyOut, Restaurant};
@@ -16,7 +16,7 @@ class MoneyOutForm extends Component
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
-        return view('livewire.resturant.transaction.money-out-form');
+        return view('livewire.resturant.transaction.money-out.money-out-form');
     }
 
     public function mount()

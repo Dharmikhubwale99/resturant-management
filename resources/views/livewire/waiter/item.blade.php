@@ -119,20 +119,18 @@
                             class="relative bg-white p-1 md:p-2 rounded shadow hover:shadow-md transition
                         border-2 {{ $item->type_color_class }} cursor-pointer">
                             @php
-                                // Get cart quantity for this item (including variants/addons)
                                 $cartQty = 0;
-                                if (isset($cart[$item->id]['qty'])) {
-                                    $cartQty += $cart[$item->id]['qty'];
-                                }
-                                // Check for variants/addons in cart
-                                if (isset($cart)) {
-                                    foreach ($cart as $cartRow) {
+
+                                if (is_array($cart)) {
+                                    foreach ($cart as $key => $cartRow) {
                                         if (
+                                            is_array($cartRow) &&
                                             isset($cartRow['item_id']) &&
-                                            $cartRow['item_id'] == $item->id &&
-                                            (isset($cartRow['variant_id']) || isset($cartRow['addons']))
+                                            $cartRow['item_id'] == $item->id
                                         ) {
                                             $cartQty += $cartRow['qty'] ?? 0;
+                                        } elseif ((string) $key === (string) $item->id && isset($cartRow['qty'])) {
+                                            $cartQty += $cartRow['qty'];
                                         }
                                     }
                                 }
