@@ -22,6 +22,7 @@ class Index extends Component
         $users = User::role(['admin', 'superadmin'])
     ->leftJoin('restaurants', 'users.id', '=', 'restaurants.user_id')
     ->select('users.*', 'restaurants.id as restaurant_id', 'restaurants.plan_expiry_at', 'restaurants.created_at as restaurant_created_at')
+    ->orderBy('users.created_at', 'desc')
     ->paginate(10);
 
 

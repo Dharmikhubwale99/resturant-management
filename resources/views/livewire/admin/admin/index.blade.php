@@ -25,11 +25,13 @@
             <tbody class="divide-y divide-gray-200">
                 @foreach ($users as $index => $user)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 text-sm text-gray-900">{{ $index + 1 }}</td>
+                        <td class="px-6 text-sm text-gray-900">
+                            {{ $users->total() - (($users->currentPage() - 1) * $users->perPage() + $index) }}
+                        </td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->mobile }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->role }}</td>
-                        
+
                         <td class="px-6 text-sm text-gray-900">
                             {{ $user->restaurant_created_at ? \Carbon\Carbon::parse($user->restaurant_created_at)->format('d-m-Y') : '' }}
                         </td>

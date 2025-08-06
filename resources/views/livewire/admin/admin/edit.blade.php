@@ -29,8 +29,7 @@
             </div>
 
             <h3 class="text-lg font-semibold text-gray-700 mt-6">Restaurant Information</h3>
-            <x-form.input name="restaurant_name" label="Restaurant Name" type="text" wireModel="restaurant_name"
-                required />
+            <x-form.input name="restaurant_name" label="Restaurant Name" type="text" wireModel="restaurant_name" />
             <x-form.input name="restaurant_address" label="Address" type="textarea" wireModel="restaurant_address" />
             <x-form.input name="gst_no" label="GST Number" type="text" wireModel="gst_no" />
 

@@ -118,19 +118,25 @@ class Create extends Component
             'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
             'password' => 'required|min:6|confirmed',
             'pincode' => 'required|digits:6',
-            'restaurant_name' => 'required|string|max:255',
+            'restaurant_name' => 'nullable|string|max:255',
             'restaurant_address' => 'nullable|string',
             'gst_no' => 'nullable|string|max:15',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
             'favicon' => 'nullable|file|max:1024',
-            'plan_id' => 'exists:plans,id',
+            'plan_id' => 'nullable|exists:plans,id',
         ]);
 
-        $selectedPlan = Plan::find($this->plan_id);
-        $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
-
+        if ($this->plan_id) {
+            $selectedPlan = Plan::find($this->plan_id);
+            $planId = $selectedPlan->id;
+            $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
+        } else {
+            $selectedPlan = null;
+            $planId = null;
+            $expiryDate = null;
+        }
         $faviconPath = $this->oldFavicon;
 
         if ($this->favicon) {
@@ -159,7 +165,7 @@ class Create extends Component
             'name' => $this->restaurant_name,
             'address' => $this->restaurant_address,
             'gstin' => $this->gst_no,
-            'plan_id' => $selectedPlan->id,
+            'plan_id' => $planId,
             'plan_expiry_at' => $expiryDate,
         ]);
 
@@ -171,7 +177,9 @@ class Create extends Component
             'favicon' => $faviconPath,
         ]);
 
-        $this->syncRestaurantFeatures($restaurant, $selectedPlan);
+        if($this->plan_id) {
+            $this->syncRestaurantFeatures($restaurant, $selectedPlan);
+        }
         session()->flash('success', 'User Restaurant created successfully.');
         return redirect()->route('superadmin.admin.index');
     }
