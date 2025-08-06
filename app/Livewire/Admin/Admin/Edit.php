@@ -63,9 +63,9 @@ class Edit extends Component
             $this->oldFavicon = $setting->favicon;
         }
 
-        $this->plans = Plan::all()->mapWithKeys(function ($plan) {
+        $this->plans = Plan::where('is_active', 0)->get()->mapWithKeys(function ($plan) {
             return [
-                $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days'
+            $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days'
             ];
         });
     }
@@ -147,14 +147,14 @@ class Edit extends Component
             'email' => 'required|email|unique:users,email,' . $this->user_id,
             'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
             'pincode' => 'required|digits:6',
-            'restaurant_name' => 'required|string|max:255',
+            'restaurant_name' => 'nullable|string|max:255',
             'restaurant_address' => 'nullable|string',
             'gst_no' => 'nullable|string|max:15',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
             'favicon' => 'nullable',
-            'plan_id' => 'exists:plans,id',
+            'plan_id' => 'nullable|exists:plans,id',
         ]);
 
         $user = User::findOrFail($this->user_id);
@@ -165,9 +165,11 @@ class Edit extends Component
             $hashedPassword = $user->password;
         }
 
+        // $selectedPlan = Plan::find($this->plan_id);
+        // $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
+        $selectedPlan = $this->plan_id ? Plan::find($this->plan_id) : null;
+        $expiryDate = $selectedPlan ? now()->addDays($selectedPlan->duration_days ?? 30) : null;
 
-        $selectedPlan = Plan::find($this->plan_id);
-        $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
         $user->update([
             'name' => $this->user_name,
             'email' => $this->email,
@@ -182,7 +184,7 @@ class Edit extends Component
                 'address' => $this->restaurant_address,
                 'gstin' => $this->gst_no,
                 'pin_code_id' => $this->pincode_id,
-                'plan_id' => $selectedPlan->id,
+                'plan_id' => $selectedPlan?->id,
                 'plan_expiry_at' => $expiryDate,
             ]);
         } else {
@@ -192,7 +194,7 @@ class Edit extends Component
             'address' => $this->restaurant_address,
             'gstin' => $this->gst_no,
             'pin_code_id' => $this->pincode_id,
-            'plan_id' => $selectedPlan->id,
+            'plan_id' => $selectedPlan?->id,
             'plan_expiry_at' => $expiryDate,
         ]);
         $this->restaurant_id = $restaurant->id;

@@ -31,6 +31,10 @@ class Login extends Component
 
     public function submit()
     {
+        // Trim inputs first
+        $this->login = trim($this->login);
+        $this->password = trim($this->password);
+
         $this->validate([
             'login' => 'required|string',
             'password' => 'required|min:6',

@@ -13,6 +13,9 @@ class Index extends Component
     public $confirmingDelete = false;
     public $areaToDelete = null;
     public $search = '';
+    public $confirmingBlock = false;
+    public $areaId = null;
+
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -57,5 +60,29 @@ class Index extends Component
         }
 
         $this->cancelDelete();
+    }
+
+    public function confirmBlock($id)
+    {
+        $this->areaId = $id;
+        $this->confirmingBlock = true;
+    }
+
+    public function cancelBlock()
+    {
+        $this->areaId = null;
+        $this->confirmingBlock = false;
+    }
+
+    public function toggleBlock()
+    {
+        $area = Area::findOrFail($this->areaId);
+        $area->is_active = !$area->is_active;
+        $area->save();
+
+        $status = $area->is_active ? 'unblocked' : 'blocked';
+        session()->flash('message', "Area {$status} successfully.");
+
+        $this->cancelBlock();
     }
 }
