@@ -43,15 +43,30 @@ class Index extends Component
     public function deletePlan()
     {
         $plan = Plan::find($this->planToDelete);
-        if ($plan) {
-            $plan->delete();
-            session()->flash('success', 'Plan deleted successfully.');
-        } else {
+
+        if (!$plan) {
             session()->flash('error', 'Plan not found.');
+            $this->cancelDelete();
+            return;
         }
 
+        // Check if any restaurant is using this plan and not yet expired
+        $activeRestaurants = \App\Models\Restaurant::where('plan_id', $plan->id)
+            ->where('plan_expiry_at', '>', now())
+            ->count();
+
+        if ($activeRestaurants > 0) {
+            session()->flash('error', 'Cannot delete this plan. It is currently active in one or more restaurants.');
+            $this->cancelDelete();
+            return;
+        }
+
+        // Proceed with delete if no restaurant is using the plan
+        $plan->delete();
+        session()->flash('success', 'Plan deleted successfully.');
         $this->cancelDelete();
     }
+
 
     public function confirmBlock($id)
     {
