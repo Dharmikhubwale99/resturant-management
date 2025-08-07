@@ -1120,9 +1120,4 @@ class Item extends Component
 
         session()->flash('success', 'Customer added and linked to order!');
     }
-
-    public function test()
-    {
-
-    }
 }
