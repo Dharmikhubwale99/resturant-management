@@ -494,20 +494,39 @@ class Item extends Component
             } else {
                 $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
             }
+            $tableId = $this->table_id;
             $subTotal = $this->getCartTotal();
 
-            $order = Order::create([
-                'restaurant_id' => $restaurantId,
-                'table_id' => $this->table_id,
-                'user_id' => Auth::id(),
-                'order_type' => 'dine_in',
-                'status' => 'pending',
-                'sub_total' => $subTotal,
-                'discount_amount' => 0,
-                'total_amount' => $subTotal,
-                'tax_amount' => 0,
-                'service_charge' => $this->serviceCharge,
-            ]);
+            $order = Order::where('restaurant_id', $restaurantId)
+                    ->where('table_id', $tableId)
+                    ->whereDate('created_at', today())
+                    ->first();
+
+            if ($order) {
+                $order->update([
+                    'user_id' => Auth::id(),
+                    'order_type' => 'dine_in',
+                    'status' => 'pending',
+                    'sub_total' => $subTotal,
+                    'discount_amount' => 0,
+                    'total_amount' => $subTotal,
+                    'tax_amount' => 0,
+                    'service_charge' => $this->serviceCharge,
+                ]);
+            } else {
+                $order = Order::create([
+                    'restaurant_id' => $restaurantId,
+                    'table_id' => $tableId,
+                    'user_id' => Auth::id(),
+                    'order_type' => 'dine_in',
+                    'status' => 'pending',
+                    'sub_total' => $subTotal,
+                    'discount_amount' => 0,
+                    'total_amount' => $subTotal,
+                    'tax_amount' => 0,
+                    'service_charge' => $this->serviceCharge,
+                ]);
+            }
 
             $kot = Kot::create([
                 'table_id' => $this->table_id,
@@ -703,9 +722,17 @@ class Item extends Component
         }
 
         if ($this->paymentMethod === 'part') {
+            if($order->customer_id) {
+                $this->customerName = $order->customer->name;
+                $this->mobile = $order->customer->mobile;
+            }
             $this->showSplitModal = true;
             return;
         } elseif ($this->paymentMethod === 'duo') {
+            if($order->customer_id) {
+                $this->duoCustomerName = $order->customer->name;
+                $this->duoMobile = $order->customer->mobile;
+            }
             $this->showDuoPaymentModal = true;
             $this->duoAmount = $this->getCartTotal();
             return;
@@ -769,9 +796,17 @@ class Item extends Component
         }
 
         if ($this->paymentMethod === 'part') {
+            if($order->customer_id) {
+                $this->customerName = $order->customer->name;
+                $this->mobile = $order->customer->mobile;
+            }
             $this->showSplitModal = true;
             return;
         } elseif ($this->paymentMethod === 'duo') {
+            if($order->customer_id) {
+                $this->duoCustomerName = $order->customer->name;
+                $this->duoMobile = $order->customer->mobile;
+            }
             $this->showDuoPaymentModal = true;
             $this->duoAmount = $this->getCartTotal();
             return;
@@ -1026,6 +1061,24 @@ class Item extends Component
     public function openCustomerModal()
     {
         $this->resetValidation();
+        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
+        if($order->customer_id)
+        {
+            $customer = Customer::find($order->customer_id);
+            if ($customer) {
+                $this->followupCustomer_name = $customer->name ?? '';
+                $this->followupCustomer_mobile = $customer->mobile ?? '';
+                $this->followupCustomer_email = $customer->email ?? '';
+                $this->customer_dob = $customer->dob ? \Carbon\Carbon::parse($customer->dob)->format('Y-m-d') : '';
+                $this->customer_anniversary = $customer->anniversary ? \Carbon\Carbon::parse($customer->anniversary)->format('Y-m-d') : '';
+            }
+        } else {
+            $this->followupCustomer_name = '';
+            $this->followupCustomer_mobile = '';
+            $this->followupCustomer_email = '';
+            $this->customer_dob = '';
+            $this->customer_anniversary = '';
+        }
         $this->showCustomerModal = true;
     }
 

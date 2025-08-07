@@ -104,6 +104,9 @@ use App\Livewire\Waiter\{
     BillPrint,
     PickupCreate,
     PickupItem,
+
+    AdvancBook\Index as AdvancBookIndex,
+    AdvancBook\Create as AdvancBookCreate
 };
 use App\Http\Controllers\PaymentController;
 
@@ -234,6 +237,9 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
     Route::get('/party', PartyIndex::class)->name('party')->middleware('can:party-index');
     Route::get('/party/create', PartyCreate::class)->name('party.create')->middleware('can:party-create');
     Route::get('/party/edit/{id}', PartyEdit::class)->name('party.edit');
+
+    Route::get('/advance-booking', AdvancBookIndex::class)->name('advance-booking');
+    Route::get('/advance-booking/create', AdvancBookCreate::class)->name('advance-booking.create');
 });
 
 // Route::prefix('waiter')->as('waiter.')->middleware(['web', 'auth', 'role:admin|waiter'])->group(function () {

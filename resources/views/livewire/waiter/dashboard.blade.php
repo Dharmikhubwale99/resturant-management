@@ -2,12 +2,18 @@
     <x-form.error />
 
     <div class="flex justify-end gap-6 mb-8">
-         <a href="{{ route('restaurant.pickup.create') }}">
+         {{-- <a href="{{ route('restaurant.pickup.create') }}">
             <button
                 class="bg-red-500 text-white px-3 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-sm md:text-base">
                 Pick Up
             </button>
-        </a>
+        </a> --}}
+        <x-form.button :route="'restaurant.pickup.create'" class="bg-red-500 text-white ">
+            Pick Up
+        </x-form.button>
+        <x-form.button :route="'restaurant.advance-booking.create'" class="bg-gray-500 text-white">
+            Advance Booking
+        </x-form.button>
         <div class="flex items-center gap-2">
             <div class="w-4 h-4 bg-green-300 rounded"></div>
             <span class="text-sm font-medium text-gray-700">Available</span>
