@@ -39,22 +39,20 @@ class Create extends Component
                             ->pluck('name', 'id')
                             ->toArray();
 
-    // Fetching names from both tables
     $users = User::where('restaurant_id', $this->restaurant->id)
-                 ->where('is_active', 0)
-                 ->pluck('name')
-                 ->toArray();
+        ->where('is_active', 0)
+        ->get()
+        ->mapWithKeys(fn($u) => ["user:$u->id" => " $u->name"])
+        ->toArray();
 
     $customers = Customer::where('restaurant_id', $this->restaurant->id)
-                         ->where('is_active', 0)
-                         ->pluck('name')
-                         ->toArray();
+        ->where('is_active', 0)
+        ->get()
+        ->mapWithKeys(fn($c) => ["customer:$c->id" => " $c->name"])
+        ->toArray();
 
-    // Merge and sort
-    $merged = array_unique(array_merge($users, $customers));
-    sort($merged);
+    $this->partyOptions = $users + $customers; // maintain order
 
-    $this->partyOptions = array_combine($merged, $merged); // ['John Doe' => 'John Doe']
     
     $this->expense_total = SalesSummaries::where('restaurant_id', $this->restaurant->id)->first();
     }
@@ -69,16 +67,27 @@ class Create extends Component
         }
 
         $this->validate([
-            'name' => 'required',
+            // 'name' => 'required',
             'amount' => 'required',
             'paid_at' => 'nullable',
             'description' => 'nullable',
         ]);
 
+        $user_id = null;
+        $customer_id = null;
+
+        if (str_starts_with($this->name, 'user:')) {
+            $user_id = explode(':', $this->name)[1];
+        } elseif (str_starts_with($this->name, 'customer:')) {
+            $customer_id = explode(':', $this->name)[1];
+        }
+
         Expense::create([
             'restaurant_id' => $this->restaurant->id,
             'expense_type_id' => $this->expense_type_id,
-            'name' => $this->name,
+            'customer_id' => $customer_id,
+            'user_id' => $user_id,
+            'name' => null,
             'amount' => $this->amount,
             'paid_at' =>$this->paid_at,
             'description' => $this->description,

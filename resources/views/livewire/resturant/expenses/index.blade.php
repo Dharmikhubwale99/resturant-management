@@ -38,7 +38,8 @@
                             @if (setting('expensetype'))
                                 <td class="px-6 text-sm text-gray-900">{{ $expense->expenseType->name ?? '' }}</td>
                             @endif
-                            <td class="px-6 text-sm text-gray-900">{{ $expense->name }}</td>
+                            <td class="px-6 text-sm text-gray-900">
+                                {{ $expense->user?->name ?? ($expense->customer?->name ?? 'N/A') }}</td>
                             <td class="px-6 text-sm text-gray-900">{{ $expense->amount }}</td>
                             <td class="px-6 text-sm text-gray-900">
                                 {{ $expense->paid_at ? $expense->paid_at->format('d-m-Y') : '' }}
