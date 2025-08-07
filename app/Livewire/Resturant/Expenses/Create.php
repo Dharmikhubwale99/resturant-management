@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Resturant\Expenses;
 
-use App\Models\{Expense, SalesSummaries};
+use App\Models\{Expense, SalesSummaries, User, Customer};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -16,6 +16,7 @@ class Create extends Component
     public $expenseTypes;
     public $paid_at;
     public $expense_total;
+    public $partyOptions = [];
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -26,19 +27,36 @@ class Create extends Component
     public function mount()
     {
         if (!setting('expenses')) {
-            abort(403, 'You do not have access to this module.');
-        }
+        abort(403, 'You do not have access to this module.');
+    }
 
-        $this->restaurant = auth()->user()->restaurants()->first();
+    $this->restaurant = auth()->user()->restaurants()->first();
 
-        $this->expenseTypes = $this->restaurant
-                                ->expenseTypes()
-                                ->where('is_active', 0)
-                                ->orderBy('name')
-                                ->pluck('name', 'id')
-                                ->toArray();
+    $this->expenseTypes = $this->restaurant
+                            ->expenseTypes()
+                            ->where('is_active', 0)
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->toArray();
 
-        $this->expense_total = SalesSummaries::where('restaurant_id', $this->restaurant->id)->first();
+    // Fetching names from both tables
+    $users = User::where('restaurant_id', $this->restaurant->id)
+                 ->where('is_active', 0)
+                 ->pluck('name')
+                 ->toArray();
+
+    $customers = Customer::where('restaurant_id', $this->restaurant->id)
+                         ->where('is_active', 0)
+                         ->pluck('name')
+                         ->toArray();
+
+    // Merge and sort
+    $merged = array_unique(array_merge($users, $customers));
+    sort($merged);
+
+    $this->partyOptions = array_combine($merged, $merged); // ['John Doe' => 'John Doe']
+    
+    $this->expense_total = SalesSummaries::where('restaurant_id', $this->restaurant->id)->first();
     }
 
 
