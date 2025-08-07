@@ -25,6 +25,10 @@ class Create extends Component
 
     public function mount()
     {
+        if (!setting('moneyIn')) {
+            abort(403, 'You do not have access to this module.');
+        }
+
         $this->restaurantId = auth()->user()->restaurant_id ?: Restaurant::where('user_id', auth()->id())->value('id');
 
         $this->customerId = Customer::where('restaurant_id', $this->restaurantId)

@@ -29,7 +29,6 @@ class Edit extends Component
         if (!setting('expenses')) {
             abort(403, 'You do not have access to this module.');
         }
-
         $this->expense = Expense::findOrFail($id);
         $this->expense_type_id = $this->expense->expense_type_id;
         $this->name = $this->expense->name;
@@ -39,8 +38,8 @@ class Edit extends Component
 
         $restaurant = auth()->user()->restaurants()->first();
 
-        $this->expenseTypes = $restaurant->expenseTypes()->pluck('name', 'id')->toArray();
-        $this->expense_total = SalesSummaries::where('restaurant_id', $this->restaurant->id)->first();
+        $this->expenseTypes = $restaurant->expenseTypes()->where('is_active', 0)->pluck('name', 'id')->toArray();
+        // $this->expense_total = SalesSummaries::where('restaurant_id', $this->restaurant->id)->first();
     }
 
     public function submit()
@@ -65,15 +64,15 @@ class Edit extends Component
             'description' => $this->description,
         ]);
 
-        if ($this->expense_total->summary_date != now()->format('Y-m-d')) {
+        if (!$this->expense_total || $this->expense_total->summary_date != now()->format('Y-m-d')) {
             SalesSummaries::create([
                 'restaurant_id' => $this->restaurant->id,
-                'total_sale' => $this->amount,
+                'total_expances' => $this->amount,
                 'summary_date' => now(),
             ]);
         } else {
             $this->expense_total->update([
-                'total_sale' => $this->expense_total->total_sale + $this->amount,
+                'total_expances' => $this->expense_total->total_sale + $this->amount,
                 'summary_date' => now(),
             ]);
         }

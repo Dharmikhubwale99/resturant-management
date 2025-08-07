@@ -64,6 +64,17 @@ trait HasRolesAndPermissions
             'kitchen-dashboard',
 
             'order',
+
+            'party-index',
+            'party-create',
+
+            'moneyin-index',
+            'moneyin-create',
+
+            'moneyout-index',
+            'moneyout-create',
+
+            'report-index',
         ];
     }
 
@@ -96,6 +107,10 @@ trait HasRolesAndPermissions
             'discount' => 8,
             'kitchen' => 9,
             'order' => 10,
+            'report' => 11,
+            'moneyin' => 12,
+            'moneyout' => 13,
+            'party' => 14,
         ];
 
         return $mapping[strtolower($moduleName)] ?? null;

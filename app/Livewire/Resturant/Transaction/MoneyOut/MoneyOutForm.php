@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Resturant\Transaction;
+namespace App\Livewire\Resturant\Transaction\MoneyOut;
 
 use Livewire\Component;
 use App\Models\{MoneyOut, Restaurant};
@@ -16,11 +16,15 @@ class MoneyOutForm extends Component
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
-        return view('livewire.resturant.transaction.money-out-form');
+        return view('livewire.resturant.transaction.money-out.money-out-form');
     }
 
     public function mount()
     {
+        if (!setting('moneyOut')) {
+            abort(403, 'You do not have access to this module.');
+        }
+
         $this->date = now()->format('Y-m-d');
     }
 
@@ -49,6 +53,6 @@ class MoneyOutForm extends Component
 
         session()->flash('success', 'Money Out entry saved.');
         $this->reset(['party_name', 'amount', 'description', 'date']);
-        // return redirect()->route('resturant.transaction.money-out.index');
+        return redirect()->route('resturant.transaction.money-out');
     }
 }

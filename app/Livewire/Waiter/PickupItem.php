@@ -720,6 +720,7 @@ class PickupItem extends Component
             $amount = $this->getCartTotal();
 
             Payment::create([
+                'restaurant_id' => $order->restaurant_id,
                 'order_id' => $order->id,
                 'amount' => $amount,
                 'method' => $this->paymentMethod,
@@ -781,6 +782,7 @@ class PickupItem extends Component
             $amount = $this->getCartTotal();
 
             Payment::create([
+                'restaurant_id' => $order->restaurant_id,
                 'order_id' => $order->id,
                 'amount' => $amount,
                 'method' => $this->paymentMethod,
@@ -833,6 +835,7 @@ class PickupItem extends Component
             return;
         }
         $payment = Payment::create([
+            'restaurant_id' => $order->restaurant_id,
             'order_id' => $order->id,
             'amount' => $order->total_amount,
             'method' => $this->paymentMethod,
@@ -881,7 +884,11 @@ class PickupItem extends Component
             'duoCustomerName' => 'required|string|max:100',
             'duoMobile' => 'required|string|max:20',
             'duoAmount' => 'required|numeric|min:0.01',
-            'duoMethod' => ['required', new Enum(PaymentMethod::class)],
+            'duoMethod' => ['nullable', function ($attribute, $value, $fail) {
+                if (!is_null($value) && !PaymentMethod::tryFrom($value)) {
+                    $fail("The selected payment method is invalid.");
+                }
+            }],
             'duoIssue' => 'nullable|string|max:255',
         ]);
 
@@ -907,6 +914,7 @@ class PickupItem extends Component
         $table->update(['status' => 'available']);
 
         $payment = Payment::create([
+            'restaurant_id' => $order->restaurant_id,
             'order_id' => $order->id,
             'amount' => $order->total_amount,
             'method' => 'duo',
@@ -928,7 +936,7 @@ class PickupItem extends Component
             'mobile' => $this->duoMobile,
             'paid_amount' => $this->duoAmount,
             'amount' => $remainingAmount,
-            'method' => $this->duoMethod,
+            'method' => $this->duoMethod ?: 'cash',
             'issue' => $this->duoIssue,
         ]);
 

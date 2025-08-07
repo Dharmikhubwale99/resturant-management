@@ -4,9 +4,21 @@
     start: 0,
     visible: 5,
     menuLinks: [
-        { text: 'Money In', href: '{{ route('restaurant.money-maintain') }}' },
-        { text: 'Money Out', href: '{{ route('restaurant.money-out') }}' },
-        { text: 'Party', href: '{{ route('restaurant.party') }}' },
+        @if (setting('moneyIn'))
+            @can('moneyin-index')
+                { text: 'Money In', href: '{{ route('restaurant.money-maintain') }}' },
+            @endcan
+        @endif
+        @if (setting('moneyOut'))
+            @can('moneyout-index')
+                { text: 'Money Out', href: '{{ route('restaurant.money-out') }}' },
+            @endcan
+        @endif
+        @if (setting('party'))
+            @can('party-index')
+                { text: 'Party', href: '{{ route('restaurant.party') }}' },
+            @endcan
+        @endif
         @if (setting('user'))
             @can('user-index')
                 { text: 'User', href: '{{ route('restaurant.users.index') }}' },
@@ -57,7 +69,11 @@
                 { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
             @endcan
         @endif
-        { text: 'Report', href: '{{ route('restaurant.report') }}' },
+        @if (setting('report'))
+            @can('report-index')
+                { text: 'Report', href: '{{ route('restaurant.report') }}' },
+            @endcan
+        @endif
     ]
 }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,7 +81,8 @@
             <!-- Logo -->
             <div class="flex items-center">
                 <a href="{{ route('restaurant.dashboard') }}" class="text-xl font-bold text-gray-800">
-                    <img src="{{ asset('icon/logo.png') }}" alt="Logo" class="h-10 w-auto">
+                    <img src="{{ asset('storage/' . ($siteSettings->favicon ?? 'icon/hubwalelogopng.png')) }}"
+                        alt="Logo" class="h-10 w-auto">
                 </a>
             </div>
 

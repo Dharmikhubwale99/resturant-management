@@ -31,8 +31,7 @@
         </div>
     </nav>
 
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 p-6">
         @foreach ($plans as $plan)
             @php
                 $originalPrice = (float) $plan->price;
@@ -52,47 +51,73 @@
 
                 $finalPrice = max(0, $finalPrice);
                 $youSave = $originalPrice - $finalPrice;
+
+                $features = $planFeatures[$plan->id] ?? collect();
             @endphp
 
             <div x-data="{ show: false }" x-init="setTimeout(() => show = true, 100 * {{ $loop->index }})" x-show="show" x-transition.duration.500ms
-                class="bg-white shadow-xl rounded-2xl border border-gray-200 hover:shadow-2xl transition-transform transform hover:-translate-y-1 cursor-pointer">
+                class="bg-white shadow-xl rounded-2xl border border-gray-200 hover:shadow-2xl transition-transform transform hover:-translate-y-1 cursor-pointer p-6 space-y-4 w-full">
 
-                <div class="p-6 space-y-3">
-                    <h2 class="text-2xl font-bold text-indigo-600">{{ $plan->name }}</h2>
-                    <p class="text-gray-500 text-sm">{{ $plan->description }}</p>
+                <h2 class="text-2xl text-center font-bold text-indigo-600">{{ $plan->name }}</h2>
+                <p class="text-gray-500 text-sm">{{ $plan->description }}</p>
 
-                    <div class="flex items-center justify-between mt-4">
-                        <div>
-                            @if ($finalPrice < $originalPrice)
-                                <div>
-                                    <span class="text-sm line-through text-red-400">
-                                        ₹{{ number_format($originalPrice, 2) }}
-                                    </span>
-                                    <span class="text-lg font-bold text-green-600 ml-2">
-                                        ₹{{ number_format($finalPrice, 2) }}
-                                        ({{ $discountLabel }} off)
-                                    </span>
-                                </div>
-                            @else
-                                <span class="text-lg font-bold text-gray-800">
-                                    ₹{{ number_format($finalPrice, 2) }}
+                <div class="flex items-center justify-between mt-2">
+                    <div>
+                        @if ($finalPrice < $originalPrice)
+                            <div>
+                                <span class="text-3xl font-extrabold line-through text-red-400">
+                                    ₹{{ number_format($originalPrice, 2) }}
                                 </span>
-                            @endif
-                        </div>
-                        <span class="text-sm text-gray-500">{{ $plan->duration_days }} Days</span>
+                                <span class="text-lg font-bold text-green-600 ml-2">
+                                    ₹{{ number_format($finalPrice, 2) }}
+                                    ({{ $discountLabel }} off)
+                                </span>
+                            </div>
+                        @else
+                            <span class="text-lg font-extrabold  ml-2">
+                                ₹{{ number_format($finalPrice, 2) }}
+                            </span>
+                        @endif
                     </div>
+                    <span class="text-sm text-gray-500">{{ $plan->duration_days }} Days</span>
+                </div>
 
-                    <div class="mt-6">
-                        <button onclick="startPlanPurchase({{ $plan->id }}, {{ (int) ($finalPrice * 100) }})"
-                            class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300">
-                            {{ $finalPrice == 0 ? 'Start Free Trial' : 'Buy Now' }}
-                        </button>
-                    </div>
+                <div class="mb-5">
+                    <ul class="grid grid-cols-1 gap-2">
+                        @foreach ($modules as $module)
+                            @php
+                                $enabled = $features->contains('feature', $module->key);
+                            @endphp
+                            <li class="flex items-center gap-4 bg-gray-50 px-3 py-1 rounded-md">
+
+                                @if ($enabled)
+                                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                @else
+                                    <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor"
+                                        stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                @endif
+                                <span
+                                    class="text-sm text-gray-800 capitalize">{{ str_replace('_', ' ', $module->key) }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="mt-4">
+                    <button onclick="startPlanPurchase({{ $plan->id }}, {{ (int) ($finalPrice * 100) }})"
+                        class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300">
+                        {{ $finalPrice == 0 ? 'Start Free Trial' : 'Buy Now' }}
+                    </button>
                 </div>
             </div>
         @endforeach
     </div>
-
 </div>
 @push('scripts')
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>

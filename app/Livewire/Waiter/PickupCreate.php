@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Order, Restaurant};
+use App\Models\{Order, Restaurant, Customer};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -64,6 +64,13 @@ class PickupCreate extends Component
             'customer_name' => $this->customer_name,
             'mobile' => $this->mobile,
             'order_type' => 'takeaway',
+        ]);
+
+        Customer::create([
+            'restaurant_id' => $restaurantId,
+            'order_id' => $order->id,
+            'name' => $this->customer_name,
+            'mobile' => $this->mobile,
         ]);
 
         return redirect()->route('restaurant.pickup.item', $order->id);
