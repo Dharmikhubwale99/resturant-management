@@ -76,6 +76,12 @@
                                     @endif
                                 </x-form.button>
                                 <x-form.button title=""
+                                        class="w-8 h-8 rounded flex items-center justify-center" :route="['superadmin.admin.show', $user->id]">
+                                        <span class="w-4 h-4 text-yellow-700">
+                                            {!! file_get_contents(public_path('icon/view.svg')) !!}
+                                        </span>
+                                    </x-form.button>
+                                <x-form.button title=""
                                     class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
                                     :route="['superadmin.admin.edit', ['id' => $user->id]]">
                                     <span class="w-5 h-1 flex items-center justify-center">
