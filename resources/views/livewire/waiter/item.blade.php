@@ -236,7 +236,7 @@
                             @foreach ($cartItems as $key => $row)
                                 @if (!in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
                                     <div class="border rounded p-1 md:p-2 flex items-center justify-between"
-                                        wire:key="row-{{ $row['id'] }}">
+                                    wire:key="row-{{ $row['id'] ?? $key }}">
                                         <div class="flex-1 min-w-0">
                                             <p
                                                 class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
