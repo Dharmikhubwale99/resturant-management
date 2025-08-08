@@ -19,8 +19,8 @@ class TableBooking extends Model
      */
     protected $fillable = [
         'table_id',
-        'customer_name',
-        'mobile',
+        'customer_id',
+        'restaurant_id',
         'booking_time',
         'deposit',
         'status',
@@ -37,7 +37,7 @@ class TableBooking extends Model
         return [
             'id' => 'integer',
             'table_id' => 'integer',
-            'booking_time' => 'timestamp',
+            'booking_time' => 'datetime',
             'deposit' => 'decimal:2',
         ];
     }
@@ -50,5 +50,10 @@ class TableBooking extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 }

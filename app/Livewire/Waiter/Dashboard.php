@@ -5,7 +5,8 @@ namespace App\Livewire\Waiter;
 use App\Models\Order;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
-use App\Models\{Table, Restaurant};
+use App\Models\{Table, Restaurant, TableBooking};
+use Carbon\Carbon;
 
 class Dashboard extends Component
 {
@@ -37,8 +38,8 @@ class Dashboard extends Component
             ->where('restaurant_id', $restaurantId)
             ->where('is_active', 0)
             ->where(function ($query) {
-                $query->whereNull('area_id') // tables with no area
-                    ->orWhereHas('area', fn($q) => $q->where('is_active', 0)); // or area is active
+                $query->whereNull('area_id')
+                    ->orWhereHas('area', fn($q) => $q->where('is_active', 0));
             })
             ->get();
 
@@ -51,7 +52,20 @@ class Dashboard extends Component
     public function openConfirm($tableId)
     {
         $this->selectedTable = Table::findOrFail($tableId);
-        $this->showConfirm = true;
+        $now = Carbon::now();
+        $estimatedEnd = $now->copy()->addMinutes(90);
+
+        $hasConflict = TableBooking::where('table_id', $this->selectedTable->id)
+        ->where('status', 'booked')
+        ->where('booking_time', '<', $estimatedEnd)
+        ->whereRaw("DATE_ADD(booking_time, INTERVAL 90 MINUTE) > ?", [$now])
+        ->exists();
+
+        if ($hasConflict) {
+            session()->flash('error', '⚠️ This table is already reserved during your dining time!');
+        } else {
+            $this->showConfirm = true;
+        }
     }
 
     public function editTable($tableId)
