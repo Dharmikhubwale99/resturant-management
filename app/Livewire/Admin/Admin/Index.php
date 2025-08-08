@@ -17,21 +17,30 @@ class Index extends Component
     public $deleteId;
     public $confirmingBlock = false;
     public $blockId = null;
+    public $search = '';
 
     #[Layout('components.layouts.admin.app')]
     public function render()
-    {
-        $users = User::role(['admin', 'superadmin'])
-    ->leftJoin('restaurants', 'users.id', '=', 'restaurants.user_id')
-    ->select('users.*', 'restaurants.id as restaurant_id', 'restaurants.plan_expiry_at', 'restaurants.created_at as restaurant_created_at')
-    ->orderBy('users.created_at', 'desc')
-    ->paginate(10);
+{
+    $users = User::role(['admin', 'superadmin'])
+        ->with('restaurant')
+        ->leftJoin('restaurants', 'users.id', '=', 'restaurants.user_id')
+        ->where(function ($query) {
+            $query->where('users.name', 'like', '%' . $this->search . '%')
+                  ->orWhere('users.mobile', 'like', '%' . $this->search . '%')
+                  ->orWhere('restaurants.name', 'like', '%' . $this->search . '%')
+                  ->orWhere('restaurants.mobile', 'like', '%' . $this->search . '%')
+                  ->orWhere('restaurants.plan_expiry_at', 'like', '%' . $this->search . '%');
+        })
+        ->select('users.*') // necessary to avoid ambiguous column errors
+        ->orderBy('users.created_at', 'desc')
+        ->paginate(10);
 
+    return view('livewire.admin.admin.index', [
+        'users' => $users,
+    ]);
+}
 
-        return view('livewire.admin.admin.index', [
-            'users' => $users,
-        ]);
-    }
 
     public function confirmDelete($id)
     {
