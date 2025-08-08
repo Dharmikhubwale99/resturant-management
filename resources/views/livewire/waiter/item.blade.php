@@ -294,8 +294,14 @@
                             </div> --}}
 
                             <div class="text-right text-lg md:text-xl font-bold py-1 md:py-2">
-                                Total: ₹{{ number_format($cartTotal, 2) }}
+                                {{-- Total: ₹{{ number_format($cartTotal, 2) }}
+
+                                <input type="text" class="border rounded px-2 py-1 ml-2"
+                                       value="{{ number_format($cartTotal, 2) }}" readonly /> --}}
+                                       <input type="text" wire:model.live="cartTotal" readonly>
+
                             </div>
+
 
                             <div class="flex flex-wrap justify-center gap-4 mt-3 mb-3">
                                 @foreach ($paymentMethods as $value => $label)

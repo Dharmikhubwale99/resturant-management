@@ -70,15 +70,15 @@ class Item extends Component
     public string $customer_anniversary = '';
     public string $cartDiscountType = 'percentage';
     public float|string $cartDiscountValue = 0;
-
+    public float $cartTotal = 0;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
+        $this->cartTotal = $this->getCartTotal();
         return view('livewire.waiter.item', [
             'filteredItems' => $this->getFilteredItems(),
             'cartItems' => $this->cart,
-            'cartTotal' => $this->getCartTotal(),
         ]);
     }
 
