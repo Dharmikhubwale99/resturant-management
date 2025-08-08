@@ -49,8 +49,14 @@
                 </div>
             @endif
 
-            <x-form.select name="plan_id" label="Select Plan" :options="$plans" wireModel="plan_id"
+            <x-form.select name="plan_id" label="Select Plan" :options="$plans" wireModelLive="plan_id"
                 placeholder="-- Select Plan --" />
+
+            @if($calculated_expiry && $selected_plan_days)
+                <div class="text-green-600 font-semibold">
+                    Expiry Date: {{ $calculated_expiry }} ({{ $selected_plan_days }} days)
+                </div>
+            @endif
 
             <div class="flex flex-row text-center  space-x-3">
                 <x-form.button type="submit" title="Update" wireTarget="update" />

@@ -26,6 +26,9 @@ class Edit extends Component
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
     public $plan_id;
     public $plans = [];
+    public $selected_plan_days;
+    public $calculated_expiry;
+
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -73,6 +76,15 @@ class Edit extends Component
                   $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days',
             ];
         });
+
+        if ($this->plan_id) {
+            $plan = Plan::find($this->plan_id);
+            if ($plan) {
+                $this->selected_plan_days = $plan->duration_days;
+                $this->calculated_expiry = optional($restaurant->plan_expiry_at)->format('d-m-Y');
+            }
+        }
+
     }
 
     public function updatedPincode($value)
@@ -142,6 +154,20 @@ class Edit extends Component
         $this->state_name = $state->name;
         $this->city_name = $city->name;
         $this->district_name = $district->name;
+    }
+
+    public function updatedPlanId($value)
+    {
+        if ($value) {
+            $plan = Plan::find($value);
+            if ($plan) {
+                $this->selected_plan_days = $plan->duration_days;
+                $this->calculated_expiry = now()->addDays($plan->duration_days)->format('d-m-Y');
+            }
+        } else {
+            $this->selected_plan_days = null;
+            $this->calculated_expiry = null;
+        }
     }
 
     public function update()
