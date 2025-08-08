@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use App\Traits\HasRolesAndPermissions;
+use Illuminate\Validation\Rule;
 
 class Edit extends Component
 {
@@ -146,7 +147,12 @@ class Edit extends Component
     {
         $this->validate([
             'user_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $this->user_id,
+            'email' => [
+                'required',
+                'email',
+                'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
+                Rule::unique('users', 'email')->ignore($this->user_id)->whereNull('deleted_at'),
+            ],
             'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
             'pincode' => 'required|digits:6',
             'restaurant_name' => 'nullable|string|max:255',

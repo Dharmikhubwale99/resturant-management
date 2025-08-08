@@ -74,6 +74,14 @@
                                     </span>
                                 </x-form.button>
 
+                                <x-form.button title=""
+                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                    wire:click="confirmDelete({{ $user->id }})">
+                                    <span class="w-5 h-1 flex items-center justify-center">
+                                        {!! file_get_contents(public_path('icon/delete.svg')) !!}
+                                    </span>
+                                </x-form.button>
+
                                 @if ($user->restaurant_id)
                                     <x-form.button title=""
                                         class="p-1 w-15 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition mt-4"
@@ -83,13 +91,6 @@
                                     </x-form.button>
                                 @endif
 
-                                <x-form.button title=""
-                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                    wire:click="confirmDelete({{ $user->id }})">
-                                    <span class="w-5 h-1 flex items-center justify-center">
-                                        {!! file_get_contents(public_path('icon/delete.svg')) !!}
-                                    </span>
-                                </x-form.button>
 
                             </div>
 

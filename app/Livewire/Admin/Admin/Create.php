@@ -11,6 +11,7 @@ use Livewire\WithFileUploads;
 use App\Traits\HasRolesAndPermissions;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Validation\Rule;
 
 class Create extends Component
 {
@@ -114,8 +115,18 @@ class Create extends Component
     {
         $this->validate([
             'user_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
+            'email' => [
+                'required',
+                'email',
+                'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
+                Rule::unique('users', 'email')->whereNull('deleted_at'),
+            ],
+            'mobile' => [
+                'required',
+                'numeric',
+                'regex:/^[0-9]{10}$/',
+                Rule::unique('users', 'mobile')->whereNull('deleted_at'),
+            ],
             'password' => 'required|min:6|confirmed',
             'pincode' => 'required|digits:6',
             'restaurant_name' => 'nullable|string|max:255',
