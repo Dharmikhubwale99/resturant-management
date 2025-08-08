@@ -9,7 +9,8 @@
                     :options="$expenseTypes" />
             @endif
 
-            <x-form.select name="name" label="Party Name" wireModel="name" required :options="$partyOptions" />
+            <x-form.multiselect name="name" label="Party Name" wireModel="name" :options="$partyOptions" mode="single" />
+
 
             <x-form.input name="amount" label="Amount" wireModel="amount" required placeholder="Enter amount"
                 type="number" step="0.01" />
