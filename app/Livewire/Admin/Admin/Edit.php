@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use App\Traits\HasRolesAndPermissions;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class Edit extends Component
 {
@@ -216,6 +217,10 @@ class Edit extends Component
 
         $faviconPath = $this->oldFavicon;
         if ($this->favicon && $this->favicon !== $this->oldFavicon) {
+            if ($this->oldFavicon && Storage::disk('public')->exists($this->oldFavicon)) {
+                Storage::disk('public')->delete($this->oldFavicon);
+            }
+
             $faviconPath = $this->favicon->store('icon', 'public');
         } elseif ($this->favicon === null) {
             $faviconPath = null;

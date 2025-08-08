@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Livewire\WithFileUploads;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class RestoRegister extends Component
 {
@@ -186,6 +187,9 @@ class RestoRegister extends Component
         $faviconPath = $this->oldFavicon;
 
         if ($this->favicon) {
+            if ($this->oldFavicon && Storage::disk('public')->exists($this->oldFavicon)) {
+                Storage::disk('public')->delete($this->oldFavicon);
+            }
             $faviconPath = $this->favicon->store('icon', 'public');
         }
 
