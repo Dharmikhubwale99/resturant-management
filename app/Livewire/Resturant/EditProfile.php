@@ -47,6 +47,12 @@ class EditProfile extends Component
         $this->restaurant_mobile = $this->restaurant?->mobile;
         $this->restaurant_address = $this->restaurant?->address;
         $this->gst = $this->restaurant?->gstin;
+        $this->bank_name = $this->restaurant?->bank_name;
+        $this->ifsc = $this->restaurant?->ifsc;
+        $this->holder_name = $this->restaurant?->holder_name;
+        $this->account_type = $this->restaurant?->account_type;
+        $this->upi_id = $this->restaurant?->upi_id;
+        $this->account_number = $this->restaurant?->account_number;
 
         if ($user->pin_code_id) {
             $pincode = \App\Models\PinCode::with('district.city.state.country')->find($user->pin_code_id);

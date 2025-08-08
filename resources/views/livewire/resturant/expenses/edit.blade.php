@@ -5,10 +5,11 @@
         <form wire:submit.prevent="submit" class="space-y-4" enctype="multipart/form-data">
 
             @if (setting('expensetype'))
-            <x-form.select name="expense_type_id" label="Expense Type" wireModel="expense_type_id" required :options="$expenseTypes" />
+                <x-form.select name="expense_type_id" label="Expense Type" wireModel="expense_type_id" required
+                    :options="$expenseTypes" />
             @endif
 
-            <x-form.input name="name" label="Name" wireModel="name" placeholder="Enter name" required />
+            <x-form.select name="name" label="Party Name" wireModel="name" required :options="$partyOptions" />
 
             <x-form.input name="amount" label="Amount" wireModel="amount" required placeholder="Enter amount"
                 type="number" step="0.01" />

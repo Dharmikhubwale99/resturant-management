@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('restaurant_id');
             $table->foreignId('expense_type_id')->nullable();
-            $table->string('name');
+            $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->decimal('amount', 10, 2);
             $table->date('paid_at')->nullable();
