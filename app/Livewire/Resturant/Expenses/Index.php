@@ -29,7 +29,7 @@ class Index extends Component
                           });
                 });
             })
-            ->with('expenseType')
+            ->with('expenseType','user','customer')
             ->orderByDesc('id')
             ->paginate(10);
 

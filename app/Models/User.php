@@ -108,8 +108,12 @@ class User extends Authenticatable
     }
 
     public function restaurant()
-{
-    return $this->hasOne(Restaurant::class);
-}
+    {
+        return $this->hasOne(Restaurant::class);
+    }
 
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
 }

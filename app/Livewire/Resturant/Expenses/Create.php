@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Resturant\Expenses;
 
-use App\Models\{Expense, SalesSummaries};
+use App\Models\{Expense, SalesSummaries, User, Customer};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -16,6 +16,7 @@ class Create extends Component
     public $expenseTypes;
     public $paid_at;
     public $expense_total;
+    public $partyOptions = [];
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -26,19 +27,34 @@ class Create extends Component
     public function mount()
     {
         if (!setting('expenses')) {
-            abort(403, 'You do not have access to this module.');
-        }
+        abort(403, 'You do not have access to this module.');
+    }
 
-        $this->restaurant = auth()->user()->restaurants()->first();
+    $this->restaurant = auth()->user()->restaurants()->first();
 
-        $this->expenseTypes = $this->restaurant
-                                ->expenseTypes()
-                                ->where('is_active', 0)
-                                ->orderBy('name')
-                                ->pluck('name', 'id')
-                                ->toArray();
+    $this->expenseTypes = $this->restaurant
+                            ->expenseTypes()
+                            ->where('is_active', 0)
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->toArray();
 
-        $this->expense_total = SalesSummaries::where('restaurant_id', $this->restaurant->id)->first();
+    $users = User::where('restaurant_id', $this->restaurant->id)
+        ->where('is_active', 0)
+        ->get()
+        ->mapWithKeys(fn($u) => ["user:$u->id" => " $u->name"])
+        ->toArray();
+
+    $customers = Customer::where('restaurant_id', $this->restaurant->id)
+        ->where('is_active', 0)
+        ->get()
+        ->mapWithKeys(fn($c) => ["customer:$c->id" => " $c->name"])
+        ->toArray();
+
+    $this->partyOptions = $users + $customers; // maintain order
+
+    
+    $this->expense_total = SalesSummaries::where('restaurant_id', $this->restaurant->id)->first();
     }
 
 
@@ -51,16 +67,27 @@ class Create extends Component
         }
 
         $this->validate([
-            'name' => 'required',
+            // 'name' => 'required',
             'amount' => 'required',
             'paid_at' => 'nullable',
             'description' => 'nullable',
         ]);
 
+        $user_id = null;
+        $customer_id = null;
+
+        if (str_starts_with($this->name, 'user:')) {
+            $user_id = explode(':', $this->name)[1];
+        } elseif (str_starts_with($this->name, 'customer:')) {
+            $customer_id = explode(':', $this->name)[1];
+        }
+
         Expense::create([
             'restaurant_id' => $this->restaurant->id,
             'expense_type_id' => $this->expense_type_id,
-            'name' => $this->name,
+            'customer_id' => $customer_id,
+            'user_id' => $user_id,
+            'name' => null,
             'amount' => $this->amount,
             'paid_at' =>$this->paid_at,
             'description' => $this->description,
