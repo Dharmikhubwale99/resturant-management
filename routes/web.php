@@ -15,6 +15,7 @@ use \App\Livewire\Admin\{
 
     Admin\Create,
     Admin\Edit,
+    Admin\Show,
 
     Plan\Index as PlanIndex,
     Plan\Create as PlanCreate,
@@ -131,6 +132,7 @@ Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFr
         Route::get('/', Index::class)->name('index');
         Route::get('/create', Create::class)->name('create');
         Route::get('/edit/{id}', Edit::class)->name('edit');
+        Route::get('/show/{id}', Show::class)->name('show');
 
         Route::get('/', Index::class)->name('index');
 

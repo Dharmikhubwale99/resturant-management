@@ -46,6 +46,23 @@
             <x-form.input name="upi_id" label="UPI ID" wireModel="upi_id" />
         </div>
 
+        <h2 class="text-2xl font-bold mb-4 text-gray-700 border-b pb-2">Meta Settings</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <x-form.input name="meta_title" label="Meta Title" type="text" wireModel="meta_title" />
+
+            <x-form.input name="meta_keywords" label="Meta Keywords" type="text" wireModel="meta_keywords" />
+
+            <x-form.input name="meta_description" label="Meta Description" type="textarea"
+                wireModel="meta_description" />
+
+            <x-form.input name="favicon" label="Favicon Image" type="file" wireModel="favicon" />
+            @if ($oldFavicon)
+                <div class="mt-2">
+                    <img src="{{ asset('storage/' . $oldFavicon) }}" class="ml-3 h-25 w-20" alt="Current Favicon">
+                </div>
+            @endif
+        </div>
+
         <div class="mt-6 flex justify-end gap-3">
             <x-form.button title="Save Profile" wireClick="updateProfile" wireTarget="updateProfile" />
             <x-form.button :route="'restaurant.dashboard'" class="bg-gray-500 text-white">

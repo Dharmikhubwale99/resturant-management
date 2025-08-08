@@ -11,6 +11,7 @@ use Livewire\WithFileUploads;
 use App\Traits\HasRolesAndPermissions;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Validation\Rule;
 
 class Create extends Component
 {
@@ -23,6 +24,9 @@ class Create extends Component
     public $permissions = [];
     public $plan_id;
     public $plans = [];
+    public $selected_plan_days;
+    public $calculated_expiry;
+
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -110,12 +114,36 @@ class Create extends Component
         $this->district_name = $district->name;
     }
 
+    public function updatedPlanId($value)
+    {
+        if ($value) {
+            $plan = Plan::find($value);
+            if ($plan) {
+                $this->selected_plan_days = $plan->duration_days;
+                $this->calculated_expiry = now()->addDays($plan->duration_days)->format('d-m-Y');
+            }
+        } else {
+            $this->selected_plan_days = null;
+            $this->calculated_expiry = null;
+        }
+    }
+
     public function submit()
     {
         $this->validate([
             'user_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
+            'email' => [
+                'required',
+                'email',
+                'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
+                Rule::unique('users', 'email')->whereNull('deleted_at'),
+            ],
+            'mobile' => [
+                'required',
+                'numeric',
+                'regex:/^[0-9]{10}$/',
+                Rule::unique('users', 'mobile')->whereNull('deleted_at'),
+            ],
             'password' => 'required|min:6|confirmed',
             'pincode' => 'required|digits:6',
             'restaurant_name' => 'nullable|string|max:255',

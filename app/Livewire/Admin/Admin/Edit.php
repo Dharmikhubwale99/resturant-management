@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use App\Traits\HasRolesAndPermissions;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class Edit extends Component
 {
@@ -24,6 +26,9 @@ class Edit extends Component
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
     public $plan_id;
     public $plans = [];
+    public $selected_plan_days;
+    public $calculated_expiry;
+
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -71,6 +76,15 @@ class Edit extends Component
                   $plan->id => $plan->name . ' | ₹' . number_format($plan->price, 2) . ' | ' . $plan->duration_days . ' days',
             ];
         });
+
+        if ($this->plan_id) {
+            $plan = Plan::find($this->plan_id);
+            if ($plan) {
+                $this->selected_plan_days = $plan->duration_days;
+                $this->calculated_expiry = optional($restaurant->plan_expiry_at)->format('d-m-Y');
+            }
+        }
+
     }
 
     public function updatedPincode($value)
@@ -142,11 +156,30 @@ class Edit extends Component
         $this->district_name = $district->name;
     }
 
+    public function updatedPlanId($value)
+    {
+        if ($value) {
+            $plan = Plan::find($value);
+            if ($plan) {
+                $this->selected_plan_days = $plan->duration_days;
+                $this->calculated_expiry = now()->addDays($plan->duration_days)->format('d-m-Y');
+            }
+        } else {
+            $this->selected_plan_days = null;
+            $this->calculated_expiry = null;
+        }
+    }
+
     public function update()
     {
         $this->validate([
             'user_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $this->user_id,
+            'email' => [
+                'required',
+                'email',
+                'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
+                Rule::unique('users', 'email')->ignore($this->user_id)->whereNull('deleted_at'),
+            ],
             'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
             'pincode' => 'required|digits:6',
             'restaurant_name' => 'nullable|string|max:255',
@@ -210,6 +243,10 @@ class Edit extends Component
 
         $faviconPath = $this->oldFavicon;
         if ($this->favicon && $this->favicon !== $this->oldFavicon) {
+            if ($this->oldFavicon && Storage::disk('public')->exists($this->oldFavicon)) {
+                Storage::disk('public')->delete($this->oldFavicon);
+            }
+
             $faviconPath = $this->favicon->store('icon', 'public');
         } elseif ($this->favicon === null) {
             $faviconPath = null;

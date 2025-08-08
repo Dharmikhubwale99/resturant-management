@@ -7,23 +7,23 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 
 class EditProfile extends Component
 {
-    public $step = 1;
+    use WithFileUploads;
 
-    // Step 1 - Personal Info
     public $personal_name, $personal_email, $personal_mobile, $personal_address;
     public $password, $confirm_password;
 
-    // Step 2 - Restaurant Info
     public $restaurant_name, $restaurant_email, $restaurant_mobile, $restaurant_address, $restaurant, $gst;
 
-    // Step 3 - Bank Info
     public $bank_name, $ifsc, $holder_name, $account_type, $upi_id, $account_number;
 
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
+    public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon, $setting;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -34,14 +34,13 @@ class EditProfile extends Component
     {
         $user = Auth::user();
         $this->restaurant = $user->restaurants->first();
+        $this->setting = $user->setting;
 
-        // Step 1
         $this->personal_name = $user->name;
         $this->personal_email = $user->email;
         $this->personal_mobile = $user->mobile;
         $this->personal_address = $user->address;
 
-        // Step 2
         $this->restaurant_name = $this->restaurant?->name;
         $this->restaurant_email = $this->restaurant?->email;
         $this->restaurant_mobile = $this->restaurant?->mobile;
@@ -70,6 +69,14 @@ class EditProfile extends Component
                 $this->city_id = $pincode->district->city->id ?? null;
                 $this->district_id = $pincode->district->id ?? null;
             }
+        }
+
+        if ($this->setting) {
+            $this->meta_title = $this->setting->meta_title;
+            $this->meta_description = $this->setting->meta_description;
+            $this->meta_keywords = $this->setting->meta_keywords;
+            $this->favicon = $this->setting->favicon;
+            $this->oldFavicon = $this->setting->favicon;
         }
     }
 
@@ -160,6 +167,11 @@ class EditProfile extends Component
             'account_type' => 'nullable|string|max:20',
             'upi_id' => 'nullable|string|max:50',
             'account_number' => 'nullable|string|max:50',
+
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
+            'favicon' => 'nullable',
         ]);
 
         $user = Auth::user();
@@ -195,6 +207,26 @@ class EditProfile extends Component
                 'account_type' => $this->account_type,
                 'upi_id' => $this->upi_id,
                 'account_number' => $this->account_number,
+            ]);
+        }
+
+        $faviconPath = $this->oldFavicon;
+        if ($this->favicon && $this->favicon !== $this->oldFavicon) {
+            if ($this->oldFavicon && Storage::disk('public')->exists($this->oldFavicon)) {
+                Storage::disk('public')->delete($this->oldFavicon);
+            }
+
+            $faviconPath = $this->favicon->store('icon', 'public');
+        } elseif ($this->favicon === null) {
+            $faviconPath = null;
+        }
+
+        if ($this->setting) {
+            $this->setting->update([
+                'meta_title' => $this->meta_title,
+                'meta_description' => $this->meta_description,
+                'meta_keywords' => $this->meta_keywords,
+                'favicon' => $faviconPath,
             ]);
         }
 

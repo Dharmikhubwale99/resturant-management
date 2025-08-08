@@ -3,7 +3,14 @@
 
         <h2 class="text-xl font-bold">Admin List</h2>
 
-        <div class="flex space-x-2">
+        <div class="flex items-center gap-4">
+            <x-form.input
+                name="search"
+                placeholder="Search..."
+                wireModelLive="search"
+                wrapperClass="mb-0"
+                inputClass="w-72"
+            />
             <x-form.button title="+ Add" route="superadmin.admin.create"
                 class="bg-blue-600 hover:bg-blue-700 text-white" />
         </div>
@@ -16,6 +23,8 @@
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Resturant Name</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Resturant no</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Created At</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Plan Expiry Date</th>
@@ -31,14 +40,14 @@
                         </td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->mobile }}</td>
+                        <td class="px-6 text-sm text-gray-900">{{ $user->restaurant?->name }}</td>
+                        <td class="px-6 text-sm text-gray-900">{{ $user->restaurant?->mobile }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->role }}</td>
-
                         <td class="px-6 text-sm text-gray-900">
-                            {{ $user->restaurant_created_at ? \Carbon\Carbon::parse($user->restaurant_created_at)->format('d-m-Y') : '' }}
+                            {{ $user->restaurant?->created_at ? $user->restaurant->created_at->format('d-m-Y') : '' }}
                         </td>
-
                         <td class="px-6 text-sm text-gray-900">
-                            {{ $user->plan_expiry_at ? \Carbon\Carbon::parse($user->plan_expiry_at)->format('d-m-Y') : '' }}
+                            {{ $user->restaurant?->plan_expiry_at ? $user->restaurant->plan_expiry_at->format('d-m-Y') : '' }}
                         </td>
                         <td class="px-6 text-sm">
 
@@ -67,10 +76,24 @@
                                     @endif
                                 </x-form.button>
                                 <x-form.button title=""
+                                        class="w-8 h-8 rounded flex items-center justify-center" :route="['superadmin.admin.show', $user->id]">
+                                        <span class="w-4 h-4 text-yellow-700">
+                                            {!! file_get_contents(public_path('icon/view.svg')) !!}
+                                        </span>
+                                    </x-form.button>
+                                <x-form.button title=""
                                     class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
                                     :route="['superadmin.admin.edit', ['id' => $user->id]]">
                                     <span class="w-5 h-1 flex items-center justify-center">
                                         {!! file_get_contents(public_path('icon/edit.svg')) !!}
+                                    </span>
+                                </x-form.button>
+
+                                <x-form.button title=""
+                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                    wire:click="confirmDelete({{ $user->id }})">
+                                    <span class="w-5 h-1 flex items-center justify-center">
+                                        {!! file_get_contents(public_path('icon/delete.svg')) !!}
                                     </span>
                                 </x-form.button>
 
@@ -83,13 +106,6 @@
                                     </x-form.button>
                                 @endif
 
-                                <x-form.button title=""
-                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                    wire:click="confirmDelete({{ $user->id }})">
-                                    <span class="w-5 h-1 flex items-center justify-center">
-                                        {!! file_get_contents(public_path('icon/delete.svg')) !!}
-                                    </span>
-                                </x-form.button>
 
                             </div>
 

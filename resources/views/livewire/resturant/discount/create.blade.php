@@ -38,6 +38,7 @@
                 label="Apply to Item(s)"
                 wireModel="selected_items"
                 :options="$items"
+                mode="multi"
             />
 
             <div class="flex flex-row text-center space-x-3">

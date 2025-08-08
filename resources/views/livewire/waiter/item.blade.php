@@ -236,7 +236,7 @@
                             @foreach ($cartItems as $key => $row)
                                 @if (!in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
                                     <div class="border rounded p-1 md:p-2 flex items-center justify-between"
-                                        wire:key="row-{{ $row['id'] }}">
+                                    wire:key="row-{{ $row['id'] ?? $key }}">
                                         <div class="flex-1 min-w-0">
                                             <p
                                                 class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
@@ -294,8 +294,14 @@
                             </div> --}}
 
                             <div class="text-right text-lg md:text-xl font-bold py-1 md:py-2">
-                                Total: ₹{{ number_format($cartTotal, 2) }}
+                                {{-- Total: ₹{{ number_format($cartTotal, 2) }}
+
+                                <input type="text" class="border rounded px-2 py-1 ml-2"
+                                       value="{{ number_format($cartTotal, 2) }}" readonly /> --}}
+                                       <input type="text" wire:model.live="cartTotal" readonly>
+
                             </div>
+
 
                             <div class="flex flex-wrap justify-center gap-4 mt-3 mb-3">
                                 @foreach ($paymentMethods as $value => $label)

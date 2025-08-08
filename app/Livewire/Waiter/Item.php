@@ -70,15 +70,15 @@ class Item extends Component
     public string $customer_anniversary = '';
     public string $cartDiscountType = 'percentage';
     public float|string $cartDiscountValue = 0;
-
+    public float $cartTotal = 0;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
+        $this->cartTotal = $this->getCartTotal();
         return view('livewire.waiter.item', [
             'filteredItems' => $this->getFilteredItems(),
             'cartItems' => $this->cart,
-            'cartTotal' => $this->getCartTotal(),
         ]);
     }
 
@@ -380,8 +380,20 @@ class Item extends Component
             return;
         }
 
-        unset($this->cart[$key]);
+        $this->cart[$key] = [
+            'id' => $this->cart[$key]['id'] ?? $key, // Fallback to $key if no 'id'
+            'item_id' => $this->cart[$key]['item_id'] ?? null,
+            'name' => $this->cart[$key]['name'] ?? '',
+            'qty' => 0,
+            'price' => 0,
+            'addons' => [],
+            'note' => '',
+            'variant' => $this->cart[$key]['variant'] ?? null,
+            'discount' => 0,
+        ];
+
     }
+
 
     public function updateQty($key, $qty)
     {

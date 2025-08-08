@@ -8,6 +8,8 @@ use App\Models\{Restaurant, User, Country, State, City, District, PinCode, Setti
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Livewire\WithFileUploads;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class RestoRegister extends Component
 {
@@ -170,7 +172,12 @@ class RestoRegister extends Component
                 'account_type' => 'nullable|string|max:20',
                 'upi_id' => 'nullable|string|max:50',
                 'account_number' => 'nullable|string|max:50',
-                'email' => ['email', 'unique:users,email,' . Auth::id(), 'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i'],
+                'email' => [
+                    'required',
+                    'email',
+                    'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
+                    Rule::unique('users', 'email')->ignore(Auth::id())->whereNull('deleted_at'),
+                ],
             ],
             [
                 'email.regex' => 'Only .com email addresses are allowed.',
@@ -180,6 +187,9 @@ class RestoRegister extends Component
         $faviconPath = $this->oldFavicon;
 
         if ($this->favicon) {
+            if ($this->oldFavicon && Storage::disk('public')->exists($this->oldFavicon)) {
+                Storage::disk('public')->delete($this->oldFavicon);
+            }
             $faviconPath = $this->favicon->store('icon', 'public');
         }
 
