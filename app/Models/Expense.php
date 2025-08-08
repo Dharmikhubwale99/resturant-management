@@ -19,6 +19,8 @@ class Expense extends Model
     protected $fillable = [
         'restaurant_id',
         'expense_type_id',
+        'customer_id',
+        'user_id',
         'name',
         'description',
         'amount',
@@ -51,5 +53,15 @@ class Expense extends Model
     public function expenseType()
     {
         return $this->belongsTo(ExpenseType::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
