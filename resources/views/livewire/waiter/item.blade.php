@@ -256,16 +256,15 @@
                                                 class="text-xs bg-yellow-100 text-yellow-700 px-1 md:px-2 rounded mt-1"
                                                 wire:click="openPriceModal('{{ $row['id'] }}')">Edit Price</button>
 
-                                                @if (
-                                                    (!empty($row['variant_price']) && $row['variant_price'] > 0) ||
-                                                    (!empty($row['addons']) && count($row['addons']) > 0)
-                                                )
-                                                    <button
-                                                        class="text-xs bg-purple-100 text-purple-700 px-1 md:px-2 rounded mt-1"
-                                                        wire:click="openModsModal('{{ $row['id'] }}')">
-                                                        Edit Variant/Addons
-                                                    </button>
-                                                @endif
+                                            @if (
+                                                (!empty($row['variant_price']) && $row['variant_price'] > 0) ||
+                                                    (!empty($row['addons']) && count($row['addons']) > 0))
+                                                <button
+                                                    class="text-xs bg-purple-100 text-purple-700 px-1 md:px-2 rounded mt-1"
+                                                    wire:click="openModsModal('{{ $row['id'] }}')">
+                                                    Edit Variant/Addons
+                                                </button>
+                                            @endif
 
                                         </div>
 
@@ -863,4 +862,5 @@
             window.open(`/restaurant/bill-print/${billId}`, '_blank');
         });
     </script>
+@endpush
 @endpush

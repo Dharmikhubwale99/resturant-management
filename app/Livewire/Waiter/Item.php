@@ -386,7 +386,7 @@ class Item extends Component
         }
 
         $this->cart[$key] = [
-            'id' => $this->cart[$key]['id'] ?? $key, // Fallback to $key if no 'id'
+            'id' => $this->cart[$key]['id'] ?? $key,
             'item_id' => $this->cart[$key]['item_id'] ?? null,
             'name' => $this->cart[$key]['name'] ?? '',
             'qty' => 0,
