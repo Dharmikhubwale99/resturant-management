@@ -7,7 +7,7 @@
     <style>
         @media print {
             @page {
-                size: 58mm auto;
+                size: 57mm auto;
                 margin: 0;
             }
 
