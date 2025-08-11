@@ -13,20 +13,41 @@ use App\Traits\TransactionTrait;
 class PickupItem extends Component
 {
     use TransactionTrait;
-    public $items, $order, $categories, $selectedCategory = null, $search = '';
-    public $cart = [], $showVariantModal = false, $currentItem = null, $variantOptions = [];
-    public $selectedVariantId = null, $showNoteModal = false, $noteInput = '', $currentNoteKey = null;
-    public $orderTypes = [], $order_type, $kotId, $kotTime;
+    public $items,
+        $order,
+        $categories,
+        $selectedCategory = null,
+        $search = '';
+    public $cart = [],
+        $showVariantModal = false,
+        $currentItem = null,
+        $variantOptions = [];
+    public $selectedVariantId = null,
+        $showNoteModal = false,
+        $noteInput = '',
+        $currentNoteKey = null;
+    public $orderTypes = [],
+        $order_type,
+        $kotId,
+        $kotTime;
     public array $originalKotItemKeys = [];
     public bool $editMode = false;
     public string $paymentMethod = '';
-    public $paymentMethods = [], $orderId;
-    public bool $showSplitModal = false, $showDuoPaymentModal = false, $showCustomerModal = false;
+    public $paymentMethods = [],
+        $orderId;
+    public bool $showSplitModal = false,
+        $showDuoPaymentModal = false,
+        $showCustomerModal = false;
     public array $splits = [];
-    public string $customerName = '', $mobile = '', $duoCustomerName = '', $duoMobile = '';
+    public string $customerName = '',
+        $mobile = '',
+        $duoCustomerName = '',
+        $duoMobile = '';
     public float $duoAmount = 0;
-    public string $duoIssue = '', $duoMethod = '';
-    public $addonOptions = [], $selectedAddons = [];
+    public string $duoIssue = '',
+        $duoMethod = '';
+    public $addonOptions = [],
+        $selectedAddons = [];
     public string $followupCustomer_name = '';
     public string $followupCustomer_mobile = '';
     public string $followupCustomer_email = '';
@@ -56,7 +77,8 @@ class PickupItem extends Component
     public ?int $modsVariantId = null;
     public string $modsVariantName = '';
     public array $modsAddons = [];
-
+    public string $cartDiscountType = 'percentage';
+    public float|string $cartDiscountValue = 0;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -92,26 +114,22 @@ class PickupItem extends Component
         $this->mobile = $this->order->mobile ?? '';
         $this->duoCustomerName = $this->order->customer_name ?? '';
         $this->duoMobile = $this->order->mobile ?? '';
-
     }
 
     protected function loadEditModeData($id)
     {
         $order = Order::where('id', $id)->where('status', 'pending')->first();
 
-        $latestKot = Kot::where('order_id', $order->id)
-                    ->where('status', 'pending')
-                    ->orderBy('created_at')
-                    ->get();
+        $latestKot = Kot::where('order_id', $order->id)->where('status', 'pending')->orderBy('created_at')->get();
 
         $coustomer = Customer::where('order_id', $order->id)->first();
 
-        if($coustomer) {
+        if ($coustomer) {
             $this->followupCustomer_name = $coustomer->name;
             $this->followupCustomer_mobile = $coustomer->mobile;
-            $this->followupCustomer_email = $coustomer->email;
-            $this->customer_dob = $coustomer->dob->format('Y-m-d');
-            $this->customer_anniversary = $coustomer->anniversary->format('Y-m-d');
+            $this->followupCustomer_email = $coustomer->email ?? '';
+            $this->customer_dob = $coustomer->dob ? \Carbon\Carbon::parse($coustomer->dob)->format('Y-m-d') : '';
+            $this->customer_anniversary = $coustomer->anniversary ? \Carbon\Carbon::parse($coustomer->anniversary)->format('Y-m-d') : '';
         }
 
         foreach ($latestKot as $kot) {
@@ -155,16 +173,18 @@ class PickupItem extends Component
 
     public function getFilteredItems()
     {
-        $collection = $this->selectedCategory
-            ? $this->items->where('category_id', $this->selectedCategory)
-            : $this->items;
+        $collection = $this->selectedCategory ? $this->items->where('category_id', $this->selectedCategory) : $this->items;
 
         if ($this->search !== '') {
             $searchLower = str($this->search)->lower();
             $collection = $collection->filter(function ($i) use ($searchLower) {
-                return str($i->name)->lower()->contains($searchLower)
-                    || str($i->code ?? '')->lower()->contains($searchLower)
-                    || str($i->short_name ?? '')->lower()->contains($searchLower);
+                return str($i->name)->lower()->contains($searchLower) ||
+                    str($i->code ?? '')
+                        ->lower()
+                        ->contains($searchLower) ||
+                    str($i->short_name ?? '')
+                        ->lower()
+                        ->contains($searchLower);
             });
         }
 
@@ -409,7 +429,6 @@ class PickupItem extends Component
         $this->cart[$key]['qty'] = $qty;
     }
 
-
     public function openNoteModal($key)
     {
         $this->currentNoteKey = $key;
@@ -566,7 +585,6 @@ class PickupItem extends Component
                 }
             }
 
-
             if ($print) {
                 $this->dispatch('printKot', kotId: $kot->id);
             }
@@ -717,9 +735,11 @@ class PickupItem extends Component
             $this->createOrderAndKot();
             $order = Order::where('id', $this->order)->where('status', 'pending')->latest()->first();
         } else {
-            $newItemsExist = collect($this->cart)->reject(function ($item, $key) {
-                return in_array($key, $this->originalKotItemKeys);
-            })->isNotEmpty();
+            $newItemsExist = collect($this->cart)
+                ->reject(function ($item, $key) {
+                    return in_array($key, $this->originalKotItemKeys);
+                })
+                ->isNotEmpty();
 
             if ($newItemsExist) {
                 $this->updateOrder();
@@ -779,9 +799,11 @@ class PickupItem extends Component
             $this->createOrderAndKot();
             $order = Order::where('id', $this->order)->where('status', 'pending')->latest()->first();
         } else {
-            $newItemsExist = collect($this->cart)->reject(function ($item, $key) {
-                return in_array($key, $this->originalKotItemKeys);
-            })->isNotEmpty();
+            $newItemsExist = collect($this->cart)
+                ->reject(function ($item, $key) {
+                    return in_array($key, $this->originalKotItemKeys);
+                })
+                ->isNotEmpty();
 
             if ($newItemsExist) {
                 $this->updateOrder();
@@ -887,7 +909,6 @@ class PickupItem extends Component
         }
 
         if ($order) {
-
             $order->update([
                 'status' => 'served',
             ]);
@@ -917,11 +938,14 @@ class PickupItem extends Component
             'duoCustomerName' => 'required|string|max:100',
             'duoMobile' => 'required|string|max:20',
             'duoAmount' => 'required|numeric|min:0.01',
-            'duoMethod' => ['nullable', function ($attribute, $value, $fail) {
-                if (!is_null($value) && !PaymentMethod::tryFrom($value)) {
-                    $fail("The selected payment method is invalid.");
-                }
-            }],
+            'duoMethod' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if (!is_null($value) && !PaymentMethod::tryFrom($value)) {
+                        $fail('The selected payment method is invalid.');
+                    }
+                },
+            ],
             'duoIssue' => 'nullable|string|max:255',
         ]);
 
@@ -960,7 +984,6 @@ class PickupItem extends Component
         $this->totalSale($order->restaurant_id, $order->total_amount);
 
         $remainingAmount = $order->total_amount - $this->duoAmount;
-
 
         RestaurantPaymentLog::create([
             'restaurant_id' => $restaurantId,
@@ -1004,10 +1027,7 @@ class PickupItem extends Component
                 ]);
 
             if ($kot) {
-                KOTItem::where('kot_id', $kot->id)
-                    ->where('item_id', $itemId)
-                    ->when($variantId, fn($q) => $q->where('variant_id', $variantId))
-                    ->delete();
+                KOTItem::where('kot_id', $kot->id)->where('item_id', $itemId)->when($variantId, fn($q) => $q->where('variant_id', $variantId))->delete();
             }
         });
 
@@ -1019,7 +1039,11 @@ class PickupItem extends Component
     public function openCustomerModal()
     {
         $this->resetValidation();
-        $order = Order::where('id', $this->order)->where('status', 'pending')->latest()->firstOrFail();
+        $order = Order::find($this->orderId);
+        if (!$order) {
+            session()->flash('error', 'Order not found.');
+            return;
+        }
         if ($order->customer_id) {
             $customer = Customer::find($order->customer_id);
             if ($customer) {
@@ -1057,9 +1081,10 @@ class PickupItem extends Component
         ]);
 
         $order = Order::where('id', $this->order)->where('status', 'pending')->latest()->firstOrFail();
-        $coustomer = Customer::where('order_id', $order->id)->first();
-        if(!$coustomer) {
-            $coustomer->create([
+        $customer = Customer::where('order_id', $order->id)->first();
+
+        if (!$customer) {
+            $customer = Customer::create([
                 'order_id' => $order->id,
                 'name' => $this->followupCustomer_name,
                 'mobile' => $this->followupCustomer_mobile,
@@ -1068,11 +1093,20 @@ class PickupItem extends Component
                 'anniversary' => $this->customer_anniversary,
                 'restaurant_id' => $restaurantId,
             ]);
-
-            $order->update([
-                'customer_id' => $coustomer->id
+        } else {
+            $customer->update([
+                'name' => $this->followupCustomer_name,
+                'mobile' => $this->followupCustomer_mobile,
+                'email' => $this->followupCustomer_email,
+                'dob' => $this->customer_dob,
+                'anniversary' => $this->customer_anniversary,
             ]);
         }
+
+        $order->update([
+            'customer_id' => $customer->id,
+        ]);
+
         $this->showCustomerModal = false;
 
         session()->flash('success', 'Customer added and linked to order!');
@@ -1202,5 +1236,4 @@ class PickupItem extends Component
         $this->recalcRowTotals($this->modsKey);
         $this->modsAddons = array_values(array_filter($this->modsAddons, fn($a) => (int) $a['id'] !== (int) $addonId));
     }
-
 }

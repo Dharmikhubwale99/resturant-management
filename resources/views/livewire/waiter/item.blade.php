@@ -687,21 +687,44 @@
                 <x-form.error />
 
                 <div class="space-y-3">
-                    <input type="text" wire:model.defer="followupCustomer_name" class="w-full border p-2 rounded"
-                        placeholder="Customer Name">
+                    <x-form.input
+                    name="followupCustomer_name"
+                    label="Customer Name"
+                    placeholder="Customer Name"
+                    :required="true"
+                    wireModel="followupCustomer_name"
+                  />
 
-                    <input type="text" wire:model.defer="followupCustomer_mobile"
-                        class="w-full border p-2 rounded" placeholder="Mobile Number" maxlength="10"
-                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)">
+                  <x-form.input
+                  name="followupCustomer_mobile"
+                  label="Mobile Number"
+                  placeholder="Mobile Number"
+                  maxlength="10"
+                  oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                  wireModel="followupCustomer_mobile"
+                />
 
-                    <input type="email" wire:model.defer="followupCustomer_email" class="w-full border p-2 rounded"
-                        placeholder="Email (optional)">
+                <x-form.input
+                  name="followupCustomer_email"
+                  label="Email (optional)"
+                  type="email"
+                  placeholder="Email (optional)"
+                  wireModel="followupCustomer_email"
+                />
 
-                    <input type="date" wire:model.defer="customer_dob" class="w-full border p-2 rounded"
-                        placeholder="DOB (optional)">
+                <x-form.input
+                  name="customer_dob"
+                  label="DOB (optional)"
+                  type="date"
+                  wireModel="customer_dob"
+                />
 
-                    <input type="date" wire:model.defer="customer_anniversary" class="w-full border p-2 rounded"
-                        placeholder="Anniversary (optional)">
+                <x-form.input
+                  name="customer_anniversary"
+                  label="Anniversary (optional)"
+                  type="date"
+                  wireModel="customer_anniversary"
+                />
                 </div>
 
                 <div class="mt-4 flex justify-end gap-2">

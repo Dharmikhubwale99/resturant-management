@@ -1108,6 +1108,12 @@ class Item extends Component
 
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
 
+        if (auth()->user()->restaurant_id) {
+            $restaurantId = auth()->user()->restaurant_id;
+        } else {
+            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
+        }
+
         $order->update([
             'customer_name' => $this->followupCustomer_name,
             'mobile' => $this->followupCustomer_mobile,
@@ -1115,18 +1121,18 @@ class Item extends Component
 
         $coustomer = Customer::where('order_id', $order->id)->first();
         if (!$coustomer) {
-            $coustomer->create([
+           $newCustomer = Customer::create([
                 'order_id' => $order->id,
                 'name' => $this->followupCustomer_name,
                 'mobile' => $this->followupCustomer_mobile,
                 'email' => $this->followupCustomer_email,
                 'dob' => $this->customer_dob,
                 'anniversary' => $this->customer_anniversary,
-                'restaurant_id' => auth()->user()->restaurant_id,
+                'restaurant_id' => $restaurantId,
             ]);
 
             $order->update([
-                'customer_id' => $coustomer->id,
+                'customer_id' => $newCustomer->id,
             ]);
         }
 
