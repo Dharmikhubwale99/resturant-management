@@ -6,7 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\SendOtpNotification;
-use App\Models\User;
+use App\Models\{User, Restaurant};
 use Illuminate\Support\Facades\Hash;
 use App\Traits\WhatsappTrait;
 use Illuminate\Validation\Rule;
@@ -94,6 +94,10 @@ class Register extends Component
             'otp_expires_at' => null,
             'email_verified_at' => now(),
             'is_active' => 0,
+        ]);
+        
+        $resturant = Restaurant::create([
+            'user_id' => $user->id,
         ]);
         $user->assignRole('admin');
 
