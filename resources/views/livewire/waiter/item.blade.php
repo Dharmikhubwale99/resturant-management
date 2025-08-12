@@ -236,7 +236,7 @@
                             @foreach ($cartItems as $key => $row)
                                 @if (!in_array($key, $originalKotItemKeys) && $row['qty'] > 0)
                                     <div class="border rounded p-1 md:p-2 flex items-center justify-between"
-                                    wire:key="row-{{ $row['id'] ?? $key }}">
+                                        wire:key="row-{{ $row['id'] ?? $key }}">
                                         <div class="flex-1 min-w-0">
                                             <p
                                                 class="font-semibold flex items-center gap-1 text-xs md:text-sm truncate">
@@ -255,6 +255,16 @@
                                             <button
                                                 class="text-xs bg-yellow-100 text-yellow-700 px-1 md:px-2 rounded mt-1"
                                                 wire:click="openPriceModal('{{ $row['id'] }}')">Edit Price</button>
+
+                                            @if (
+                                                (!empty($row['variant_price']) && $row['variant_price'] > 0) ||
+                                                    (!empty($row['addons']) && count($row['addons']) > 0))
+                                                <button
+                                                    class="text-xs bg-purple-100 text-purple-700 px-1 md:px-2 rounded mt-1"
+                                                    wire:click="openModsModal('{{ $row['id'] }}')">
+                                                    Edit Variant/Addons
+                                                </button>
+                                            @endif
 
                                         </div>
 
@@ -298,7 +308,7 @@
 
                                 <input type="text" class="border rounded px-2 py-1 ml-2"
                                        value="{{ number_format($cartTotal, 2) }}" readonly /> --}}
-                                       <input type="text" wire:model.live="cartTotal" readonly>
+                                <input type="text" wire:model.live="cartTotal" readonly>
 
                             </div>
 
@@ -677,21 +687,44 @@
                 <x-form.error />
 
                 <div class="space-y-3">
-                    <input type="text" wire:model.defer="followupCustomer_name" class="w-full border p-2 rounded"
-                        placeholder="Customer Name">
+                    <x-form.input
+                    name="followupCustomer_name"
+                    label="Customer Name"
+                    placeholder="Customer Name"
+                    :required="true"
+                    wireModel="followupCustomer_name"
+                  />
 
-                    <input type="text" wire:model.defer="followupCustomer_mobile"
-                        class="w-full border p-2 rounded" placeholder="Mobile Number" maxlength="10"
-                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)">
+                  <x-form.input
+                  name="followupCustomer_mobile"
+                  label="Mobile Number"
+                  placeholder="Mobile Number"
+                  maxlength="10"
+                  oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                  wireModel="followupCustomer_mobile"
+                />
 
-                    <input type="email" wire:model.defer="followupCustomer_email" class="w-full border p-2 rounded"
-                        placeholder="Email (optional)">
+                <x-form.input
+                  name="followupCustomer_email"
+                  label="Email (optional)"
+                  type="email"
+                  placeholder="Email (optional)"
+                  wireModel="followupCustomer_email"
+                />
 
-                    <input type="date" wire:model.defer="customer_dob" class="w-full border p-2 rounded"
-                        placeholder="DOB (optional)">
+                <x-form.input
+                  name="customer_dob"
+                  label="DOB (optional)"
+                  type="date"
+                  wireModel="customer_dob"
+                />
 
-                    <input type="date" wire:model.defer="customer_anniversary" class="w-full border p-2 rounded"
-                        placeholder="Anniversary (optional)">
+                <x-form.input
+                  name="customer_anniversary"
+                  label="Anniversary (optional)"
+                  type="date"
+                  wireModel="customer_anniversary"
+                />
                 </div>
 
                 <div class="mt-4 flex justify-end gap-2">
@@ -702,6 +735,66 @@
             </div>
         </div>
     @endif
+
+    @if ($showModsModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-lg">
+            <div class="bg-white w-full max-w-md rounded shadow-lg p-4 md:p-6 mx-2">
+                <h3 class="text-lg font-bold mb-3">Modify Item</h3>
+
+                <div class="text-sm mb-2">
+                    <div class="font-semibold">Item:</div>
+                    <div>{{ $modsItemName }}</div>
+                </div>
+
+                {{-- Variant section --}}
+                @if ($modsVariantId)
+                    <div class="border rounded p-3 mb-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-semibold">Variant</div>
+                                <div class="text-gray-700 text-sm">{{ $modsVariantName }}</div>
+                            </div>
+                            <button class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded"
+                                wire:click="removeVariant">
+                                Remove Variant
+                            </button>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Addons section --}}
+                <div class="border rounded p-3 mb-4">
+                    <div class="text-sm font-semibold mb-2">Addons</div>
+
+                    @if (count($modsAddons))
+                        <div class="space-y-2">
+                            @foreach ($modsAddons as $ad)
+                                <div class="flex items-center justify-between text-sm border rounded px-2 py-1">
+                                    <div>
+                                        <div class="font-medium">{{ $ad['name'] }}</div>
+                                        <div class="text-gray-600">₹{{ number_format($ad['price'], 2) }}</div>
+                                    </div>
+                                    <button class="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded"
+                                        wire:click="removeAddon({{ $ad['id'] }})">
+                                        Remove
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-gray-500 text-sm">No addons applied.</div>
+                    @endif
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button class="px-4 py-2 bg-gray-200 rounded" wire:click="$set('showModsModal', false)">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
 
 </div>
 

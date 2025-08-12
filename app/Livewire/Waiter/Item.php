@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Waiter;
 
-use App\Models\{Restaurant, Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer, SalesSummaries};
+use App\Models\{Restaurant, Table, Order, OrderItem, Kot, KOTItem, Payment, RestaurantPaymentLog, PaymentGroup, Addon, Customer, SalesSummaries, Variant};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\{DB, Auth};
@@ -71,6 +71,12 @@ class Item extends Component
     public string $cartDiscountType = 'percentage';
     public float|string $cartDiscountValue = 0;
     public float $cartTotal = 0;
+    public bool $showModsModal = false;
+    public ?string $modsKey = null;
+    public string $modsItemName = '';
+    public ?int $modsVariantId = null;
+    public string $modsVariantName = '';
+    public array $modsAddons = [];
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -198,7 +204,6 @@ class Item extends Component
 
         return $subtotal - $discount + $service;
     }
-
 
     public function getSubtotal()
     {
@@ -381,7 +386,7 @@ class Item extends Component
         }
 
         $this->cart[$key] = [
-            'id' => $this->cart[$key]['id'] ?? $key, // Fallback to $key if no 'id'
+            'id' => $this->cart[$key]['id'] ?? $key,
             'item_id' => $this->cart[$key]['item_id'] ?? null,
             'name' => $this->cart[$key]['name'] ?? '',
             'qty' => 0,
@@ -391,9 +396,7 @@ class Item extends Component
             'variant' => $this->cart[$key]['variant'] ?? null,
             'discount' => 0,
         ];
-
     }
-
 
     public function updateQty($key, $qty)
     {
@@ -509,10 +512,7 @@ class Item extends Component
             $tableId = $this->table_id;
             $subTotal = $this->getCartTotal();
 
-            $order = Order::where('restaurant_id', $restaurantId)
-                    ->where('table_id', $tableId)
-                    ->whereDate('created_at', today())
-                    ->first();
+            $order = Order::where('restaurant_id', $restaurantId)->where('table_id', $tableId)->whereDate('created_at', today())->first();
 
             if ($order) {
                 $order->update([
@@ -734,14 +734,14 @@ class Item extends Component
         }
 
         if ($this->paymentMethod === 'part') {
-            if($order->customer_id) {
+            if ($order->customer_id) {
                 $this->customerName = $order->customer->name;
                 $this->mobile = $order->customer->mobile;
             }
             $this->showSplitModal = true;
             return;
         } elseif ($this->paymentMethod === 'duo') {
-            if($order->customer_id) {
+            if ($order->customer_id) {
                 $this->duoCustomerName = $order->customer->name;
                 $this->duoMobile = $order->customer->mobile;
             }
@@ -808,14 +808,14 @@ class Item extends Component
         }
 
         if ($this->paymentMethod === 'part') {
-            if($order->customer_id) {
+            if ($order->customer_id) {
                 $this->customerName = $order->customer->name;
                 $this->mobile = $order->customer->mobile;
             }
             $this->showSplitModal = true;
             return;
         } elseif ($this->paymentMethod === 'duo') {
-            if($order->customer_id) {
+            if ($order->customer_id) {
                 $this->duoCustomerName = $order->customer->name;
                 $this->duoMobile = $order->customer->mobile;
             }
@@ -960,11 +960,14 @@ class Item extends Component
             'duoCustomerName' => 'required|string|max:100',
             'duoMobile' => 'required|string|max:20',
             'duoAmount' => 'nullable|numeric|min:0',
-            'duoMethod' => ['nullable', function ($attribute, $value, $fail) {
-                if (!is_null($value) && !PaymentMethod::tryFrom($value)) {
-                    $fail("The selected payment method is invalid.");
-                }
-            }],
+            'duoMethod' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if (!is_null($value) && !PaymentMethod::tryFrom($value)) {
+                        $fail('The selected payment method is invalid.');
+                    }
+                },
+            ],
             'duoIssue' => 'nullable|string|max:255',
         ]);
 
@@ -1074,8 +1077,7 @@ class Item extends Component
     {
         $this->resetValidation();
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
-        if($order->customer_id)
-        {
+        if ($order->customer_id) {
             $customer = Customer::find($order->customer_id);
             if ($customer) {
                 $this->followupCustomer_name = $customer->name ?? '';
@@ -1106,6 +1108,12 @@ class Item extends Component
 
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
 
+        if (auth()->user()->restaurant_id) {
+            $restaurantId = auth()->user()->restaurant_id;
+        } else {
+            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
+        }
+
         $order->update([
             'customer_name' => $this->followupCustomer_name,
             'mobile' => $this->followupCustomer_mobile,
@@ -1113,23 +1121,148 @@ class Item extends Component
 
         $coustomer = Customer::where('order_id', $order->id)->first();
         if (!$coustomer) {
-            $coustomer->create([
+           $newCustomer = Customer::create([
                 'order_id' => $order->id,
                 'name' => $this->followupCustomer_name,
                 'mobile' => $this->followupCustomer_mobile,
                 'email' => $this->followupCustomer_email,
                 'dob' => $this->customer_dob,
                 'anniversary' => $this->customer_anniversary,
-                'restaurant_id' => auth()->user()->restaurant_id,
+                'restaurant_id' => $restaurantId,
             ]);
 
             $order->update([
-                'customer_id' => $coustomer->id,
+                'customer_id' => $newCustomer->id,
             ]);
         }
 
         $this->showCustomerModal = false;
 
         session()->flash('success', 'Customer added and linked to order!');
+    }
+
+    public function openModsModal(string $key)
+    {
+        if (!isset($this->cart[$key])) {
+            return;
+        }
+
+        $this->modsKey = $key;
+        $row = $this->cart[$key];
+
+        $this->modsItemName = $row['name'] ?? '';
+
+        $this->modsVariantId = null;
+        $this->modsVariantName = '';
+        if (str_starts_with($key, 'v')) {
+            $this->modsVariantId = (int) substr($key, 1);
+        } elseif (!empty($row['variant_price'] ?? 0)) {
+            $this->modsVariantId = $row['variant_id'] ?? null;
+        }
+
+        if ($this->modsVariantId) {
+            $variant = Variant::find($this->modsVariantId);
+            $this->modsVariantName = $variant?->name ?? 'Variant';
+        }
+
+        $ids = $row['addons'] ?? [];
+        if (!is_array($ids)) {
+            $ids = [];
+        }
+        $addons = [];
+        if (count($ids)) {
+            $addons = Addon::whereIn('id', $ids)
+                ->get(['id', 'name', 'price'])
+                ->map(fn($a) => ['id' => $a->id, 'name' => $a->name, 'price' => $a->price])
+                ->toArray();
+        }
+        $this->modsAddons = $addons;
+        $this->showModsModal = true;
+    }
+
+    private function recalcRowTotals(string $key)
+    {
+        if (!isset($this->cart[$key])) {
+            return;
+        }
+
+        $row = &$this->cart[$key];
+        $base = (float) ($row['base_price'] ?? ($row['price'] ?? 0));
+        $variant = (float) ($row['variant_price'] ?? 0);
+        $addons = (float) ($row['addons_price'] ?? 0);
+
+        if (!empty($row['discount_type'])) {
+            $dval = (float) ($row['discount_value'] ?? 0);
+            if ($row['discount_type'] === 'percentage') {
+                $base = max($base - ($base * $dval) / 100, 0);
+            } elseif ($row['discount_type'] === 'fixed') {
+                $base = max($base - $dval, 0);
+            }
+            $row['base_price'] = $base;
+        }
+
+        $row['price'] = round($base + $variant + $addons, 2);
+    }
+
+    public function removeVariant()
+    {
+        if (!$this->modsKey || !isset($this->cart[$this->modsKey])) {
+            return;
+        }
+
+        $oldKey = $this->modsKey;
+        $row = $this->cart[$oldKey];
+
+        $hasVariant = str_starts_with($oldKey, 'v') || !empty($row['variant_price'] ?? 0);
+        if (!$hasVariant) {
+            return;
+        }
+
+        $baseItemId = $row['item_id'] ?? null;
+        if (!$baseItemId) {
+            $baseItemId = (int) preg_replace('/-new\d*/', '', $row['id'] ?? $oldKey);
+        }
+
+        $newKey = (string) $baseItemId;
+        if (isset($this->cart[$newKey])) {
+            $suffix = 1;
+            while (isset($this->cart[$newKey . "-new{$suffix}"])) {
+                $suffix++;
+            }
+            $newKey = $newKey . "-new{$suffix}";
+        }
+
+        $newRow = $row;
+        $newRow['id'] = $newKey;
+        $newRow['variant_price'] = 0;
+        $newRow['variant_id'] = null;
+        $newRow['name'] = preg_replace('/\s*\([^)]*\)\s*$/', '', $row['name'] ?? '');
+        $newRow['price'] = (float) ($row['base_price'] ?? 0) + (float) ($row['addons_price'] ?? 0);
+
+        $this->cart[$newKey] = $newRow;
+        unset($this->cart[$oldKey]);
+
+        $this->recalcRowTotals($newKey);
+        $this->modsKey = $newKey;
+        $this->modsVariantId = null;
+        $this->modsVariantName = '';
+    }
+
+    public function removeAddon(int $addonId)
+    {
+        if (!$this->modsKey || !isset($this->cart[$this->modsKey])) {
+            return;
+        }
+
+        $row = &$this->cart[$this->modsKey];
+        $row['addons'] = array_values(array_filter($row['addons'] ?? [], fn($id) => (int) $id !== (int) $addonId));
+
+        $addon = Addon::find($addonId);
+        if ($addon) {
+            $row['addons_price'] = max(0, (float) ($row['addons_price'] ?? 0) - (float) $addon->price);
+        }
+
+        $this->recalcRowTotals($this->modsKey);
+        $this->modsAddons = array_values(array_filter($this->modsAddons, fn($a) => (int) $a['id'] !== (int) $addonId));
     }
 }
