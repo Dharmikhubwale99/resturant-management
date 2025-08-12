@@ -90,6 +90,7 @@ class Item extends Component
 
     public function mount($table_id)
     {
+        $this->table_id = $table_id;
         $table = Table::findOrFail($table_id);
         $this->items = $table->restaurant
             ->items()
@@ -512,7 +513,11 @@ class Item extends Component
             $tableId = $this->table_id;
             $subTotal = $this->getCartTotal();
 
-            $order = Order::where('restaurant_id', $restaurantId)->where('table_id', $tableId)->whereDate('created_at', today())->first();
+            $order = Order::where('restaurant_id', $restaurantId)
+            ->where('table_id', $tableId)
+            ->where('status', 'pending')
+            ->latest('id')
+            ->first();
 
             if ($order) {
                 $order->update([
@@ -790,21 +795,10 @@ class Item extends Component
             ],
         );
 
-        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
-
+        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->first();
         if (!$order) {
             $this->createOrderAndKot();
-            $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
-        } else {
-            $newItemsExist = collect($this->cart)
-                ->reject(function ($item, $key) {
-                    return in_array($key, $this->originalKotItemKeys);
-                })
-                ->isNotEmpty();
-
-            if ($newItemsExist) {
-                $this->updateOrder();
-            }
+            $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->first();
         }
 
         if ($this->paymentMethod === 'part') {
