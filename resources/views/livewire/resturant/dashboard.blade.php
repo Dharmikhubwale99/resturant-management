@@ -72,65 +72,60 @@
 
     <div class="bg-gradient-to-br from-slate-900 via-pink-900 to-slate-900 min-h-screen p-4">
         <div class="max-w-7xl mx-auto">
-            <!-- Header -->
             <div class="text-center mb-8 animate-fade-in">
                 <h1 class="text-4xl font-bold text-white mb-2">Dashboard Overview</h1>
                 <p class="text-gray-300">Monitor your key metrics at a glance</p>
             </div>
 
-            <!-- Stats Cards Row -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <a href="{{ route('restaurant.sales-report') }}" class="block">
-                <div class="card-hover-shadow bg-white rounded-xl p-6 card-shadow animate-slide-up">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="gradient-bg text-white p-3 rounded-lg">
-                            <!-- Income Icon -->
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
-                                </path>
-                            </svg>
+                    <div class="card-hover-shadow bg-white rounded-xl p-6 card-shadow animate-slide-up">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="gradient-bg text-white p-3 rounded-lg">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
+                                    </path>
+                                </svg>
+                            </div>
+                            <span class="text-green-500 text-sm font-medium">{{ $todayIncomePercentage }}%</span>
                         </div>
-                        <span class="text-green-500 text-sm font-medium">{{ $todayIncomePercentage }}%</span>
+                        <h3 class="text-gray-600 text-sm font-medium mb-1">Today's Sale</h3>
+                        <p class="text-2xl font-bold text-gray-900">₹{{ number_format($todayIncome, 2) }}</p>
+                        <div class="mt-4 bg-gray-100 rounded-full h-2">
+                            <div class="gradient-bg h-2 rounded-full transition-all duration-1000"
+                                style="width: {{ $todayIncomeProgress }}%;"></div>
+                        </div>
                     </div>
-                    <h3 class="text-gray-600 text-sm font-medium mb-1">Today's Sale</h3>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($todayIncome, 2) }}</p>
-                    <div class="mt-4 bg-gray-100 rounded-full h-2">
-                        <div class="gradient-bg h-2 rounded-full transition-all duration-1000"
-                            style="width: {{ $todayIncomeProgress }}%;"></div>
-                    </div>
-                </div>
                 </a>
 
 
                 <a href="{{ route('restaurant.payment-report') }}" class="block">
-                <div class="card-hover-shadow bg-white rounded-xl p-6 card-shadow animate-slide-up"
-                    style="animation-delay: 0.1s;">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="gradient-success text-white p-3 rounded-lg">
-                            <!-- Money SVG Icon -->
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <rect x="2" y="7" width="20" height="10" rx="2" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                                <circle cx="12" cy="12" r="3" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M6 10v4M18 10v4" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
+                    <div class="card-hover-shadow bg-white rounded-xl p-6 card-shadow animate-slide-up"
+                        style="animation-delay: 0.1s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="gradient-success text-white p-3 rounded-lg">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <rect x="2" y="7" width="20" height="10" rx="2" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <circle cx="12" cy="12" r="3" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M6 10v4M18 10v4" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <span class="text-green-500 text-sm font-medium">{{ $todayMoneyPercentage }}%</span>
                         </div>
-                        <span class="text-green-500 text-sm font-medium">{{ $todayMoneyPercentage }}%</span>
+                        <h3 class="text-gray-600 text-sm font-medium mb-1">Today's Money</h3>
+                        <p class="text-2xl font-bold text-gray-900">₹{{ number_format($todayMoney, 2) }}</p>
+                        <div class="mt-4 bg-gray-100 rounded-full h-2">
+                            <div class="gradient-success h-2 rounded-full transition-all duration-1000"
+                                style="width: {{ $todayMoneyProgress }}%;"></div>
+                        </div>
                     </div>
-                    <h3 class="text-gray-600 text-sm font-medium mb-1">Today's Money</h3>
-                    <p class="text-2xl font-bold text-gray-900">₹{{ number_format($todayMoney, 2) }}</p>
-                    <div class="mt-4 bg-gray-100 rounded-full h-2">
-                        <div class="gradient-success h-2 rounded-full transition-all duration-1000"
-                            style="width: {{ $todayMoneyProgress }}%;"></div>
-                    </div>
-                </div>
                 </a>
 
 
-                <!-- Orders Card -->
                 <div class="card-hover-shadow bg-white rounded-xl p-6 card-shadow animate-slide-up"
                     style="animation-delay: 0.2s;">
                     <div class="flex items-center justify-between mb-4">
@@ -149,7 +144,6 @@
                     </div>
                 </div>
 
-                <!-- Conversion Card -->
                 <div class="card-hover-shadow bg-white rounded-xl p-6 card-shadow animate-slide-up"
                     style="animation-delay: 0.3s;">
                     <div class="flex items-center justify-between mb-4">
@@ -170,9 +164,7 @@
                 </div>
             </div>
 
-            <!-- Detailed Cards Row -->
             <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                <!-- Performance Card -->
                 <div
                     class="card-hover-shadow bg-white rounded-xl p-6 card-shadow animate-slide-up col-span-1 lg:col-span-2 xl:col-span-1">
                     <div class="flex items-center justify-between mb-6">
@@ -212,7 +204,6 @@
                     </div>
                 </div>
 
-                <!-- Recent Activity Card -->
                 <div class="card-hover-shadow bg-white rounded-xl p-6 card-shadow animate-slide-up">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6">Recent Activity</h3>
                     <div class="space-y-4">
@@ -259,7 +250,6 @@
                     </div>
                 </div>
 
-                <!-- Quick Actions Card -->
                 <div class="card-hover-shadow bg-white rounded-xl p-6 card-shadow animate-slide-up">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h3>
                     <div class="grid grid-cols-2 gap-4">
@@ -304,6 +294,68 @@
                 </div>
             </div>
         </div>
+
+        <div class="max-w-7xl mx-auto mt-10">
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">All Orders (Latest)</h3>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-gray-600 border-b">
+                                <th class="py-2 pr-4">#</th>
+                                <th class="py-2 pr-4">Table</th>
+                                <th class="py-2 pr-4">Type</th>
+                                <th class="py-2 pr-4">Status</th>
+                                <th class="py-2 pr-4">Amount</th>
+                                <th class="py-2 pr-4">Created</th>
+                                <th class="py-2 pr-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($orders as $o)
+                                <tr class="border-b last:border-0">
+                                    <td class="py-2 pr-4 font-medium">#{{ $o->order_number ?? $o->id }}</td>
+                                    <td class="py-2 pr-4">{{ $o->table->name ?? '—' }}</td>
+                                    <td class="py-2 pr-4 capitalize">{{ $o->order_type }}</td>
+                                    <td class="py-2 pr-4 capitalize">
+                                        <span
+                                            class="px-2 py-0.5 rounded-full text-xs
+                    @class([
+                        'bg-yellow-100 text-yellow-700' => $o->status === 'pending',
+                        'bg-green-100 text-green-700' => $o->status === 'served',
+                        'bg-gray-100 text-gray-700' => !in_array($o->status, ['pending', 'served']),
+                    ])
+                  ">{{ $o->status }}</span>
+                                    </td>
+                                    <td class="py-2 pr-4">₹{{ number_format($o->total_amount, 2) }}</td>
+                                    <td class="py-2 pr-4">{{ $o->created_at->format('d-m, h:i A') }}</td>
+                                    <td class="py-2 pr-0 text-right">
+                                        <a href="{{ route('restaurant.bill.print', $o->id) }}" target="_blank"
+                                            rel="noopener"
+                                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 9V2h12v7M6 18h12v4H6v-4zM6 14H4a2 2 0 01-2-2V9a2 2 0 012-2h16a2 2 0 012 2v3a2 2 0 01-2 2h-2" />
+                                            </svg>
+                                            Print
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="py-6 text-center text-gray-500">No orders yet.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>

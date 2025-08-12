@@ -17,11 +17,20 @@ class Dashboard extends Component
     public $todayMoneyProgress = 0;
     public $todayMoneyPercentage = 0;
     public $todayOrders = 0;
+    public $restaurantId;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
-        return view('livewire.resturant.dashboard');
+        $orders = Order::with(['table'])
+        ->where('restaurant_id', $this->restaurantId)
+        ->orderByDesc('id')
+        ->limit(50)
+        ->get();
+
+        return view('livewire.resturant.dashboard', [
+            'orders' => $orders,
+        ]);
     }
 
     public function mount()
@@ -35,6 +44,7 @@ class Dashboard extends Component
         }
 
         $restaurant = Restaurant::find($restaurantId);
+        $this->restaurantId = $restaurantId;
 
         if (empty($restaurant->name) || empty($restaurant->email) || empty($restaurant->mobile) || empty($restaurant->address) || empty($restaurant->pin_code_id)) {
             return redirect()->route('restaurant.resto-register')->with('info', 'Please complete your restaurant profile.');
