@@ -20,6 +20,11 @@ class BillPrint extends Component
 
     public function mount(Order $order)
     {
+        $userRestId = auth()->user()->restaurant_id
+        ?: \App\Models\Restaurant::where('user_id', auth()->id())->value('id');
+
+        abort_if($order->restaurant_id !== $userRestId, 403);
+
         $this->order = $order->load([
             'orderItems',
             'orderItems.item.taxSetting',

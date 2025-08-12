@@ -86,7 +86,7 @@
         <p><strong>Bill No:</strong> {{ $order->bill_number }}</p>
         <p><strong>Order No:</strong> {{ $order->order_number }}</p>
         <p><strong>Date On:</strong> {{ $order->created_at->format('d/m/y h:i A') }}</p>
-        <p><strong>Table No:</strong> {{ ucfirst($order->table_id) }}</p>
+        <p><strong>Table No:</strong> {{ $order->table->name }}</p>
         <p><strong>Bill To:</strong> {{ ucfirst($order->order_type) }}</p>
 
         <hr>
