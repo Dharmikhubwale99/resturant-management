@@ -32,7 +32,7 @@ class Index extends Component
                   ->orWhere('restaurants.mobile', 'like', '%' . $this->search . '%')
                   ->orWhere('restaurants.plan_expiry_at', 'like', '%' . $this->search . '%');
         })
-        ->select('users.*') // necessary to avoid ambiguous column errors
+        ->select('users.*')
         ->orderBy('users.created_at', 'desc')
         ->paginate(10);
 

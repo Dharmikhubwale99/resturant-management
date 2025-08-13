@@ -97,7 +97,7 @@
                                     </span>
                                 </x-form.button>
 
-                                @if ($user->restaurant_id)
+                                @if ($user->restaurant()->exists())
                                     <x-form.button title=""
                                         class="p-1 w-15 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition mt-4"
                                         :route="['superadmin.admin.access', ['id' => $user->id]]">
