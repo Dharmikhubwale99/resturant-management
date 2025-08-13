@@ -119,9 +119,9 @@ class Item extends Component
         if ($coustomer) {
             $this->followupCustomer_name = $coustomer->name;
             $this->followupCustomer_mobile = $coustomer->mobile;
-            $this->followupCustomer_email = $coustomer->email;
-            $this->customer_dob = $coustomer->dob->format('Y-m-d');
-            $this->customer_anniversary = $coustomer->anniversary->format('Y-m-d');
+            $this->followupCustomer_email = $coustomer->email ?? '';
+            $this->customer_dob = $coustomer->dob ? \Carbon\Carbon::parse($coustomer->dob)->format('Y-m-d') : '';
+            $this->customer_anniversary = $coustomer->anniversary ? \Carbon\Carbon::parse($coustomer->anniversary)->format('Y-m-d') : '';
         }
 
         foreach ($kots as $kot) {

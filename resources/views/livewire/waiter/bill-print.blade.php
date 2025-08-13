@@ -104,37 +104,58 @@
                 @php
                     $totalQty = 0;
                     $totalItems = 0;
-                    $totalTaxable = 0;
+                    $totalTaxable = 0; // will equal $subTotal below
                     $totalCgst = 0;
                     $totalSgst = 0;
+                    $subTotal = 0;
                 @endphp
 
+
                 @foreach ($order->orderItems as $item)
-                    @php
-                        $qty = $item->quantity;
-                        $rate = $item->base_price;
-                        $variant = $item->variant;
-                        $tax = optional($item->item->taxSetting);
-                        $taxRate = $tax?->rate ?? 0;
-                        $isInclusive = $item->item->is_tax_inclusive;
-                        $basePrice = $rate;
-                        $cgst = $sgst = 0;
+                @php
+                $qty = $item->quantity;
+                $rate = $item->base_price;            // per-unit entered price
+                $variant = $item->variant;
+                $tax = optional($item->item->taxSetting);
+                $taxRate = $tax?->rate ?? 0;          // e.g., 5
+                $isInclusive = $item->item->is_tax_inclusive;
 
-                        if ($taxRate > 0) {
-                            if ($isInclusive) {
-                                $basePrice = $rate / (1 + $taxRate / 100);
-                            }
-                            $taxAmount = $basePrice * ($taxRate / 100);
-                            $cgst = $sgst = $taxAmount / 2;
-                            $totalTaxable += $basePrice * $qty;
-                            $totalCgst += $cgst * $qty;
-                            $totalSgst += $sgst * $qty;
-                        }
+                // We will DISPLAY base (tax-exclusive) price in Rate column
+                if ($taxRate > 0) {
+                    if ($isInclusive) {
+                        // YOUR SPEC: inclusive=100 should SHOW 95 and tax 5
+                        $basePrice = $rate - ($rate * $taxRate / 100);  // 100 - 5 = 95
+                        $taxPerUnit = ($rate * $taxRate / 100);         // 5
+                    } else {
+                        // exclusive=100 should SHOW 100 and tax 5
+                        $basePrice = $rate;                              // 100
+                        $taxPerUnit = ($basePrice * $taxRate / 100);     // 5
+                    }
+                } else {
+                    $basePrice = $rate;
+                    $taxPerUnit = 0;
+                }
 
-                        $lineTotal = $rate * $qty;
-                        $totalQty += $qty;
-                        $totalItems++;
-                    @endphp
+                $cgstPerUnit = $taxPerUnit / 2;
+                $sgstPerUnit = $taxPerUnit / 2;
+
+                // Totals (base subtotal + split taxes)
+                $lineBaseTotal = $basePrice * $qty;
+                $subTotal     += $lineBaseTotal;
+                $totalTaxable += $lineBaseTotal;     // same as subtotal for display
+                $totalCgst    += $cgstPerUnit * $qty;
+                $totalSgst    += $sgstPerUnit * $qty;
+
+                $displayRate = $basePrice;           // show base in Rate column
+                $lineTotal   = $lineBaseTotal;       // show base in Total column
+
+                $totalQty += $qty;
+                $totalItems++;
+            @endphp
+            @php
+            $grandTotal = $subTotal + $totalCgst + $totalSgst;
+        @endphp
+
 
                     <tr>
                         <td>{{ $item->item->name }} @if ($variant)
@@ -157,11 +178,12 @@
                 <td colspan="3" class="text-right">Total Qty: {{ $totalQty }}</td>
             </tr>
 
+            <tr>
+                <td colspan="3" class="text-right">Sub Total:</td>
+                <td class="text-right">{{ number_format($subTotal, 2) }}</td>
+            </tr>
+
             @if ($totalCgst > 0 || $totalSgst > 0)
-                <tr>
-                    <td colspan="3" class="text-right">Taxable Amt:</td>
-                    <td class="text-right">{{ number_format($totalTaxable, 2) }}</td>
-                </tr>
                 <tr>
                     <td colspan="3" class="text-right">CGST:</td>
                     <td class="text-right">{{ number_format($totalCgst, 2) }}</td>
@@ -170,16 +192,20 @@
                     <td colspan="3" class="text-right">SGST:</td>
                     <td class="text-right">{{ number_format($totalSgst, 2) }}</td>
                 </tr>
+                <tr>
+                    <td colspan="3" class="text-right">Tax Value:</td>
+                    <td class="text-right">{{ number_format($totalCgst + $totalSgst, 2) }}</td>
+                </tr>
             @endif
 
             <tr>
                 <td colspan="3" class="text-right font-bold">Grand Total:</td>
-                <td class="text-right font-bold">{{ number_format($order->total_amount, 2) }}</td>
+                <td class="text-right font-bold">{{ number_format($grandTotal, 2) }}</td>
             </tr>
 
             <tr>
                 <td colspan="3" class="text-right">Balance:</td>
-                <td class="text-right">{{ number_format($order->total_amount, 2) }}</td>
+                <td class="text-right">{{ number_format($grandTotal, 2) }}</td>
             </tr>
         </table>
 

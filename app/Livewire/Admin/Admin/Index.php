@@ -22,7 +22,7 @@ class Index extends Component
     #[Layout('components.layouts.admin.app')]
     public function render()
 {
-    $users = User::role(['admin', 'superadmin'])
+    $users = User::role(['admin'])
         ->with('restaurant')
         ->leftJoin('restaurants', 'users.id', '=', 'restaurants.user_id')
         ->where(function ($query) {
@@ -32,7 +32,7 @@ class Index extends Component
                   ->orWhere('restaurants.mobile', 'like', '%' . $this->search . '%')
                   ->orWhere('restaurants.plan_expiry_at', 'like', '%' . $this->search . '%');
         })
-        ->select('users.*') // necessary to avoid ambiguous column errors
+        ->select('users.*')
         ->orderBy('users.created_at', 'desc')
         ->paginate(10);
 
