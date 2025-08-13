@@ -22,7 +22,7 @@ class Index extends Component
     #[Layout('components.layouts.admin.app')]
     public function render()
 {
-    $users = User::role(['admin', 'superadmin'])
+    $users = User::role(['admin'])
         ->with('restaurant')
         ->leftJoin('restaurants', 'users.id', '=', 'restaurants.user_id')
         ->where(function ($query) {
