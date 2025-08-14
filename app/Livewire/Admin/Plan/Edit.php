@@ -18,6 +18,7 @@ class Edit extends Component
     public $value;
     public $amount;
     public $selectAllFeatures = false;
+    public $storage_quota_mb, $max_file_size_kb;
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -28,7 +29,7 @@ class Edit extends Component
     public function mount($id)
     {
         $this->plan = Plan::findOrFail($id);
-        $this->fill($this->plan->only('name', 'price', 'duration_days', 'description'));
+        $this->fill($this->plan->only('name', 'price', 'duration_days', 'description','storage_quota_mb','max_file_size_kb'));
 
         $this->availableFeatures = AppConfiguration::all()->pluck('key')->toArray();
 
@@ -68,6 +69,8 @@ class Edit extends Component
             'duration_days' => 'nullable|numeric|min:0',
             'description' => 'nullable|string|max:255',
             'type' => 'nullable',
+            'storage_quota_mb' => 'nullable|integer|min:0',
+            'max_file_size_kb' => 'nullable|integer|min:0',
         ];
 
         if ($this->type === 'percentage') {
@@ -87,6 +90,8 @@ class Edit extends Component
             'type' => $this->type,
             'value' => $this->value,
             'amount' => $this->amount,
+            'storage_quota_mb' => $this->storage_quota_mb,
+            'max_file_size_kb' => $this->max_file_size_kb,
         ]);
 
         // Handle image upload (if new image is uploaded)

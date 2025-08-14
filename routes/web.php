@@ -115,7 +115,7 @@ use UniSharp\LaravelFilemanager\Lfm;
 
 Route::group([
     'prefix' => 'laravel-filemanager',
-    'middleware' => ['web','auth'],
+    'middleware' => ['web','auth','enforce.restaurant.storage'],
 ], function () {
     Lfm::routes();
 });

@@ -14,7 +14,8 @@
             <x-form.input name="description" label="Description" type="textarea" wireModel="description"
                 placeholder="Enter description" />
 
-
+            <x-form.input name="storage_quota_mb" label="Storage Quota (MB)" type="number" wireModel="storage_quota_mb" placeholder="e.g. 10240 for 10 GB" />
+            <x-form.input name="max_file_size_kb" label="Max File Size (KB)" type="number" wireModel="max_file_size_kb" placeholder="e.g. 2048 for 2 MB" />
 
             <x-form.input label="Images" name="images" type="file" wireModel="images" />
             <div wire:loading wire:target="images" class="flex items-center justify-center mt-2">

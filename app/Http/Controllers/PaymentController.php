@@ -24,7 +24,7 @@ class PaymentController extends Controller
     {
         $api_key    = config('razorpay.api_key');
         $api_secret = config('razorpay.api_secret');
-    
+
         $price = $plan->price;
         if ($plan->type === 'fixed' && $plan->amount) {
             $price -= $plan->amount;
@@ -33,14 +33,14 @@ class PaymentController extends Controller
         }
         $price = max(0, $price);
         $amountPaise = (int) round($price * 100);
-    
+
         $payload = [
             'amount'   => $amountPaise,
             'currency' => 'INR',
             'receipt'  => 'order_rcptid_' . uniqid(),
             'notes'    => ['plan_id' => (string) $plan->id],
         ];
-    
+
         $response = Http::withOptions([
             'force_ip_resolve' => 'v4',
             'verify' => true,
@@ -50,7 +50,7 @@ class PaymentController extends Controller
             ],
         ])->withBasicAuth($api_key, $api_secret)
           ->post('https://api.razorpay.com/v1/orders', $payload);
-    
+
         if (!$response->successful()) {
             Log::error('Razorpay order creation failed', [
                 'status' => $response->status(),
@@ -58,16 +58,16 @@ class PaymentController extends Controller
             ]);
             return back()->with('error', $response->json('error.description') ?? 'Unable to create Razorpay order.');
         }
-    
+
         $razorpayOrder = $response->json();
-    
+
         session([
             'razorpay_order_id'    => $razorpayOrder['id'],
             'plan_id'              => $plan->id,
-            'order_amount_paise'   => $amountPaise,    
+            'order_amount_paise'   => $amountPaise,
             'order_currency'       => 'INR',
         ]);
-    
+
         return response()->json([
             'api_key'      => $api_key,
             'order_id'     => $razorpayOrder['id'],
@@ -130,6 +130,8 @@ class PaymentController extends Controller
                         [
                             'plan_id'        => $plan->id,
                             'plan_expiry_at' => now()->addDays($plan->duration_days),
+                            'storage_quota_mb'  => $plan->storage_quota_mb,
+                            'max_file_size_kb'  => $plan->max_file_size_kb,
                         ]
                     );
                 });
@@ -166,19 +168,21 @@ class PaymentController extends Controller
         }
 
         $user = Auth::user();
-        $restaurant = $user->restaurants()->firstOrCreate(
-            ['user_id' => $user->id],
-            [
-                'plan_id' => $plan->id,
-                'plan_expiry_at' => Carbon::now()->addDays($plan->duration_days),
-            ],
-        );
+        Log::info('Storage :-' . $plan->storage_quota_mb . 'Upload Limit :-' . $plan->max_file_size_kb);
+        $restaurant = $user->restaurants()->first();
 
-        $restaurant->update([
-            'plan_id' => $plan->id,
-            'plan_expiry_at' => Carbon::now()->addDays($plan->duration_days),
-        ]);
-        $permissions = $this->getAllPermissions(); 
+        DB::transaction(function () use ($user, $plan, &$restaurant) {
+            $restaurant = Restaurant::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'plan_id'        => $plan->id,
+                    'plan_expiry_at' => now()->addDays($plan->duration_days),
+                    'storage_quota_mb'  => $plan->storage_quota_mb,
+                    'max_file_size_kb'  => $plan->max_file_size_kb,
+                ]
+            );
+        });
+        $permissions = $this->getAllPermissions();
         foreach ($permissions as $perm) {
             Permission::firstOrCreate(['name' => $perm]);
         }
