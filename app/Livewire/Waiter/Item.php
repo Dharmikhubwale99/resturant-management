@@ -77,6 +77,8 @@ class Item extends Component
     public ?int $modsVariantId = null;
     public string $modsVariantName = '';
     public array $modsAddons = [];
+    public bool $showAllItems = false;
+
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -160,24 +162,33 @@ class Item extends Component
     }
 
     public function getFilteredItems()
-    {
-        $collection = $this->selectedCategory ? $this->items->where('category_id', $this->selectedCategory) : $this->items;
+{
+    // Category filter apply rakhiye (checked hoy ke search hoy to)
+    $collection = $this->selectedCategory
+        ? $this->items->where('category_id', $this->selectedCategory)
+        : $this->items;
 
-        if ($this->search !== '') {
-            $searchLower = str($this->search)->lower();
-            $collection = $collection->filter(function ($i) use ($searchLower) {
-                return str($i->name)->lower()->contains($searchLower) ||
-                    str($i->code ?? '')
-                        ->lower()
-                        ->contains($searchLower) ||
-                    str($i->short_name ?? '')
-                        ->lower()
-                        ->contains($searchLower);
-            });
-        }
+    $searching = trim((string)$this->search) !== '';
 
-        return $collection;
+    // 🔒 Default: Show Items unchecked & search khali → koi item nathi
+    if ($this->showAllItems === false && $searching === false) {
+        return collect(); // empty list
     }
+
+    // 🔍 Search hoy to filter karo (Show Items ni jaroor nathi)
+    if ($searching) {
+        $q = str($this->search)->lower();
+
+        $collection = $collection->filter(function ($i) use ($q) {
+            return str($i->name)->lower()->contains($q)
+                || str($i->code ?? '')->lower()->contains($q)
+                || str($i->short_name ?? '')->lower()->contains($q);
+        });
+    }
+
+    return $collection->values();
+}
+
 
     public function selectCategory($categoryId)
     {

@@ -1,6 +1,6 @@
 <div class="font-sans bg-gray-100 min-h-screen">
     <!-- Header - Responsive -->
-    <header class="bg-white shadow-sm border-b">
+    {{-- <header class="bg-white shadow-sm border-b">
         <div class="flex flex-col md:flex-row items-center justify-between px-2 md:px-4 py-2 md:py-3">
             <!-- Top Row (Mobile) -->
             <div class="flex items-center justify-between w-full md:w-auto mb-2 md:mb-0">
@@ -47,7 +47,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header> --}}
 
     <div class="flex flex-col md:flex-row h-full">
         <!-- Sidebar - Responsive -->
@@ -61,14 +61,14 @@
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
-            
+
                 <!-- DESKTOP: all categories (never toggled) -->
                 <nav class="category-nav hidden md:block mb-4">
                     <button wire:click="clearCategory"
                         class="block w-full text-left px-4 py-3 text-base {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                         <i class="fas fa-list mr-2"></i> All Items
                     </button>
-            
+
                     @foreach ($categories as $category)
                         <button wire:click="selectCategory({{ $category->id }})"
                             class="block w-full text-left px-4 py-3 flex items-center gap-2 text-base {{ $selectedCategory === $category->id ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
@@ -76,15 +76,15 @@
                         </button>
                     @endforeach
                 </nav>
-            
+
                 <nav class="md:hidden mb-4">
                     <button wire:click="clearCategory"
                         class="block w-full text-left px-3 py-2 text-sm {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                         <i class="fas fa-list mr-2"></i> All Items
                     </button>
-            
-                 
-            
+
+
+
                     <!-- Extra categories (toggled by both the header + button and the Show More button) -->
                     <div id="mobileCats" class="mobile-categories hidden">
                         @foreach ($categories as $category)
@@ -94,7 +94,7 @@
                             </button>
                         @endforeach
                     </div>
-            
+
                     <!-- Show More/Less toggle for mobile -->
                     <!--<button-->
                     <!--    class="w-full text-left px-3 py-2 text-gray-300 hover:text-white flex items-center gap-2 text-sm"-->
@@ -113,12 +113,22 @@
             <!-- Menu Items - Responsive -->
             <div class="flex-1 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
-                    <div class="flex flex-wrap gap-2">
-                        <input type="text" wire:model.live="search"
-                            placeholder="Search by product, code, or short name..."
-                            class="border px-3 py-2 rounded w-50" />
+                    <div class="flex flex-wrap items-center gap-3">
+                      <input
+                        type="text"
+                        wire:model.live="search"
+                        placeholder="Search by product, code, or short name..."
+                        class="border px-3 py-2 rounded w-50"
+                        wire:keydown.enter="addTopSearchResult"
+                      />
+
+                      <!-- ✅ NEW: Show Items checkbox -->
+                      <label class="inline-flex items-center gap-2 select-none">
+                        <input type="checkbox" wire:model.live="showAllItems" class="rounded">
+                        <span class="text-sm text-gray-700">Show Items</span>
+                      </label>
                     </div>
-                </div>
+                  </div>
 
                 <x-form.error />
 
@@ -193,9 +203,14 @@
 
                         </div>
                     @empty
-                        <p class="flex items-center col-span-full text-gray-500 text-center py-4">
-                            No items found in this category.
-                        </p>
+                    <p class="flex items-center col-span-full text-gray-500 text-center py-4">
+                        <!-- NEW: smarter empty message -->
+                        @if(!$showAllItems && trim($search) === '')
+                          Tick “Show Items” to browse all items, or start typing in Search.
+                        @else
+                          No items found.
+                        @endif
+                      </p>
                     @endforelse
                 </div>
             </div>
