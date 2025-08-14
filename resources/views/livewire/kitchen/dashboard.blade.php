@@ -5,12 +5,13 @@
             <div class="flex flex-col md:flex-row md:justify-between mb-6 gap-4">
                 <h1 class="text-2xl font-bold">Kitchen Dashboard</h1>
                 @if ($isAdmin)
-                <select wire:model.live="dateFilter" class="border rounded px-3 py-1 text-sm w-32 self-start md:self-auto">
-                    <option value="today">Today</option>
-                    <option value="all">All</option>
-                </select>
+                    <select wire:model.live="dateFilter"
+                        class="border rounded px-3 py-1 text-sm w-32 self-start md:self-auto">
+                        <option value="today">Today</option>
+                        <option value="all">All</option>
+                    </select>
                 @else
-                <span class="text-sm font-medium text-gray-600">Showing: Today</span>
+                    <span class="text-sm font-medium text-gray-600">Showing: Today</span>
                 @endif
             </div>
 
@@ -47,7 +48,8 @@
                 @forelse ($kotList as $kot)
                     <div class="border-l-4 border-{{ $borderColor }} bg-white p-4 rounded shadow mb-4">
                         <p class="font-semibold">
-                            {{ $kot->table->area->name ?? 'Area' }} – Table {{ $kot->table->name ?? $kot->table->id ?? 'Table' }}
+                            {{ $kot->table->area->name ?? 'Area' }} – Table
+                            {{ $kot->table->name ?? ($kot->table->id ?? 'Table') }}
                         </p>
                         <p class="text-sm text-gray-600">
                             KOT #{{ $kot->kot_number }}
@@ -76,27 +78,31 @@
                                         @endif
 
                                     </div>
-                                     <div class="flex gap-1">
-                                    @if ($item->status === 'pending')
-                                        <button wire:click="updateKotItemStatus({{ $item->id }})"
-                                            class="px-2 py-0.5 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
-                                            Preparing
-                                        </button>
-                                        <button wire:click="showCancelItemModal({{ $item->id }})"
-                                            class="px-2 py-0.5 bg-red-500 text-white rounded text-xs hover:bg-red-600">
-                                            Cancel
-                                        </button>
-                                    @elseif ($item->status === 'preparing')
-                                        <button wire:click="updateKotItemStatus({{ $item->id }})"
-                                            class="px-2 py-0.5 bg-green-500 text-white rounded text-xs hover:bg-green-600">
-                                            Ready
-                                        </button>
-                                        <button wire:click="showCancelItemModal({{ $item->id }})"
-                                            class="px-2 py-0.5 bg-red-500 text-white rounded text-xs hover:bg-red-600">
-                                            Cancel
-                                        </button>
-                                    @endif
-                                </div>
+                                    <div class="flex gap-1">
+                                        @if ($item->status === 'pending')
+                                            <button wire:click="updateKotItemStatus({{ $item->id }})"
+                                                class="px-2 py-0.5 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
+                                                Preparing
+                                            </button>
+                                            <button wire:click="showCancelItemModal({{ $item->id }})"
+                                                class="px-2 py-0.5 bg-red-500 text-white rounded text-xs hover:bg-red-600">
+                                                Cancel
+                                            </button>
+                                            <button wire:click="updateKotandPrint({{ $item->id }})"
+                                                class="px-2 py-0.5 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
+                                                Preparing & Print
+                                            </button>
+                                        @elseif ($item->status === 'preparing')
+                                            <button wire:click="updateKotItemStatus({{ $item->id }})"
+                                                class="px-2 py-0.5 bg-green-500 text-white rounded text-xs hover:bg-green-600">
+                                                Ready
+                                            </button>
+                                            <button wire:click="showCancelItemModal({{ $item->id }})"
+                                                class="px-2 py-0.5 bg-red-500 text-white rounded text-xs hover:bg-red-600">
+                                                Cancel
+                                            </button>
+                                        @endif
+                                    </div>
                                 </li>
                             @endforeach
                         </ul>
@@ -133,23 +139,40 @@
             </div>
         </div>
 
-          @if($showCancelModal)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full">
-                <h3 class="text-lg font-semibold mb-4">Cancel Item</h3>
-                <p class="mb-2">Please provide a reason for cancellation:</p>
-                <textarea wire:model="cancelReason" class="w-full border rounded p-2 mb-4" rows="3" placeholder="Reason for cancellation..."></textarea>
-                @error('cancelReason') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+        @if ($showCancelModal)
+            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                    <h3 class="text-lg font-semibold mb-4">Cancel Item</h3>
+                    <p class="mb-2">Please provide a reason for cancellation:</p>
+                    <textarea wire:model="cancelReason" class="w-full border rounded p-2 mb-4" rows="3"
+                        placeholder="Reason for cancellation..."></textarea>
+                    @error('cancelReason')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
 
-                <div class="flex justify-end gap-2">
-                    <button wire:click="$set('showCancelModal', false)" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
-                        Cancel
-                    </button>
-                    <button wire:click="cancelKotItem" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-                        Confirm Cancellation
-                    </button>
+                    <div class="flex justify-end gap-2">
+                        <button wire:click="$set('showCancelModal', false)"
+                            class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                            Cancel
+                        </button>
+                        <button wire:click="cancelKotItem"
+                            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                            Confirm Cancellation
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    @endif
+        @endif
     </div>
+    @push('scripts')
+        <script data-navigate-once>
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('printKot', (payload) => {
+                    const url = payload?.url ??
+                        `/restaurant/kitchen/kot/${payload.kotId}/item/${payload.itemId}/print`;
+
+                    window.open(url, '_blank', 'width=380,height=600,noopener,noreferrer');
+                });
+            });
+        </script>
+    @endpush

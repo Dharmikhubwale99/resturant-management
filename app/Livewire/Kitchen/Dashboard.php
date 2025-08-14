@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Kitchen;
 
-use App\Models\{Kot, Order};
+use App\Models\{Kot, Order, KOTItem};
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -14,7 +14,7 @@ class Dashboard extends Component
     public $itemToCancel = null;
     public $cancelReason = '';
     public $dateFilter = 'today';
-    
+
     #[Layout('components.layouts.kitchen.app')]
     public function render()
     {
@@ -58,7 +58,7 @@ class Dashboard extends Component
         $itemStatuses = $kot->items->pluck('status')->unique()->toArray();
 
         if ($kot->status === 'pending' && in_array('preparing', $itemStatuses)) {
-            
+
             foreach ($kot->items as $item) {
                 if ($item->status === 'preparing') {
                     $item->status = 'ready';
@@ -71,7 +71,7 @@ class Dashboard extends Component
         }
 
         if ($kot->status === 'preparing' && in_array('pending', $itemStatuses)) {
-            return; 
+            return;
         }
 
         $nextStatus = match ($kot->status) {
@@ -140,10 +140,10 @@ class Dashboard extends Component
             $item->status = 'cancelled';
             $item->reason = $this->cancelReason;
             $item->save();
-            
+
             // Check if all items in the KOT are now ready or cancelled
             $this->checkKotStatus($item->kot_id);
-            
+
             $this->dispatch('kotItemStatusUpdated');
         }
 
@@ -170,5 +170,30 @@ class Dashboard extends Component
             $kot->save();
             $this->dispatch('kotStatusUpdated');
         }
+    }
+
+    public function updateKotandPrint($itemId)
+    {
+        $item = KOTItem::with('kot')->find($itemId);
+        if (!$item) {
+            return;
         }
+        $nextStatus = match ($item->status) {
+            'pending' => 'preparing',
+            'preparing' => 'ready',
+            default => null,
+        };
+        if ($nextStatus) {
+            $item->status = $nextStatus;
+            $item->save();
+            $this->dispatch('kotItemStatusUpdated');
+        }
+        $url = route('restaurant.kitchen.kot.item.print', [
+            'kot'  => $item->kot_id,
+            'item' => $item->id,
+        ]);
+
+        $this->dispatch('printKot', url: $url, kotId: $item->kot_id, itemId: $item->id);
+
+    }
 }
