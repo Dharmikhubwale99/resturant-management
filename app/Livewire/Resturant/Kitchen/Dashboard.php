@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Resturant\Kitchen;
 
-use App\Models\{Kot, Order};
+use App\Models\{Kot, Order, KOTItem};
 use App\Models\Restaurant;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
@@ -178,4 +178,30 @@ class Dashboard extends Component
             $this->dispatch('kotStatusUpdated');
         }
     }
+
+    public function updateKotandPrint($itemId)
+    {
+        $item = KOTItem::with('kot')->find($itemId);
+        if (!$item) return;
+
+        $nextStatus = match ($item->status) {
+            'pending' => 'preparing',
+            'preparing' => 'ready',
+            default => null,
+        };
+
+        if ($nextStatus) {
+            $item->status = $nextStatus;
+            $item->save();
+            $this->dispatch('kotItemStatusUpdated');
+        }
+
+        $url = route('restaurant.kitchen.kot.item.print', [
+            'kot'  => $item->kot_id,
+            'item' => $item->id,
+        ]);
+
+        $this->dispatch('printKot', url: $url, kotId: $item->kot_id, itemId: $item->id);
+    }
+
 }

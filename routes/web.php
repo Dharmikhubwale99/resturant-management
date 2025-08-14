@@ -94,6 +94,7 @@ use \App\Livewire\Resturant\{
 
 use \App\Livewire\Kitchen\{
     Dashboard as KitchenDashboard,
+    PrintKotItem,
 };
 
 use App\Livewire\Waiter\{
@@ -217,6 +218,8 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
 
     Route::prefix('kitchen')->as('kitchen.')->group(function () {
         Route::get('/index', AdminKitchenDashboard::class)->name('index')->middleware('can:kitchen-dashboard');
+        Route::get('/kot/{kot}/item/{item}/print', PrintKotItem::class)->name('kot.item.print');
+
     });
 
 
