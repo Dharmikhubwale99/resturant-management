@@ -11,9 +11,7 @@
         <div class="mb-4">
             <strong>Images:</strong>
             <div class="flex gap-2 mt-2">
-                @foreach ($item->getMedia('images') as $media)
-                    <img src="{{ $media->getUrl() }}" alt="Image" class="w-20 h-20 object-cover rounded" />
-                @endforeach
+                    <img src="{{ $item->image_url }}" alt="Image" class="w-20 h-20 object-cover rounded" />
             </div>
         </div>
 

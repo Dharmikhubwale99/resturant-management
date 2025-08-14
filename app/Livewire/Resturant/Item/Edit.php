@@ -2,15 +2,13 @@
 
 namespace App\Livewire\Resturant\Item;
 
-use App\Models\{Item, TaxSetting};
+use App\Models\{Item, TaxSetting, Variant, Addon};
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Enums\ItemType;
 use Livewire\Attributes\Layout;
 use Illuminate\Validation\ValidationException;
-use App\Models\Variant;
 use Illuminate\Support\Str;
-use App\Models\Addon;
 
 
 class Edit extends Component
@@ -26,7 +24,6 @@ class Edit extends Component
     public $code;
     public $description;
     public $price;
-    public $images = [];
     public $categories;
     public $itemTypes;
     public $restaurant;
@@ -35,6 +32,7 @@ class Edit extends Component
     public $tax_id;
     public $is_tax_inclusive;
     public $taxOptions = [];
+    public $picked_image_url = null;
 
 
      public function render()
@@ -47,7 +45,7 @@ class Edit extends Component
             abort(403, 'You do not have access to this module.');
         }
 
-        $this->item = Item::with('media')->findOrFail($id);
+        $this->item = Item::with(['media','variants','addons'])->findOrFail($id);
 
         $this->category_id = $this->item->category_id;
         $this->item_type = $this->item->item_type;
@@ -58,7 +56,7 @@ class Edit extends Component
         $this->price = $this->item->price;
         $this->tax_id = $this->item->tax_id;
         $this->is_tax_inclusive = $this->item->is_tax_inclusive;
-
+        $this->picked_image_url  = $this->item->image_url;
 
         $restaurant = auth()->user()->restaurants()->first();
         $this->restaurant = $restaurant;
@@ -101,12 +99,6 @@ class Edit extends Component
         }
         unset($this->variants[$index]);
         $this->variants = array_values($this->variants); // reindex
-    }
-
-    public function removeImage($mediaId)
-    {
-        $this->item->deleteMedia($mediaId);
-        $this->item->refresh();
     }
 
     public function getRestaurantFolder(): string
@@ -156,6 +148,7 @@ class Edit extends Component
             'price' => $this->price,
             'tax_id' => $this->tax_id,
             'is_tax_inclusive' => $this->is_tax_inclusive,
+            'image_url'         => $this->picked_image_url,
         ]);
 
         foreach ($this->variants as $variant) {
@@ -194,22 +187,6 @@ class Edit extends Component
             }
         }
 
-        if (is_array($this->images)) {
-            foreach ($this->images as $image) {
-                $folder = 'images/' . $this->getRestaurantFolder();
-
-                $originalName = $image->getClientOriginalName();
-                $fileName = uniqid() . '-' . $originalName;
-
-                $storedPath = $image->storeAs($folder, $fileName, 'public');
-
-                $this->item->addMedia(storage_path("app/public/{$storedPath}"))
-                    ->preservingOriginal()
-                    ->usingName(pathinfo($fileName, PATHINFO_FILENAME))
-                    ->usingFileName($fileName)
-                    ->toMediaCollection('images');
-            }
-        }
         return redirect()->route('restaurant.items.index')->with('success', 'Item updated successfully.');
     }
 

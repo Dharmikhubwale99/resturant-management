@@ -30,6 +30,8 @@ class Create extends Component
     public $is_tax_inclusive = null;
     public $taxOptions = [];
     public $calculated_price = 0;
+    public $picked_images = [];
+    public $picked_image_url = null;
 
     #[Layout('components.layouts.resturant.app')]
 
@@ -96,6 +98,22 @@ class Create extends Component
         }
     }
 
+    protected function pathFromUrl(string $url): ?string
+    {
+
+        $path = parse_url($url, PHP_URL_PATH) ?? $url;
+
+
+        $prefix = '/storage/';
+        if (Str::startsWith($path, $prefix)) {
+            $relative = Str::after($path, $prefix);
+            return storage_path('app/public/' . $relative);
+        }
+
+
+        return public_path(ltrim($path, '/'));
+    }
+
     public function submit()
     {
         if (setting('category_module')) {
@@ -141,22 +159,8 @@ class Create extends Component
             'price'         => $this->price,
             'tax_id'            => $this->tax_id,
             'is_tax_inclusive'  => $this->is_tax_inclusive,
+            'image_url'        => $this->picked_image_url,
         ]);
-
-        foreach ($this->images as $image) {
-            $folder = 'images/' . $this->getRestaurantFolder();
-
-            $originalName = $image->getClientOriginalName();
-            $fileName = uniqid() . '-' . $originalName;
-
-            $storedPath = $image->storeAs($folder, $fileName, 'public');
-
-            $item->addMedia(storage_path("app/public/{$storedPath}"))
-                 ->preservingOriginal()
-                 ->usingName(pathinfo($fileName, PATHINFO_FILENAME))
-                 ->usingFileName($fileName)
-                 ->toMediaCollection('images');
-        }
 
         foreach ($this->variants as $variant) {
             if (!empty($variant['name']) && !empty($variant['price'])) {
