@@ -57,45 +57,54 @@
                     <div class="text-sm text-gray-400">Categories</div>
                     <!-- Mobile expand button (hidden on desktop) -->
                     <button class="md:hidden text-gray-300 hover:text-white focus:outline-none"
-                        onclick="document.querySelector('.category-nav').classList.toggle('hidden')">
+                        onclick="document.getElementById('mobileCats').classList.toggle('hidden')">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
-
-                <!-- Navigation with expandable categories -->
+            
+                <!-- DESKTOP: all categories (never toggled) -->
                 <nav class="category-nav hidden md:block mb-4">
                     <button wire:click="clearCategory"
-                        class="block w-full text-left px-3 py-2 md:px-4 md:py-3 text-sm md:text-base {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
-                        <i class="fas fa-list mr-2"></i>All Items
+                        class="block w-full text-left px-4 py-3 text-base {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                        <i class="fas fa-list mr-2"></i> All Items
                     </button>
-
-                    <!-- Visible categories (first 5 on mobile) -->
-                    @foreach ($categories->take(5) as $category)
+            
+                    @foreach ($categories as $category)
                         <button wire:click="selectCategory({{ $category->id }})"
-                            class="block w-full text-left px-3 py-2 md:px-4 md:py-3 flex items-center gap-2 text-sm md:text-base {{ $selectedCategory === $category->id ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                            class="block w-full text-left px-4 py-3 flex items-center gap-2 text-base {{ $selectedCategory === $category->id ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                             <span>{{ $category->name }}</span>
                         </button>
                     @endforeach
-
-                    <!-- Hidden categories (shown when expanded on mobile) -->
-                    <div class="mobile-categories hidden md:hidden">
-                        @foreach ($categories->slice(5) as $category)
+                </nav>
+            
+                <nav class="md:hidden mb-4">
+                    <button wire:click="clearCategory"
+                        class="block w-full text-left px-3 py-2 text-sm {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                        <i class="fas fa-list mr-2"></i> All Items
+                    </button>
+            
+                 
+            
+                    <!-- Extra categories (toggled by both the header + button and the Show More button) -->
+                    <div id="mobileCats" class="mobile-categories hidden">
+                        @foreach ($categories as $category)
                             <button wire:click="selectCategory({{ $category->id }})"
-                                class="block w-full text-left px-3 py-2 md:px-4 md:py-3 flex items-center gap-2 text-sm md:text-base {{ $selectedCategory === $category->id ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                                class="block w-full text-left px-3 py-2 flex items-center gap-2 text-sm {{ $selectedCategory === $category->id ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                                 <span>{{ $category->name }}</span>
                             </button>
                         @endforeach
                     </div>
-
+            
                     <!-- Show More/Less toggle for mobile -->
-                    <button
-                        class="md:hidden w-full text-left px-3 py-2 text-gray-300 hover:text-white flex items-center gap-2 text-sm"
-                        onclick="document.querySelector('.mobile-categories').classList.toggle('hidden'); this.querySelector('span').textContent = this.querySelector('span').textContent === 'Show More +' ? 'Show Less -' : 'Show More +'">
-                        <i class="fas fa-chevron-down"></i>
-                        <span>Show More +</span>
-                    </button>
+                    <!--<button-->
+                    <!--    class="w-full text-left px-3 py-2 text-gray-300 hover:text-white flex items-center gap-2 text-sm"-->
+                    <!--    onclick="const m=document.getElementById('mobileCats'); m.classList.toggle('hidden'); this.querySelector('span').textContent = m.classList.contains('hidden') ? 'Show More +' : 'Show Less -'">-->
+                    <!--    <i class="fas fa-chevron-down"></i>-->
+                    <!--    <span>Show More +</span>-->
+                    <!--</button>-->
                 </nav>
             </div>
+
         @endif
 
 
