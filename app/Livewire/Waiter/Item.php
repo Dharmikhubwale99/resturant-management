@@ -98,6 +98,7 @@ class Item extends Component
             ->with(['variants', 'discounts'])
             ->get();
         $this->categories = $this->items->pluck('category')->where('is_active', 0)->unique('id')->values();
+        // dd($this->categories);
         $this->orderTypes = collect(OrderType::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
         $this->paymentMethods = collect(PaymentMethod::cases())->mapWithKeys(fn($case) => [$case->value => $case->label()])->toArray();
         $this->splits = [['method' => '', 'amount' => 0]];
