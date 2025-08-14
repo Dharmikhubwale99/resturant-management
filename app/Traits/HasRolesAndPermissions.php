@@ -75,6 +75,8 @@ trait HasRolesAndPermissions
             'moneyout-create',
 
             'report-index',
+
+            'file-manager'
         ];
     }
 

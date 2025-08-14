@@ -4,71 +4,87 @@
     start: 0,
     visible: 5,
     menuLinks: [
-        @if (setting('moneyIn'))
-            @can('moneyin-index')
-                { text: 'Money In', href: '{{ route('restaurant.money-maintain') }}' },
-            @endcan
-        @endif
-        @if (setting('moneyOut'))
-            @can('moneyout-index')
-                { text: 'Money Out', href: '{{ route('restaurant.money-out') }}' },
-            @endcan
-        @endif
-        @if (setting('party'))
-            @can('party-index')
-                { text: 'Party', href: '{{ route('restaurant.party') }}' },
-            @endcan
-        @endif
-        @if (setting('user'))
-            @can('user-index')
-                { text: 'User', href: '{{ route('restaurant.users.index') }}' },
-            @endcan
-        @endif
-        @if (setting('category_module'))
-            @can('category-index')
-                { text: 'Category', href: '{{ route('restaurant.categories.index') }}' },
-            @endcan
-        @endif
-        @if (setting('item'))
-            @can('item-index')
-                { text: 'Item', href: '{{ route('restaurant.items.index') }}' },
-            @endcan
-        @endif
-        @if (setting('area_module'))
-            @can('area-index')
-                { text: 'Area', href: '{{ route('restaurant.areas.index') }}' },
-            @endcan
-        @endif
-        @if (setting('table'))
-            @can('table-index')
-                { text: 'Table', href: '{{ route('restaurant.tables.index') }}' },
-            @endcan
-        @endif
-        @if (setting('expensetype'))
-            @can('expensetype-index')
-                { text: 'Expense-Type', href: '{{ route('restaurant.expense-types.index') }}' },
-            @endcan
-        @endif
-        @if (setting('expenses'))
-            @can('expenses-index')
-                { text: 'Expenses', href: '{{ route('restaurant.expenses.index') }}' },
-            @endcan
-        @endif
-        @if (setting('discount'))
-            @can('discount-index')
-                { text: 'Discount', href: '{{ route('restaurant.discount.index') }}' },
-            @endcan
-        @endif
-        @if (setting('kitchen'))
-            @can('kitchen-dashboard')
-                { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
-            @endcan
-        @endif
         @if ('order')
             @can('order')
                 { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
             @endcan
         @endif
+
+        @if (setting('kitchen'))
+            @can('kitchen-dashboard')
+                { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
+            @endcan
+        @endif
+
+        @if (setting('user'))
+            @can('user-index')
+                { text: 'User', href: '{{ route('restaurant.users.index') }}' },
+            @endcan
+        @endif
+
+        @if (setting('party'))
+            @can('party-index')
+                { text: 'Party', href: '{{ route('restaurant.party') }}' },
+            @endcan
+        @endif
+
+        @if (setting('moneyOut'))
+            @can('moneyout-index')
+                { text: 'Money Out', href: '{{ route('restaurant.money-out') }}' },
+            @endcan
+        @endif
+
+        @if (setting('moneyIn'))
+            @can('moneyin-index')
+                { text: 'Money In', href: '{{ route('restaurant.money-maintain') }}' },
+            @endcan
+        @endif
+
+        @if (setting('expenses'))
+            @can('expenses-index')
+                { text: 'Expenses', href: '{{ route('restaurant.expenses.index') }}' },
+            @endcan
+        @endif
+
+        @if (setting('item'))
+            @can('item-index')
+                { text: 'Item', href: '{{ route('restaurant.items.index') }}' },
+            @endcan
+        @endif
+
+        @if (setting('discount'))
+            @can('discount-index')
+                { text: 'Discount', href: '{{ route('restaurant.discount.index') }}' },
+            @endcan
+        @endif
+
+        @if (setting('table'))
+            @can('table-index')
+                { text: 'Table', href: '{{ route('restaurant.tables.index') }}' },
+            @endcan
+        @endif
+
+        @if (setting('category_module'))
+            @can('category-index')
+                { text: 'Category', href: '{{ route('restaurant.categories.index') }}' },
+            @endcan
+        @endif
+
+        @if (setting('area_module'))
+            @can('area-index')
+                { text: 'Area', href: '{{ route('restaurant.areas.index') }}' },
+            @endcan
+        @endif
+
+        @if (setting('expensetype'))
+            @can('expensetype-index')
+                { text: 'Expense-Type', href: '{{ route('restaurant.expense-types.index') }}' },
+            @endcan
+        @endif
+
+        { text: 'File Manager', href: '{{ url('restaurant/file-manager') }}?type=image', newTab: true },
+
+
         @if (setting('report'))
             @can('report-index')
                 { text: 'Report', href: '{{ route('restaurant.report') }}' },

@@ -61,7 +61,7 @@
 
             <div class="mt-3">
                 <button type="button" class="px-3 py-2 bg-gray-200 rounded"
-                    x-on:click="window.open('/laravel-filemanager?type=image','fm','width=1200,height=600')">
+                    x-on:click="window.open('{{ url(config('lfm.url_prefix')) }}?type=image','fm','width=1200,height=600')">
                     Choose from File Manager
                 </button>
             </div>

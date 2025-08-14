@@ -14,6 +14,7 @@ return [
     | Routing
     |--------------------------------------------------------------------------
      */
+    'url_prefix' => 'restaurant/file-manager',
 
     'use_package_routes'       => true,
 

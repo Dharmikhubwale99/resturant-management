@@ -114,12 +114,12 @@ use App\Http\Controllers\PaymentController;
 use UniSharp\LaravelFilemanager\Lfm;
 
 
-Route::group([
-    'prefix' => 'laravel-filemanager',
-    'middleware' => ['web','auth','enforce.restaurant.storage'],
-], function () {
-    Lfm::routes();
-});
+// Route::group([
+//     'prefix' => 'laravel-filemanager',
+//     'middleware' => ['web','auth','enforce.restaurant.storage'],
+// ], function () {
+//     Lfm::routes();
+// })->middleware('can:file-manager');
 
 Route::get('superadmin/login', Login::class)->name('superadmin.login');
 Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');
@@ -161,6 +161,15 @@ Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFr
 Route::get('/plan-purchase', ResturantPlanPurchase::class)->name('plan.purchase');
 
 Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role:admin|waiter|kitchen', 'check.restaurant.plan'])->group(function () {
+
+    Route::group([
+        'prefix' => 'file-manager',
+        'as' => 'filemanager.',
+        'middleware' => ['web','auth','enforce.restaurant.storage','can:file-manager'],
+    ], function () {
+        \UniSharp\LaravelFilemanager\Lfm::routes();
+    });
+
     Route::get('/resto-register', RestoRegister::class)->name('resto-register');
     Route::get('/', ResturantDashboard::class)->name('dashboard');
     Route::get('/edit-profile', EditProfile::class)->name('edit-profile');
