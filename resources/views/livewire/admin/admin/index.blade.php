@@ -23,6 +23,7 @@
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Resturant Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Resturant no</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
@@ -40,6 +41,7 @@
                         </td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->mobile }}</td>
+                        <td class="px-6 text-sm text-gray-900">{{ $user->email }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->restaurant?->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->restaurant?->mobile }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->role }}</td>

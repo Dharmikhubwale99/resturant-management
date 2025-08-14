@@ -110,6 +110,15 @@ use App\Livewire\Waiter\{
     AdvancBook\Create as AdvancBookCreate
 };
 use App\Http\Controllers\PaymentController;
+use UniSharp\LaravelFilemanager\Lfm;
+
+
+Route::group([
+    'prefix' => 'laravel-filemanager',
+    'middleware' => ['web','auth','enforce.restaurant.storage'],
+], function () {
+    Lfm::routes();
+});
 
 Route::get('superadmin/login', Login::class)->name('superadmin.login');
 Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');

@@ -46,37 +46,25 @@
             <x-form.input name="description" label="Description" type="textarea" wireModel="description"
                 placeholder="Enter description" />
 
-            <x-form.input label="Images" name="images" type="file" wireModel="images" multiple />
-            <div wire:loading wire:target="images" class="flex gap-2 mt-2">
-                <div class="flex items-center justify-center w-20 h-20 bg-white bg-opacity-60 rounded">
-                    <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                            stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                    </svg>
-                </div>
-            </div>
-            @if ($images)
-                <div class="flex gap-2 mt-2">
-                    @foreach ($images as $image)
-                        <img src="{{ $image->temporaryUrl() }}" alt="Preview" class="w-20 h-20 object-cover rounded" />
-                    @endforeach
-                </div>
-            @endif
-            @php
-                $existingImages = $item->getMedia('images');
-            @endphp
+            <div class="mt-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Main Image (from File Manager)
+                </label>
 
-            @foreach ($existingImages as $media)
-                <div class="flex items-center gap-4 mb-4">
-                    <img src="{{ $media->getUrl() }}" class="w-20 h-20 object-cover rounded">
-                    <button wire:click.prevent="removeImage({{ $media->id }})"
-                        class="bg-red-600 text-white px-4 py-1 rounded-full text-xs hover:bg-red-700">
-                        Delete
+                <div class="flex items-center gap-3">
+                    <button type="button" class="px-3 py-2 bg-gray-200 rounded"
+                        x-on:click="window.open('/laravel-filemanager?type=image&multiple=0','fm','width=1200,height=600')">
+                        Choose from File Manager
                     </button>
                 </div>
-            @endforeach
+
+                    @if ($picked_image_url)
+                        <img src="{{ $picked_image_url }}" class="h-12 w-12 mt-3 object-cover rounded">
+                        <button type="button" class="text-red-600" x-on:click="$wire.set('picked_image_url', null)">
+                            Remove
+                        </button>
+                    @endif
+            </div>
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Variants</label>
@@ -118,3 +106,11 @@
         </form>
     </div>
 </div>
+@push('scripts')
+    <script>
+        window.SetUrl = function(items) {
+            const url = items && items.length ? items[0].url : null; // single-select
+            window.Livewire.find(@this.__instance.id).set('picked_image_url', url);
+        }
+    </script>
+@endpush

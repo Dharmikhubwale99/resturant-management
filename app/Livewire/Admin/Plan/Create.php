@@ -19,7 +19,7 @@ class Create extends Component
     public $featureAccess = [];
     public $availableFeatures = [];
     public $selectAllFeatures = false;
-
+    public $storage_quota_mb, $max_file_size_kb;
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -50,6 +50,8 @@ class Create extends Component
             'duration_days' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
             'type' => 'nullable',
+            'storage_quota_mb' => 'nullable|integer|min:0',
+            'max_file_size_kb' => 'nullable|integer|min:0',
         ];
 
         if ($this->type === 'percentage') {
@@ -68,6 +70,8 @@ class Create extends Component
             'type' => $this->type,
             'value' => $this->value,
             'amount' => $this->amount,
+            'storage_quota_mb' => $this->storage_quota_mb,
+            'max_file_size_kb' => $this->max_file_size_kb,
         ]);
 
         foreach ($this->images as $image) {

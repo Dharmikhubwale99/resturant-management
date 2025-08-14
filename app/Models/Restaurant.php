@@ -34,7 +34,10 @@ class Restaurant extends Model
         'account_type',
         'upi_id',
         'account_number',
-        'is_active'
+        'is_active',
+        'storage_quota_mb',
+        'max_file_size_kb',
+        'storage_used_kb',
     ];
 
     /**

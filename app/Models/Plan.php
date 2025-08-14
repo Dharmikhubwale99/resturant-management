@@ -27,6 +27,8 @@ class Plan extends Model implements HasMedia
         'type',
         'value',
         'amount',
+        'storage_quota_mb',
+        'max_file_size_kb'
     ];
 
     /**

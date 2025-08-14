@@ -60,7 +60,7 @@
                                 $imgUrl = $item->getFirstMediaUrl('images') ?: asset('icon/hubwalelogopng.png');
                             @endphp
                             <td class="px-6 text-sm text-gray-900">
-                                <img src="{{ $imgUrl }}" alt="Item Image" class="w-12 h-8 object-cover rounded">
+                                <img src="{{ $item->image_url }}" alt="Item Image" class="w-12 h-8 object-cover rounded">
                             </td>
                             @if (setting('category_module'))
                                 <td class="px-6 text-sm text-gray-900">{{ $item->category->name ?? '' }}</td>

@@ -31,6 +31,7 @@ class Item extends Model implements HasMedia
         'is_active',
         'tax_id',
         'is_tax_inclusive',
+        'image_url',
     ];
 
     /**
