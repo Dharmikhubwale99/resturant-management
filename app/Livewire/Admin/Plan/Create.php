@@ -11,7 +11,6 @@ class Create extends Component
 {
     use WithFileUploads;
     public $name, $price, $duration_days, $description;
-    public $images = [];
     public $plan;
     public $type;
     public $value;
@@ -73,10 +72,6 @@ class Create extends Component
             'storage_quota_mb' => $this->storage_quota_mb,
             'max_file_size_kb' => $this->max_file_size_kb,
         ]);
-
-        foreach ($this->images as $image) {
-            $this->plan->addMedia($image)->toMediaCollection('planImages');
-        }
 
         foreach ($this->featureAccess as $featureKey) {
             $this->plan->planFeatures()->create([

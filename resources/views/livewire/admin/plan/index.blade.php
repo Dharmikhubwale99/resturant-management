@@ -20,7 +20,6 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Image</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
@@ -34,12 +33,6 @@
                 @foreach ($plans as $plan)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 text-sm text-gray-900">{{ $loop->iteration }}</td>
-                         @php
-                                $imgUrl = $plan->getFirstMediaUrl('planImages') ?: asset('icon/hubwalelogopng.png');
-                        @endphp
-                            <td class="px-6 text-sm text-gray-900">
-                                <img src="{{ $imgUrl }}" alt="Item Image" class="w-12 h-8 object-cover rounded">
-                            </td>
                         <td class="px-6 text-sm text-gray-900">{{ $plan->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $plan->price }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $plan->type }}</td>
