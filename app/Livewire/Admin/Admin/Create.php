@@ -17,7 +17,7 @@ class Create extends Component
 {
     use WithFileUploads, HasRolesAndPermissions;
     public $user_name, $email, $mobile, $password;
-    public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
+    public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name, $username;
     public $country_id, $state_id, $city_id, $district_id;
     public $restaurant_name, $restaurant_address, $gst_no, $password_confirmation;
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
@@ -154,6 +154,7 @@ class Create extends Component
             'meta_keywords' => 'nullable|string',
             'favicon' => 'nullable|file|max:1024',
             'plan_id' => 'nullable|exists:plans,id',
+            'username' =>'required', 'min:6', 'max:50', 'unique:users,username'
         ]);
 
         if ($this->plan_id) {
@@ -175,6 +176,7 @@ class Create extends Component
         $user = User::create([
             'name' => $this->user_name,
             'email' => $this->email,
+            'username' => $this->username,
             'mobile' => $this->mobile,
             'password' => Hash::make($this->password),
             'pin_code_id' => $this->pincode_id,

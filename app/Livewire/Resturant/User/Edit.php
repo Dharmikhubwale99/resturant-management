@@ -14,6 +14,7 @@ class Edit extends Component
     use HasRolesAndPermissions;
     public $name;
     public $email;
+    public $username;
     public $role;
     public $mobile;
     public $password;
@@ -47,7 +48,8 @@ class Edit extends Component
 
         $this->name = $this->user->name;
         $this->email = $this->user->email;
-        $this->role = $this->user->roles->pluck('name')->first(); // role field
+        $this->username = $this->user->username;
+        $this->role = $this->user->roles->pluck('name')->first();
         $this->mobile = $this->user->mobile;
 
         $this->permissions = $this->user->permissions->pluck('name')->toArray();
@@ -75,6 +77,7 @@ class Edit extends Component
         $this->validate([
             'name' => 'required',
             'email' => 'required|email',
+            'username' => 'required|unique:users,username,' . $this->user->id,
             'role' => 'required',
             'mobile' => 'required|numeric|digits:10',
             'password' => ['nullable', 'min:6', 'max:20', 'confirmed'],
@@ -85,6 +88,7 @@ class Edit extends Component
             'name' => $this->name,
             'email' => $this->email,
             'mobile' => $this->mobile,
+            'username' => $this->username,
         ];
 
         if ($this->password) {
@@ -93,17 +97,18 @@ class Edit extends Component
 
         $this->user->update($data);
         $this->user->syncRoles([$this->role]);
-        if (!empty($this->permissions)) {
-            $permissionList = is_array($this->permissions)
-                ? $this->permissions
-                : explode(',', $this->permissions);
+        $permissionList = is_array($this->permissions)
+        ? $this->permissions
+        : explode(',', (string) $this->permissions);
 
-            $validPermissions = Permission::whereIn('name', $permissionList)
-                ->pluck('name')
-                ->toArray();
+        $permissionList = array_values(array_unique(array_filter(array_map('trim', $permissionList))));
 
-            $this->user->syncPermissions($validPermissions);
-        }
+        $validPermissions = Permission::whereIn('name', $permissionList)
+            ->pluck('name')
+            ->toArray();
+
+        $this->user->syncPermissions($validPermissions);
+
         return redirect()->route('restaurant.users.index');
     }
 

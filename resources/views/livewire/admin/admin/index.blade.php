@@ -21,6 +21,7 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">User Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
@@ -39,6 +40,7 @@
                         <td class="px-6 text-sm text-gray-900">
                             {{ $users->total() - (($users->currentPage() - 1) * $users->perPage() + $index) }}
                         </td>
+                        <td class="px-6 text-sm text-gray-900">{{ $user->username }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->name }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->mobile }}</td>
                         <td class="px-6 text-sm text-gray-900">{{ $user->email }}</td>

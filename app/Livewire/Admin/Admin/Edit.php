@@ -19,7 +19,7 @@ class Edit extends Component
     use WithFileUploads, HasRolesAndPermissions;
 
     public $user_id, $restaurant_id, $setting_id;
-    public $user_name, $email, $mobile, $password, $password_confirmation;
+    public $user_name, $email, $mobile, $password, $password_confirmation, $username;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
     public $restaurant_name, $restaurant_address, $gst_no;
@@ -46,6 +46,7 @@ class Edit extends Component
 
         $this->user_name = $user->name;
         $this->email = $user->email;
+        $this->username = $user->username;
         $this->mobile = $user->mobile;
 
         $this->pincode_id = $user->pin_code_id;
@@ -180,6 +181,12 @@ class Edit extends Component
                 'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
                 Rule::unique('users', 'email')->ignore($this->user_id)->whereNull('deleted_at'),
             ],
+            'username' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('users', 'username')->ignore($this->user_id)->whereNull('deleted_at'),
+            ],
             'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
             'pincode' => 'required|digits:6',
             'restaurant_name' => 'nullable|string|max:255',
@@ -200,47 +207,53 @@ class Edit extends Component
             $hashedPassword = $user->password;
         }
 
-        if ($this->plan_id) {
-            $selectedPlan = Plan::find($this->plan_id);
-            $planId = $selectedPlan->id;
-            $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
+        $existingRestaurant = $this->restaurant_id ? Restaurant::find($this->restaurant_id) : null;
+        $existingPlanId     = $existingRestaurant?->plan_id;
+        $existingExpiry     = $existingRestaurant?->plan_expiry_at;
+
+        $selectedPlan   = $this->plan_id ? Plan::find($this->plan_id) : null;
+        $planId         = $selectedPlan?->id;
+        $planChanged    = ($existingRestaurant === null) ? true : ($existingPlanId !== $planId);
+
+        if ($planId) {
+            $expiryDate = $planChanged
+                ? now()->addDays($selectedPlan->duration_days ?? 30)
+                : $existingExpiry;
         } else {
-            $selectedPlan = null;
-            $planId = null;
             $expiryDate = null;
         }
 
         $user->update([
             'name' => $this->user_name,
             'email' => $this->email,
+            'username' => $this->username,
             'mobile' => $this->mobile,
             'pin_code_id' => $this->pincode_id,
             'password' => $hashedPassword,
         ]);
 
-        if ($this->restaurant_id) {
-            Restaurant::where('id', $this->restaurant_id)->update([
-                'name' => $this->restaurant_name,
-                'address' => $this->restaurant_address,
-                'gstin' => $this->gst_no,
-                'pin_code_id' => $this->pincode_id,
-                'plan_id' => $planId,
-                'plan_expiry_at' => $expiryDate,
+        if ($existingRestaurant) {
+            $existingRestaurant->update([
+                'name'          => $this->restaurant_name,
+                'address'       => $this->restaurant_address,
+                'gstin'         => $this->gst_no,
+                'pin_code_id'   => $this->pincode_id,
+                'plan_id'       => $planId,
+                'plan_expiry_at'=> $expiryDate,
             ]);
-            $restaurant = Restaurant::find($this->restaurant_id);
+            $restaurant = $existingRestaurant;
         } else {
             $restaurant = Restaurant::create([
-                'user_id' => $user->id,
-                'name' => $this->restaurant_name,
-                'address' => $this->restaurant_address,
-                'gstin' => $this->gst_no,
-                'pin_code_id' => $this->pincode_id,
-                'plan_id' => $planId,
-                'plan_expiry_at' => $expiryDate,
+                'user_id'       => $user->id,
+                'name'          => $this->restaurant_name,
+                'address'       => $this->restaurant_address,
+                'gstin'         => $this->gst_no,
+                'pin_code_id'   => $this->pincode_id,
+                'plan_id'       => $planId,
+                'plan_expiry_at'=> $expiryDate,
             ]);
             $this->restaurant_id = $restaurant->id;
         }
-
         $faviconPath = $this->oldFavicon;
         if ($this->favicon && $this->favicon !== $this->oldFavicon) {
             if ($this->oldFavicon && Storage::disk('public')->exists($this->oldFavicon)) {
@@ -285,8 +298,8 @@ class Edit extends Component
 
     protected function syncRestaurantFeatures($restaurant, $plan)
     {
-        Log::info('Syncing restaurant features for plan: ' . $plan->name);
-        Log::info('Restaurant ID: ' . $restaurant->id);
+        // Log::info('Syncing restaurant features for plan: ' . $plan->name);
+        // Log::info('Restaurant ID: ' . $restaurant->id);
 
         $configMap = AppConfiguration::pluck('id', 'key')->toArray();
 

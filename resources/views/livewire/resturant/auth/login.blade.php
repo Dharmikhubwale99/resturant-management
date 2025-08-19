@@ -10,8 +10,8 @@
                     <x-form.error />
                 </div>
 
-                <x-form.input name="login" label="Email or Mobile" type="text"
-                    placeholder="Enter your email or mobile" required wireModel="login" autocomplete="username"
+                <x-form.input name="username" label="User name" type="text"
+                    placeholder="Enter your User name" required wireModel="username" autocomplete="username"
                     inputClass="focus:ring-[#C9894B] focus:border-[#C9894B]" />
 
                 <x-form.input name="password" label="Password" type="password" wireModel="password"

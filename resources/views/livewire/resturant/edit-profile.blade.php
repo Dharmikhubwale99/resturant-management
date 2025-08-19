@@ -6,9 +6,9 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <x-form.input name="personal_name" label="Name" wireModel="personal_name" required />
             <x-form.input name="personal_email" label="Email" type="email" wireModel="personal_email" required />
+            <x-form.input name="username" label="User Name" wireModel="username" required />
             <x-form.input name="personal_mobile" label="Mobile" wireModel="personal_mobile" required />
 
-            <x-form.input name="personal_address" label="Address" wireModel="personal_address" />
 
             <x-form.input name="password" label="Password" type="password" wireModel="password" showToggle="true" />
 
@@ -23,6 +23,7 @@
             <x-form.input name="city_name" label="City" type="text" wireModel="city_name" readonly />
             <x-form.input name="district_name" label="District" type="text" wireModel="district_name" readonly />
         </div>
+        <x-form.input name="personal_address" label="Address" type="textarea" wireModel="personal_address" />
 
         <h2 class="text-2xl font-bold mb-4 text-gray-700 border-b pb-2">Restaurant Profile</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -30,9 +31,18 @@
             <x-form.input name="restaurant_email" label="Restaurant Email" wireModel="restaurant_email" required />
             <x-form.input name="restaurant_mobile" label="Restaurant Mobile" wireModel="restaurant_mobile" required />
 
-            <x-form.input name="restaurant_address" label="Restaurant Address" wireModel="restaurant_address" />
             <x-form.input name="gst" label="GST No" wireModel="gst" />
+            <x-form.input name="resto_pincode" label="Restaurant Pincode" type="text" wireModelLive="resto_pincode" required />
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+            <x-form.input name="resto_country_name" label="Country" type="text" wireModel="resto_country_name" readonly />
+            <x-form.input name="resto_state_name" label="State" type="text" wireModel="resto_state_name" readonly />
+            <x-form.input name="resto_city_name" label="City" type="text" wireModel="resto_city_name" readonly />
+            <x-form.input name="resto_district_name" label="District" type="text" wireModel="resto_district_name" readonly />
+        </div>
+
+        <x-form.input name="restaurant_address" label="Restaurant Address" type="textarea" wireModel="restaurant_address" />
 
         <h2 class="text-2xl font-bold mb-4 text-gray-700 border-b pb-2">Bank Details</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

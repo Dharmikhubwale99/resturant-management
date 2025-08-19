@@ -48,8 +48,10 @@
             <p class="mt-1 text-sm text-gray-500">{{ $hint }}</p>
         @endif
 
-        @error($name)
-            <p class="mt-1 text-sm text-red-600 {{ $errorClass }}">{{ $message }}</p>
+        @php $errorKey = $wireModel ?: ($wireModelLive ?: $name); @endphp
+
+        @error($errorKey)
+        <p class="mt-1 text-sm text-red-600 {{ $errorClass }}">{{ $message }}</p>
         @enderror
     </div>
 @elseif($type === 'textarea')
@@ -84,8 +86,10 @@
             <p class="mt-1 text-sm text-gray-500">{{ $hint }}</p>
         @endif
 
-        @error($name)
-            <p class="mt-1 text-sm text-red-600 {{ $errorClass }}">{{ $message }}</p>
+        @php $errorKey = $wireModel ?: ($wireModelLive ?: $name); @endphp
+
+        @error($errorKey)
+        <p class="mt-1 text-sm text-red-600 {{ $errorClass }}">{{ $message }}</p>
         @enderror
     </div>
 @elseif($type === 'file')
@@ -118,9 +122,12 @@
             <p class="mt-1 text-sm text-gray-500">{{ $hint }}</p>
         @endif
 
-        @error($name)
-            <p class="mt-1 text-sm text-red-600 {{ $errorClass }}">{{ $message }}</p>
+        @php $errorKey = $wireModel ?: ($wireModelLive ?: $name); @endphp
+
+        @error($errorKey)
+          <p class="mt-1 text-sm text-red-600 {{ $errorClass }}">{{ $message }}</p>
         @enderror
+
     </div>
 @else
     <div class="{{ $wrapperClass }} mb-4">
@@ -179,8 +186,11 @@
             <p class="mt-1 text-sm text-gray-500">{{ $hint }}</p>
         @endif
 
-        @error($name)
-            <p class="mt-1 text-sm text-red-600 {{ $errorClass }}">{{ $message }}</p>
+        @php $errorKey = $wireModel ?: ($wireModelLive ?: $name); @endphp
+
+        @error($errorKey)
+          <p class="mt-1 text-sm text-red-600 {{ $errorClass }}">{{ $message }}</p>
         @enderror
+
     </div>
 @endif

@@ -6,37 +6,17 @@
 
             <x-form.input name="name" label="Name" wireModel="name" required placeholder="Enter name" />
 
-            <x-form.input name="price" label="Price" type="text" wireModel="price" placeholder="Enter price" />
+            <x-form.input name="price" label="Price" type="number" wireModel="price" placeholder="Enter price" />
 
-            <x-form.input name="duration_days" label="Duration (Days)" type="text" wireModel="duration_days"
+            <x-form.input name="duration_days" label="Duration (Days)" type="number" wireModel="duration_days"
                 placeholder="Enter duration (Days)" />
 
             <x-form.input name="description" label="Description" type="textarea" wireModel="description"
                 placeholder="Enter description" />
 
             <x-form.input name="storage_quota_mb" label="Storage Quota (MB)" type="number" wireModel="storage_quota_mb" placeholder="e.g. 10240 for 10 GB" />
+
             <x-form.input name="max_file_size_kb" label="Max File Size (KB)" type="number" wireModel="max_file_size_kb" placeholder="e.g. 2048 for 2 MB" />
-
-
-            <x-form.input label="Images" name="images" type="file" wireModel="images" />
-            <div wire:loading wire:target="images" class="flex items-center justify-center mt-2">
-                <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                        stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                </svg>
-            </div>
-            @if ($images)
-                <div class="flex gap-2 mt-2">
-                    @foreach ($images as $image)
-                        <div class="relative w-20 h-20">
-                            <img src="{{ $image->temporaryUrl() }}" alt="Preview"
-                                class="w-20 h-20 object-cover rounded" />
-                        </div>
-                    @endforeach
-                </div>
-            @endif
 
             <x-form.select name="type" label="Discount Type" wireModelLive="type" :options="['fixed' => 'Fixed', 'percentage' => 'Percentage']" />
 

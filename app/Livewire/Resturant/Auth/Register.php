@@ -15,7 +15,7 @@ class Register extends Component
 {
     use WhatsappTrait;
 
-    public $name, $email, $mobile, $password, $confirm_password, $generatedOtp, $otpSentAt, $otp;
+    public $name, $email, $mobile, $password, $confirm_password, $generatedOtp, $otpSentAt, $otp, $username;
     public $showOtpForm = false;
     public $tempData = [];
 
@@ -34,6 +34,12 @@ class Register extends Component
                 Rule::unique('users', 'mobile')->whereNull('deleted_at'),
             ],
             'name' => 'required|string|max:255',
+            'username' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('users', 'username')->whereNull('deleted_at'),
+            ],
             'password' => 'required|string|min:6',
             'confirm_password' => 'required|same:password',
             'email' => [
@@ -55,6 +61,7 @@ class Register extends Component
             'email' => $this->email,
             'mobile' => $this->mobile,
             'password' => $this->password,
+            'username' => $this->username,
         ];
 
         $this->sendOTP($this->mobile, $this->generatedOtp);
@@ -88,6 +95,7 @@ class Register extends Component
         $user = User::create([
             'name' => $this->tempData['name'],
             'email' => $this->tempData['email'],
+            'username' => $this->tempData['username'],
             'mobile' => $this->tempData['mobile'],
             'password' => Hash::make($this->tempData['password']),
             'otp' => null,
@@ -95,7 +103,7 @@ class Register extends Component
             'email_verified_at' => now(),
             'is_active' => 0,
         ]);
-        
+
         $resturant = Restaurant::create([
             'user_id' => $user->id,
         ]);

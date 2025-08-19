@@ -8,6 +8,9 @@
             <h3 class="text-lg font-semibold text-gray-700">User Information</h3>
 
             <x-form.input name="user_name" label="Name" type="text" wireModel="user_name" required />
+
+            <x-form.input name="username" label="User Name" type="text" wireModel="username" required />
+
             <x-form.input name="email" label="Email" type="email" wireModel="email" required />
 
             <x-form.input name="mobile" label="Mobile" type="tel" wireModel="mobile" maxlength="10"

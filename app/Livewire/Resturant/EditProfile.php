@@ -14,16 +14,19 @@ class EditProfile extends Component
 {
     use WithFileUploads;
 
-    public $personal_name, $personal_email, $personal_mobile, $personal_address;
+    public $personal_name, $personal_email, $personal_mobile, $personal_address, $username;
     public $password, $confirm_password;
 
-    public $restaurant_name, $restaurant_email, $restaurant_mobile, $restaurant_address, $restaurant, $gst;
+    public $restaurant_name, $restaurant_email, $restaurant_mobile, $restaurant_address, $restaurant, $gst, $fssai;
 
     public $bank_name, $ifsc, $holder_name, $account_type, $upi_id, $account_number;
 
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon, $setting;
+    public $resto_pincode, $resto_pincode_id;
+    public $resto_country_id, $resto_state_id, $resto_city_id, $resto_district_id;
+    public $resto_country_name, $resto_state_name, $resto_city_name, $resto_district_name;
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
@@ -39,13 +42,32 @@ class EditProfile extends Component
         $this->personal_name = $user->name;
         $this->personal_email = $user->email;
         $this->personal_mobile = $user->mobile;
+        $this->username = $user->username;
         $this->personal_address = $user->address;
 
         $this->restaurant_name = $this->restaurant?->name;
         $this->restaurant_email = $this->restaurant?->email;
         $this->restaurant_mobile = $this->restaurant?->mobile;
         $this->restaurant_address = $this->restaurant?->address;
+        $this->fssai = $this->restaurant?->fssai;
         $this->gst = $this->restaurant?->gstin;
+        if ($this->restaurant->pin_code_id) {
+            $rp = PinCode::with('district.city.state.country')->find($this->restaurant->pin_code_id);
+            if ($rp) {
+                $this->resto_pincode_id = $rp->id;
+                $this->resto_pincode = $rp->code;
+                $this->resto_country_name = $rp->district->city->state->country->name ?? '';
+                $this->resto_state_name = $rp->district->city->state->name ?? '';
+                $this->resto_city_name = $rp->district->city->name ?? '';
+                $this->resto_district_name = $rp->district->name ?? '';
+
+                $this->resto_country_id = $rp->district->city->state->country->id ?? null;
+                $this->resto_state_id = $rp->district->city->state->id ?? null;
+                $this->resto_city_id = $rp->district->city->id ?? null;
+                $this->resto_district_id = $rp->district->id ?? null;
+            }
+        }
+
         $this->bank_name = $this->restaurant?->bank_name;
         $this->ifsc = $this->restaurant?->ifsc;
         $this->holder_name = $this->restaurant?->holder_name;
@@ -149,6 +171,79 @@ class EditProfile extends Component
         $this->district_name = $district->name;
     }
 
+    public function updatedRestoPincode($value)
+    {
+        $cached = PinCode::with('district.city.state.country')->where('code', $value)->first();
+
+        if ($cached) {
+            $this->resto_pincode_id = $cached->id;
+            $this->setRestoLocationFromModels(
+                $cached->district->city->state->country,
+                $cached->district->city->state,
+                $cached->district->city,
+                $cached->district
+            );
+            return;
+        }
+
+        try {
+            $response = Http::retry(3, 200)
+                ->timeout(10)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36',
+                ])
+                ->withOptions([
+                    'curl' => [
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_FORBID_REUSE => true,
+                        CURLOPT_FRESH_CONNECT => true,
+                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                    ],
+                ])
+                ->get("https://api.postalpincode.in/pincode/{$value}");
+
+            if ($response->successful()) {
+                $data = $response->json()[0];
+
+                if ($data['Status'] === 'Success' && count($data['PostOffice']) > 0) {
+                    $post = $data['PostOffice'][0];
+
+                    $country = Country::firstOrCreate(['name' => $post['Country']]);
+                    $state = State::firstOrCreate(['name' => $post['State'], 'country_id' => $country->id]);
+                    $city = City::firstOrCreate(['name' => $post['Block'] ?? $post['District'], 'state_id' => $state->id]);
+                    $district = District::firstOrCreate(['name' => $post['District'], 'city_id' => $city->id]);
+
+                    $pincode = PinCode::create([
+                        'code' => $value,
+                        'district_id' => $district->id,
+                    ]);
+
+                    $this->resto_pincode_id = $pincode->id;
+                    $this->setRestoLocationFromModels($country, $state, $city, $district);
+                } else {
+                    session()->flash('message', 'Invalid pincode or no result found.');
+                }
+            } else {
+                session()->flash('message', 'API request failed. Status: ' . $response->status());
+            }
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            logger()->error('Resto Pincode API error: ' . $e->getMessage());
+            session()->flash('message', 'Pincode service temporarily unavailable. Please try again later.');
+        }
+    }
+
+    protected function setRestoLocationFromModels($country, $state, $city, $district)
+    {
+        $this->resto_country_id = $country->id;
+        $this->resto_state_id   = $state->id;
+        $this->resto_city_id    = $city->id;
+        $this->resto_district_id= $district->id;
+
+        $this->resto_country_name = $country->name;
+        $this->resto_state_name   = $state->name;
+        $this->resto_city_name    = $city->name;
+        $this->resto_district_name= $district->name;
+    }
 
     public function updateProfile()
     {
@@ -156,10 +251,13 @@ class EditProfile extends Component
             'personal_name' => 'required|string|max:255',
             'personal_email' => 'required|email',
             'personal_mobile' => 'required',
+            'username' => 'required|string|max:255|unique:users,username,' . Auth::id(),
 
             'restaurant_name' => 'required|string|max:255',
             'restaurant_email' => 'required|email',
             'restaurant_mobile' => 'required',
+            'resto_pincode' => 'required|digits:6',
+            'fssai' => 'required|string|max:14',
 
             'bank_name' => 'nullable|string|max:255',
             'ifsc' => 'nullable|string|max:20',
@@ -173,6 +271,30 @@ class EditProfile extends Component
             'meta_keywords' => 'nullable|string',
             'favicon' => 'nullable',
         ]);
+
+        if (!$this->pincode_id && $this->pincode) {
+            $pin = PinCode::with('district.city.state.country')
+                    ->where('code', $this->pincode)
+                    ->first();
+            if ($pin) {
+                $this->pincode_id = $pin->id;
+            } else {
+                $this->addError('pincode', 'Enter a valid pincode.');
+                return;
+            }
+        }
+
+        if (!$this->resto_pincode_id && $this->resto_pincode) {
+            $rp = PinCode::with('district.city.state.country')
+                    ->where('code', $this->resto_pincode)
+                    ->first();
+            if ($rp) {
+                $this->resto_pincode_id = $rp->id;
+            } else {
+                $this->addError('resto_pincode', 'Enter a valid restaurant pincode.');
+                return;
+            }
+        }
 
         $user = Auth::user();
 
@@ -188,6 +310,7 @@ class EditProfile extends Component
         $user->update([
             'name' => $this->personal_name,
             'email' => $this->personal_email,
+            'username' => $this->username,
             'mobile' => $this->personal_mobile,
             'address' => $this->personal_address,
             'pin_code_id' => $this->pincode_id,
@@ -207,6 +330,8 @@ class EditProfile extends Component
                 'account_type' => $this->account_type,
                 'upi_id' => $this->upi_id,
                 'account_number' => $this->account_number,
+                'pin_code_id' => $this->resto_pincode_id,
+                'fssai' => $this->fssai,
             ]);
         }
 

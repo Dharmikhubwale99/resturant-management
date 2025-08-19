@@ -19,10 +19,12 @@ class UserSeeder extends Seeder
         $admin = User::firstOrCreate([
             'name' => 'Super Admin',
             'email' => 'admin@email.com',
+            'username' => 'superadmin10',
             'mobile' => '1234567890'
         ],
         [
             'name' => 'Super Admin',
+            'username' => 'superadmin10',
             'email' => 'admin@email.com',
             'password' => bcrypt('password'),
             'mobile' => '1234567890',

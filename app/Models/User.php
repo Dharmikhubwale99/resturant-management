@@ -26,6 +26,7 @@ class User extends Authenticatable
         'name',
         'mobile',
         'email',
+        'username',
         'password',
         'otp',
         'otp_expires_at',

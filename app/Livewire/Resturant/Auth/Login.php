@@ -10,7 +10,7 @@ use App\Models\Restaurant;
 
 class Login extends Component
 {
-    public $login, $password, $remember_me;
+    public $username, $password, $remember_me;
 
     #[Layout('components.layouts.auth.plain')]
     public function render()
@@ -32,26 +32,23 @@ class Login extends Component
 
     public function submit()
     {
-        // Trim inputs first
-        $this->login = trim($this->login);
+        $this->username = trim($this->username);
         $this->password = trim($this->password);
 
         $this->validate([
-            'login' => 'required|string',
+            'username' => 'required|string',
             'password' => 'required|min:6',
             'remember_me' => 'nullable|boolean',
         ]);
 
-        $fieldType = filter_var($this->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'mobile';
-
-         $credentials = [
-            $fieldType => $this->login,
-            'password' => $this->password
+        $credentials = [
+            'username' => $this->username,
+            'password' => $this->password,
         ];
 
         if (!Auth::attempt($credentials, $this->remember_me)) {
             throw ValidationException::withMessages([
-                'login' => 'These credentials do not match our records.',
+                'username' => 'These credentials do not match our records.',
             ]);
         }
         $user = Auth::user();
@@ -59,7 +56,7 @@ class Login extends Component
         if($user->is_active != 0){
             Auth::logout();
             throw ValidationException::withMessages([
-                'login' => 'Unauthorized access.',
+                'username' => 'Unauthorized access.',
             ]);
         }
 
@@ -81,7 +78,7 @@ class Login extends Component
         if (!$restaurant || (int) $restaurant->is_active !== 0) {
             Auth::logout();
             throw ValidationException::withMessages([
-                'login' => 'Your restaurant is inactive.',
+                'username' => 'Your restaurant is inactive.',
             ]);
         } else {
             return to_route('restaurant.dashboard')->with('success', 'Login successfully.');

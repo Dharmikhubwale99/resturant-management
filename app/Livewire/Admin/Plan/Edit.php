@@ -11,7 +11,6 @@ class Edit extends Component
 {
     use WithFileUploads;
     public $plan, $name, $price, $duration_days, $description;
-    public $images;
     public $featureAccess = [];
     public $availableFeatures = [];
     public $type;
@@ -49,9 +48,9 @@ class Edit extends Component
     public function updatedSelectAllFeatures($value)
     {
         if ($value) {
-            $this->featureAccess = $this->availableFeatures; // બધાં features select
+            $this->featureAccess = $this->availableFeatures;
         } else {
-            $this->featureAccess = []; // બધાં deselect
+            $this->featureAccess = [];
         }
     }
 
@@ -81,7 +80,6 @@ class Edit extends Component
 
         $this->validate($rules);
 
-        // Update plan details
         $this->plan->update([
             'name' => $this->name,
             'price' => $this->price,
@@ -94,17 +92,7 @@ class Edit extends Component
             'max_file_size_kb' => $this->max_file_size_kb,
         ]);
 
-        // Handle image upload (if new image is uploaded)
-        if ($this->images) {
-            $this->plan->clearMediaCollection('planImages');
-            $this->plan
-                ->addMedia($this->images->getRealPath())
-                ->usingFileName($this->images->getClientOriginalName())
-                ->toMediaCollection('planImages');
-        }
-
-        // Update features
-        $this->plan->planFeatures()->delete(); // remove old
+        $this->plan->planFeatures()->delete();
         foreach ($this->featureAccess as $featureKey) {
             $this->plan->planFeatures()->create([
                 'feature' => $featureKey,
