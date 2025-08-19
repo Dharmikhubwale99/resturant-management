@@ -23,6 +23,7 @@
                 <tr>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Username</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
@@ -35,6 +36,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-3 text-sm text-gray-900">{{ $user->id }}</td>
                         <td class="px-6 py-3 text-sm text-gray-900">{{ $user->name }}</td>
+                        <td class="px-6 py-3 text-sm text-gray-900">{{ $user->username }}</td>
                         <td class="px-6 py-3 text-sm text-gray-900">{{ $user->email }}</td>
                         <td class="px-6 py-3 text-sm text-gray-900">{{ $user->mobile }}</td>
                         <td class="px-6 py-3 text-sm text-gray-900">{{ $user->role }}</td>

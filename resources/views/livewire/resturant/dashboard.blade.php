@@ -164,7 +164,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {{-- <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 <div
                     class="card-hover-shadow bg-white rounded-xl p-6 card-shadow animate-slide-up col-span-1 lg:col-span-2 xl:col-span-1">
                     <div class="flex items-center justify-between mb-6">
@@ -292,7 +292,7 @@
                         </button>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
 
         <div class="max-w-7xl mx-auto mt-10">

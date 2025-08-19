@@ -160,7 +160,7 @@ Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFr
 
 Route::get('/plan-purchase', ResturantPlanPurchase::class)->name('plan.purchase');
 
-Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role:admin|waiter|kitchen', 'check.restaurant.plan'])->group(function () {
+Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role:admin|waiter|kitchen|manager', 'check.restaurant.plan'])->group(function () {
 
     Route::group([
         'prefix' => 'file-manager',

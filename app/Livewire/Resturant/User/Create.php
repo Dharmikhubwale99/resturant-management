@@ -15,6 +15,7 @@ class Create extends Component
     use HasRolesAndPermissions;
     public $name;
     public $email;
+    public $userename;
     public $role;
     public $mobile;
     public $password;
@@ -64,16 +65,18 @@ class Create extends Component
                 'mobile' => ['required', 'numeric', 'digits:10'],
                 'password' => ['required', 'min:6', 'max:20', 'confirmed'],
                 'role' => ['required'],
+                'userename' => ['required', 'min:6', 'max:50', 'unique:users,username'],
             ]);
 
-            $restaurantSuffix = preg_replace('/[^a-z0-9]/', '', strtolower($this->resturant->name));
-            $emailLocalPart = explode('@', $this->email)[0];
-            $finalEmail = $emailLocalPart . '@' . $restaurantSuffix . 'gmail.com';
+            // $restaurantSuffix = preg_replace('/[^a-z0-9]/', '', strtolower($this->resturant->name));
+            // $emailLocalPart = explode('@', $this->email)[0];
+            // $finalEmail = $emailLocalPart . '@' . $restaurantSuffix . 'gmail.com';
 
             $user = User::create([
                 'restaurant_id' => $this->resturant->id,
                 'name' => $this->name,
-                'email' => $finalEmail,
+                'email' => $this->email,
+                'username' => $this->userename,
                 'mobile' => $this->mobile,
                 'password' => bcrypt($this->password),
             ]);

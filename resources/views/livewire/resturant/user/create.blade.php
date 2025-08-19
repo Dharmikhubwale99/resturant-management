@@ -4,8 +4,10 @@
     <form wire:submit.prevent="submit" class="space-y-4">
         <x-form.input name="name" label="Full Name" wireModel="name" required placeholder="Enter full name" />
 
+        <x-form.input name="userename" label="User Name" wireModel="userename" required placeholder="Enter user name" />
+
         <x-form.input name="email" label="Email" type="email" wireModel="email" required
-            placeholder="Enter email address" />
+        placeholder="Enter email address" />
 
         <x-form.input name="mobile" label="Mobile Number" type="text" wireModel="mobile" required
             placeholder="Enter 10-digit mobile number" />
