@@ -14,7 +14,7 @@ class EditProfile extends Component
 {
     use WithFileUploads;
 
-    public $personal_name, $personal_email, $personal_mobile, $personal_address;
+    public $personal_name, $personal_email, $personal_mobile, $personal_address, $username;
     public $password, $confirm_password;
 
     public $restaurant_name, $restaurant_email, $restaurant_mobile, $restaurant_address, $restaurant, $gst;
@@ -39,6 +39,7 @@ class EditProfile extends Component
         $this->personal_name = $user->name;
         $this->personal_email = $user->email;
         $this->personal_mobile = $user->mobile;
+        $this->username = $user->username;
         $this->personal_address = $user->address;
 
         $this->restaurant_name = $this->restaurant?->name;
@@ -156,6 +157,7 @@ class EditProfile extends Component
             'personal_name' => 'required|string|max:255',
             'personal_email' => 'required|email',
             'personal_mobile' => 'required',
+            'username' => 'required|string|max:255|unique:users,username,' . Auth::id(),
 
             'restaurant_name' => 'required|string|max:255',
             'restaurant_email' => 'required|email',
@@ -188,6 +190,7 @@ class EditProfile extends Component
         $user->update([
             'name' => $this->personal_name,
             'email' => $this->personal_email,
+            'username' => $this->username,
             'mobile' => $this->personal_mobile,
             'address' => $this->personal_address,
             'pin_code_id' => $this->pincode_id,

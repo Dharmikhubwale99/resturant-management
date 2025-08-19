@@ -9,6 +9,8 @@
 
             <x-form.input name="name" label="Resturant Name" type="text" wireModel="name" required />
 
+            <x-form.input name="username" label="User Name" type="text" wireModel="username" required />
+
             <x-form.input name="email" label="Email" type="email" wireModel="email" readonly/>
 
             <x-form.input name="mobile" label="Mobile" type="tel" wireModel="mobile" maxlength="10"

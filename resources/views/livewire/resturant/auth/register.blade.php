@@ -6,6 +6,8 @@
 
             <x-form.input name="name" label="Personal Name" required wireModel="name" />
 
+            <x-form.input name="username" label="User Name" required wireModel="username" />
+
             <x-form.input name="email" label="PersonalEmail" type="email" required wireModel="email" />
 
             <x-form.input name="mobile" label="Personal Mobile" required wireModel="mobile" />

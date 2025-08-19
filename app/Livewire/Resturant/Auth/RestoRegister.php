@@ -16,7 +16,7 @@ class RestoRegister extends Component
     use WithFileUploads;
 
     public $name;
-    public $email;
+    public $email, $username;
     public $mobile, $resto_mobile, $personal_address;
     public $restaurant_name, $address, $gst;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
@@ -40,6 +40,7 @@ class RestoRegister extends Component
             $this->name = $user->name;
             $this->mobile = $user->mobile;
             $this->email = $user->email;
+            $this->username = $user->username;
             $this->personal_address = $user->address;
         }
 
@@ -178,6 +179,12 @@ class RestoRegister extends Component
                     'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
                     Rule::unique('users', 'email')->ignore(Auth::id())->whereNull('deleted_at'),
                 ],
+                'username' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('users', 'username')->ignore(Auth::id())->whereNull('deleted_at'),
+                ],
             ],
             [
                 'email.regex' => 'Only .com email addresses are allowed.',
@@ -199,6 +206,7 @@ class RestoRegister extends Component
             'name' => $this->name,
             'email' => $this->email,
             'mobile' => $this->mobile,
+            'username' => $this->username,
             'address' => $this->personal_address,
             'pin_code_id' => $this->pincode_id,
         ]);

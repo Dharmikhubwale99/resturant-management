@@ -6,6 +6,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <x-form.input name="personal_name" label="Name" wireModel="personal_name" required />
             <x-form.input name="personal_email" label="Email" type="email" wireModel="personal_email" required />
+            <x-form.input name="username" label="User Name" wireModel="username" required />
             <x-form.input name="personal_mobile" label="Mobile" wireModel="personal_mobile" required />
 
             <x-form.input name="personal_address" label="Address" wireModel="personal_address" />
