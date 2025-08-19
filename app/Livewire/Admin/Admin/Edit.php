@@ -19,16 +19,18 @@ class Edit extends Component
     use WithFileUploads, HasRolesAndPermissions;
 
     public $user_id, $restaurant_id, $setting_id;
-    public $user_name, $email, $mobile, $password, $password_confirmation, $username;
+    public $user_name, $email, $mobile, $password, $password_confirmation, $username, $personal_address;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
-    public $restaurant_name, $restaurant_address, $gst_no;
+    public $restaurant_name, $restaurant_address, $gst_no, $restaurant_email, $fssai, $resto_mobile;
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
     public $plan_id;
     public $plans = [];
     public $selected_plan_days;
     public $calculated_expiry;
-
+    public $resto_pincode, $resto_pincode_id;
+    public $resto_country_id, $resto_state_id, $resto_city_id, $resto_district_id;
+    public $resto_country_name, $resto_state_name, $resto_city_name, $resto_district_name;
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -62,6 +64,25 @@ class Edit extends Component
             $this->restaurant_address = $restaurant->address;
             $this->gst_no = $restaurant->gstin;
             $this->plan_id = $restaurant->plan_id;
+            $this->restaurant_email  = $restaurant->email;
+            $this->resto_mobile      = $restaurant->mobile;
+            $this->fssai = $restaurant->fssai;
+            if ($restaurant->pin_code_id) {
+                $rp = PinCode::with('district.city.state.country')->find($restaurant->pin_code_id);
+                if ($rp) {
+                    $this->resto_pincode_id = $rp->id;
+                    $this->resto_pincode = $rp->code;
+                    $this->resto_country_name = $rp->district->city->state->country->name ?? '';
+                    $this->resto_state_name = $rp->district->city->state->name ?? '';
+                    $this->resto_city_name = $rp->district->city->name ?? '';
+                    $this->resto_district_name = $rp->district->name ?? '';
+
+                    $this->resto_country_id = $rp->district->city->state->country->id ?? null;
+                    $this->resto_state_id = $rp->district->city->state->id ?? null;
+                    $this->resto_city_id = $rp->district->city->id ?? null;
+                    $this->resto_district_id = $rp->district->id ?? null;
+                }
+            }
         }
 
         if ($setting) {
@@ -171,32 +192,115 @@ class Edit extends Component
         }
     }
 
+    public function updatedRestoPincode($value)
+    {
+        $cached = PinCode::with('district.city.state.country')->where('code', $value)->first();
+
+        if ($cached) {
+            $this->resto_pincode_id = $cached->id;
+            $this->setRestoLocationFromModels(
+                $cached->district->city->state->country,
+                $cached->district->city->state,
+                $cached->district->city,
+                $cached->district
+            );
+            return;
+        }
+
+        try {
+            $response = Http::retry(3, 200)
+                ->timeout(10)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36',
+                ])
+                ->withOptions([
+                    'curl' => [
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_FORBID_REUSE => true,
+                        CURLOPT_FRESH_CONNECT => true,
+                        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                    ],
+                ])
+                ->get("https://api.postalpincode.in/pincode/{$value}");
+
+            if ($response->successful()) {
+                $data = $response->json()[0];
+
+                if ($data['Status'] === 'Success' && count($data['PostOffice']) > 0) {
+                    $post = $data['PostOffice'][0];
+
+                    $country = Country::firstOrCreate(['name' => $post['Country']]);
+                    $state = State::firstOrCreate(['name' => $post['State'], 'country_id' => $country->id]);
+                    $city = City::firstOrCreate(['name' => $post['Block'] ?? $post['District'], 'state_id' => $state->id]);
+                    $district = District::firstOrCreate(['name' => $post['District'], 'city_id' => $city->id]);
+
+                    $pincode = PinCode::create([
+                        'code' => $value,
+                        'district_id' => $district->id,
+                    ]);
+
+                    $this->resto_pincode_id = $pincode->id;
+                    $this->setRestoLocationFromModels($country, $state, $city, $district);
+                } else {
+                    session()->flash('message', 'Invalid pincode or no result found.');
+                }
+            } else {
+                session()->flash('message', 'API request failed. Status: ' . $response->status());
+            }
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            logger()->error('Resto Pincode API error: ' . $e->getMessage());
+            session()->flash('message', 'Pincode service temporarily unavailable. Please try again later.');
+        }
+    }
+
+    protected function setRestoLocationFromModels($country, $state, $city, $district)
+    {
+        $this->resto_country_id = $country->id;
+        $this->resto_state_id   = $state->id;
+        $this->resto_city_id    = $city->id;
+        $this->resto_district_id= $district->id;
+
+        $this->resto_country_name = $country->name;
+        $this->resto_state_name   = $state->name;
+        $this->resto_city_name    = $city->name;
+        $this->resto_district_name= $district->name;
+    }
+
     public function update()
     {
         $this->validate([
-            'user_name' => 'required|string|max:255',
+            'user_name' => ['required','string','max:255'],
             'email' => [
-                'required',
-                'email',
+                'required','email',
                 'regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i',
-                Rule::unique('users', 'email')->ignore($this->user_id)->whereNull('deleted_at'),
+                Rule::unique('users','email')->ignore($this->user_id)->whereNull('deleted_at'),
             ],
             'username' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('users', 'username')->ignore($this->user_id)->whereNull('deleted_at'),
+                'required','string','min:6','max:50',
+                Rule::unique('users','username')->ignore($this->user_id)->whereNull('deleted_at'),
             ],
-            'mobile' => ['required', 'regex:/^[0-9]{10}$/'],
-            'pincode' => 'required|digits:6',
-            'restaurant_name' => 'nullable|string|max:255',
-            'restaurant_address' => 'nullable|string',
-            'gst_no' => 'nullable|string|max:15',
-            'meta_title' => 'nullable|string|max:255',
-            'meta_description' => 'nullable|string',
-            'meta_keywords' => 'nullable|string',
-            'favicon' => 'nullable',
-            'plan_id' => 'nullable|exists:plans,id',
+            'mobile'  => ['required','digits:10',
+                Rule::unique('users','mobile')->ignore($this->user_id)->whereNull('deleted_at'),
+            ],
+            'password' => ['nullable','min:6','confirmed'], // optional on edit
+            'pincode'  => ['required','digits:6'],
+            'personal_address' => ['nullable','string','max:255'],
+
+            // Restaurant
+            'restaurant_name'    => ['nullable','string','max:255'],
+            'restaurant_address' => ['nullable','string'],
+            'restaurant_email'   => ['nullable','email','regex:/^[\w\.\-]+@[\w\-]+\.(com)$/i'],
+            'resto_mobile'       => ['nullable','digits:10'],
+            'gst_no'             => ['nullable','string','max:15'],
+            'fssai'              => ['nullable','string','max:14'],      // edit = optional
+            'resto_pincode'      => ['required','digits:6'],
+
+            // Meta / Misc
+            'meta_title'       => ['nullable','string','max:255'],
+            'meta_description' => ['nullable','string'],
+            'meta_keywords'    => ['nullable','string'],
+            'favicon'          => ['nullable','file','max:1024'],
+            'plan_id'          => ['nullable','exists:plans,id'],
         ]);
 
         $user = User::findOrFail($this->user_id);
@@ -223,6 +327,30 @@ class Edit extends Component
             $expiryDate = null;
         }
 
+        if (!$this->pincode_id && $this->pincode) {
+            $pin = PinCode::with('district.city.state.country')
+                    ->where('code', $this->pincode)
+                    ->first();
+            if ($pin) {
+                $this->pincode_id = $pin->id;
+            } else {
+                $this->addError('pincode', 'Enter a valid pincode.');
+                return;
+            }
+        }
+
+        if (!$this->resto_pincode_id && $this->resto_pincode) {
+            $rp = PinCode::with('district.city.state.country')
+                    ->where('code', $this->resto_pincode)
+                    ->first();
+            if ($rp) {
+                $this->resto_pincode_id = $rp->id;
+            } else {
+                $this->addError('resto_pincode', 'Enter a valid restaurant pincode.');
+                return;
+            }
+        }
+
         $user->update([
             'name' => $this->user_name,
             'email' => $this->email,
@@ -236,8 +364,11 @@ class Edit extends Component
             $existingRestaurant->update([
                 'name'          => $this->restaurant_name,
                 'address'       => $this->restaurant_address,
-                'gstin'         => $this->gst_no,
-                'pin_code_id'   => $this->pincode_id,
+                'email' => $this->restaurant_email,
+                'mobile' => $this->resto_mobile,
+                'gstin' => $this->gst_no,
+                'fssai' => $this->fssai,
+                'pin_code_id' => $this->resto_pincode_id,
                 'plan_id'       => $planId,
                 'plan_expiry_at'=> $expiryDate,
             ]);
@@ -247,8 +378,11 @@ class Edit extends Component
                 'user_id'       => $user->id,
                 'name'          => $this->restaurant_name,
                 'address'       => $this->restaurant_address,
-                'gstin'         => $this->gst_no,
-                'pin_code_id'   => $this->pincode_id,
+                'email' => $this->restaurant_email,
+                'mobile' => $this->resto_mobile,
+                'gstin' => $this->gst_no,
+                'fssai' => $this->fssai,
+                'pin_code_id' => $this->resto_pincode_id,
                 'plan_id'       => $planId,
                 'plan_expiry_at'=> $expiryDate,
             ]);

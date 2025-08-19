@@ -855,14 +855,6 @@ class Item extends Component
             $this->totalSale($order->restaurant_id, $order->total_amount);
         }
 
-        try {
-            app(\App\Services\PosPrinter::class)->printOrder($order);
-        } catch (\Throwable $e) {
-            Log::error("Thermal print failed: ".$e->getMessage());
-            // optional: flash an error but still show browser print
-            session()->flash('error', 'Thermal printer not reachable; opened printable bill.');
-        }
-
         $this->dispatch('printBill', billId: $order->id);
         return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Order Payment Complete!');
     }

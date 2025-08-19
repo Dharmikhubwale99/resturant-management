@@ -32,6 +32,7 @@
             <x-form.input name="restaurant_mobile" label="Restaurant Mobile" wireModel="restaurant_mobile" required />
 
             <x-form.input name="gst" label="GST No" wireModel="gst" />
+            <x-form.input name="fssai" label="FSSAI Number" type="text" wireModel="fssai" required />
             <x-form.input name="resto_pincode" label="Restaurant Pincode" type="text" wireModelLive="resto_pincode" required />
         </div>
 
