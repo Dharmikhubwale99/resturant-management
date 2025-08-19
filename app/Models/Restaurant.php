@@ -38,6 +38,7 @@ class Restaurant extends Model
         'storage_quota_mb',
         'max_file_size_kb',
         'storage_used_kb',
+        'fssai'
     ];
 
     /**

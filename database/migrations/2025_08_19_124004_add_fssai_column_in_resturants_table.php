@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('username')->unique()->after('email')->nullable();
-            $table->string('fssai_number')->nullable()->after('username');
+        Schema::table('restaurants', function (Blueprint $table) {
+            $table->string('fssai')->nullable()->after('address');
         });
     }
 
@@ -22,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('restaurants', function (Blueprint $table) {
             //
         });
     }
