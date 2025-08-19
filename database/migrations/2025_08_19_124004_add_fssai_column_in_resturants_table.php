@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('restaurants', function (Blueprint $table) {
             $table->string('fssai')->nullable()->after('address');
+            $table->unsignedTinyInteger('printer_width_cols')->default(32)->after('fssai');
         });
     }
 

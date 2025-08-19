@@ -7,6 +7,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\{Table, Restaurant, TableBooking};
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class Dashboard extends Component
 {
@@ -84,7 +85,13 @@ class Dashboard extends Component
         ->first();
 
     if ($order) {
-        $this->dispatch('printBill', billId: $order->id);
+        try {
+            app(\App\Services\PosPrinter::class)->printOrder($order);
+        } catch (\Throwable $e) {
+            Log::error("Thermal print failed: ".$e->getMessage());
+            // optional: flash an error but still show browser print
+            session()->flash('error', 'Thermal printer not reachable; opened printable bill.');
+        }
     } else {
         session()->flash('error', 'No active order found for this table.');
     }
