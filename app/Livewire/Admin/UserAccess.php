@@ -33,10 +33,18 @@ class UserAccess extends Component
         $user = User::findOrFail($id);
         $this->restaurantId = $user->restaurants()->first()->id;
 
-        $this->access = RestaurantConfiguration::where('restaurant_id', $this->restaurantId)
+        $existing = RestaurantConfiguration::where('restaurant_id', $this->restaurantId)
         ->pluck('value', 'configuration_id')
         ->map(fn ($v) => (bool) $v)
         ->toArray();
+
+        $allIds = AppConfiguration::pluck('id')->all();
+        $this->access = [];
+        foreach ($allIds as $mid) {
+            $this->access[$mid] = $existing[$mid] ?? false;
+        }
+
+        $this->selectAll = !in_array(false, $this->access, true);
     }
 
     public function updateAccess()
@@ -70,8 +78,19 @@ class UserAccess extends Component
 
     public function toggleSelectAll()
     {
-        foreach (AppConfiguration::all() as $module) {
-            $this->access[$module->id] = $this->selectAll;
+        // apply current selectAll value to all modules
+        $allIds = AppConfiguration::pluck('id')->all();
+        foreach ($allIds as $mid) {
+            $this->access[$mid] = (bool) $this->selectAll;
         }
     }
+
+    public function updated($name, $value)
+{
+    if (str_starts_with($name, 'access.')) {
+        $total   = AppConfiguration::count();
+        $checked = collect($this->access)->filter()->count();
+        $this->selectAll = ($checked === $total);
+    }
+}
 }

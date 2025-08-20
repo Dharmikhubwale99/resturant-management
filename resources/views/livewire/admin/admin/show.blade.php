@@ -28,6 +28,8 @@
 
             <x-form.input name="restaurant_address" label="Restaurant Address" wireModel="restaurant_address" disabled/>
             <x-form.input name="gst" label="GST No" wireModel="gst" disabled/>
+            <x-form.input name="fssai" label="FSSAI Number" type="text" wireModel="fssai" disabbled />
+
         </div>
 
         <h2 class="text-2xl font-bold mb-4 text-gray-700 border-b pb-2">Bank Details</h2>
