@@ -9,6 +9,7 @@ use Livewire\Attributes\Layout;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ItemImport;
 use Livewire\WithFileUploads;
+use Livewire\Attributes\On;
 
 class Index extends Component
 {
@@ -125,5 +126,32 @@ class Index extends Component
         session()->flash('message', "Item {$status} successfully.");
 
         $this->cancelBlock();
+    }
+
+    protected function restaurantId(): int
+    {
+        return auth()->user()->restaurants()->first()->id;
+    }
+
+    #[On('fileSelected')]
+    public function fileSelected($itemId = null, $url = null): void
+    {
+        if (!$itemId || !$url) {
+            session()->flash('error', 'Invalid image selection.');
+            return;
+        }
+
+        $item = Item::where('restaurant_id', auth()->user()->restaurants()->first()->id)
+                    ->find($itemId);
+
+        if (!$item) {
+            session()->flash('error', 'Item not found.');
+            return;
+        }
+
+        $item->image_url = $url;
+        $item->save();
+
+        session()->flash('success', 'Image updated successfully.');
     }
 }
