@@ -72,7 +72,7 @@ class BluetoothBillController extends Controller
         $lines[] = (object)['type'=>0,'content'=>'Bill No: ' . ($order->bill_number ?? '-'), 'bold'=>1,'align'=>0,'format'=>0];
         $lines[] = (object)['type'=>0,'content'=>'Order No: ' . ($order->order_number ?? '-'), 'bold'=>0,'align'=>0,'format'=>0];
         $lines[] = (object)['type'=>0,'content'=>'Date: ' . $order->created_at->format('d/m/Y h:i A'), 'bold'=>0,'align'=>0,'format'=>0];
-        $lines[] = (object)['type'=>0,'content'=>'Table: ' . ($order->table->name ?? 'N/A') . '   Type: ' . ucfirst($order->order_type), 'bold'=>0,'align'=>0,'format'=>0];
+        $lines[] = (object)['type'=>0,'content'=>'Table: ' . ($order->table->name ?? 'N/A') . '   Type: ' . ucfirst($order->order_type), 'bold'=>1,'align'=>0,'format'=>0];
 
         // separator
         $lines[] = (object)[
