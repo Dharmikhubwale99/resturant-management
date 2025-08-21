@@ -113,6 +113,15 @@ use App\Livewire\Waiter\{
 use App\Http\Controllers\PaymentController;
 use UniSharp\LaravelFilemanager\Lfm;
 
+// routes/web.php
+use App\Http\Controllers\BluetoothPrintController;
+
+Route::get('/bluetooth/response/kot/{kot}', [BluetoothPrintController::class, 'kotJson'])
+     ->name('bt.kot.response');   // ⇐ app આ URL પરથી JSON વાંચે છે
+
+Route::get('/bluetooth/launch/kot/{kot}', [BluetoothPrintController::class, 'launchKot'])
+     ->name('bt.kot.launch');     // ⇐ scheme URL ખોલે છે
+
 
 // Route::group([
 //     'prefix' => 'laravel-filemanager',
