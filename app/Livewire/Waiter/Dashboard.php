@@ -85,7 +85,7 @@ class Dashboard extends Component
         ->first();
 
     if ($order) {
-        $this->dispatch('printBill', billId: $order->id);
+        $this->dispatch('btPrintBill', orderId: $order->id);
     } else {
         session()->flash('error', 'No active order found for this table.');
     }
