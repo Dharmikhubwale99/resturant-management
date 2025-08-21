@@ -115,6 +115,8 @@ use UniSharp\LaravelFilemanager\Lfm;
 
 // routes/web.php
 use App\Http\Controllers\BluetoothPrintController;
+use App\Http\Controllers\WindowsPrintController;
+use App\Http\Controllers\BluetoothBillController;
 
 Route::get('/bluetooth/response/kot/{kot}', [BluetoothPrintController::class, 'kotJson'])
      ->name('bt.kot.response');   // ⇐ app આ URL પરથી JSON વાંચે છે
@@ -122,6 +124,18 @@ Route::get('/bluetooth/response/kot/{kot}', [BluetoothPrintController::class, 'k
 Route::get('/bluetooth/launch/kot/{kot}', [BluetoothPrintController::class, 'launchKot'])
      ->name('bt.kot.launch');     // ⇐ scheme URL ખોલે છે
 
+Route::get('/windows/kot/launch/{kot}', [WindowsPrintController::class, 'launch'])
+->name('win.kot.launch');
+
+Route::get('/windows/kot/escpos/{kot}', [WindowsPrintController::class, 'escpos'])
+->name('win.kot.escpos');
+
+Route::get('/bluetooth/response/bill/{order}', [BluetoothBillController::class, 'billJson'])
+    ->name('bt.bill.response')
+    ->middleware('signed');;     // ⇐ Thermer app આ URL પરથી JSON વાંચશે
+
+Route::get('/bluetooth/launch/bill/{order}', [BluetoothBillController::class, 'launchBill'])
+    ->name('bt.bill.launch');
 
 // Route::group([
 //     'prefix' => 'laravel-filemanager',

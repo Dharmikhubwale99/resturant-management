@@ -855,7 +855,7 @@ class Item extends Component
             $this->totalSale($order->restaurant_id, $order->total_amount);
         }
 
-        $this->dispatch('printBill', billId: $order->id);
+        $this->dispatch('btPrintBill', orderId: $order->id);
         return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Order Payment Complete!');
     }
 
