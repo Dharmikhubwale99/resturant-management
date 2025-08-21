@@ -873,9 +873,12 @@
     <script>
         Livewire.on('printKot', (event) => {
             const kotId = event.kotId;
-            window.open(`/restaurant/kot-print/${kotId}`, '_blank');
+            // OLD: window.open(`/restaurant/kot-print/${kotId}`, '_blank');
+            // NEW:
+            window.open(`/bluetooth/launch/kot/${kotId}`, '_blank');
         });
     </script>
+
     <script>
         // Add this to handle the initial state and clicks
         document.addEventListener('DOMContentLoaded', function() {

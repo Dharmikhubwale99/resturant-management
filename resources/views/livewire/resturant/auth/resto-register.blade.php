@@ -36,6 +36,7 @@
           <x-form.input name="resto_mobile" label="Restaurant Mobile" type="tel" wireModel="resto_mobile" maxlength="10"
             oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" />
             <x-form.input name="gst" label="GST No" type="text" wireModel="gst" />
+            <x-form.input name="fssai" label="FSSAI Number" type="text" wireModel="fssai" required />
           <x-form.input name="resto_pincode" label="Restaurant Pincode" type="text" wireModelLive="resto_pincode" required />
         </div>
 

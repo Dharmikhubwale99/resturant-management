@@ -85,13 +85,7 @@ class Dashboard extends Component
         ->first();
 
     if ($order) {
-        try {
-            app(\App\Services\PosPrinter::class)->printOrder($order);
-        } catch (\Throwable $e) {
-            Log::error("Thermal print failed: ".$e->getMessage());
-            // optional: flash an error but still show browser print
-            session()->flash('error', 'Thermal printer not reachable; opened printable bill.');
-        }
+        $this->dispatch('printBill', billId: $order->id);
     } else {
         session()->flash('error', 'No active order found for this table.');
     }

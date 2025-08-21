@@ -57,11 +57,27 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 text-sm text-gray-900">{{ $loop->iteration }}</td>
                             @php
-                                $imgUrl = $item->getFirstMediaUrl('images') ?: asset('icon/hubwalelogopng.png');
+                                $displayUrl =
+                                    $item->image_url ?:
+                                    ($item->getFirstMediaUrl('images') ?:
+                                    asset('icon/hubwalelogopng.png'));
                             @endphp
                             <td class="px-6 text-sm text-gray-900">
-                                <img src="{{ $item->image_url }}" alt="Item Image" class="w-12 h-8 object-cover rounded">
+                                @can('file-manager')
+                                    <button type="button" class="group relative"
+                                        onclick="openLfmForItem({{ $item->id }})" title="Click to change image">
+                                        <img src="{{ $displayUrl }}" alt="Item Image"
+                                            class="w-12 h-8 object-cover rounded ring-1 ring-gray-200 group-hover:ring-blue-400 transition" />
+                                        <span
+                                            class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-blue-600 opacity-0 group-hover:opacity-100">
+                                            Change
+                                        </span>
+                                    </button>
+                                @else
+                                    <img src="{{ $displayUrl }}" alt="Item Image" class="w-12 h-8 object-cover rounded">
+                                @endcan
                             </td>
+
                             @if (setting('category_module'))
                                 <td class="px-6 text-sm text-gray-900">{{ $item->category->name ?? '' }}</td>
                             @endif
@@ -227,3 +243,34 @@
         </div>
     @endif
 </div>
+@push('scripts')
+<script>
+
+    function openLfmForItem(itemId) {
+        window.__lfmActiveItemId = itemId;
+
+        const urlPrefix = @json(url(config('lfm.url_prefix', 'file-manager')));
+        const w = Math.min(1200, window.innerWidth - 40);
+        const h = Math.min(600,  window.innerHeight - 80);
+        const left = (window.innerWidth  - w) / 2;
+        const top  = (window.innerHeight - h) / 2;
+
+        window.open(`${urlPrefix}?type=image`, 'fm',
+            `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+    }
+
+
+    window.SetUrl = function (items) {
+        const url = items && items[0] ? items[0].url : null;
+        const itemId = window.__lfmActiveItemId;
+
+        if (!url || !itemId) return;
+
+
+        Livewire.dispatch('fileSelected', { itemId: itemId, url: url });
+
+
+        window.__lfmActiveItemId = null;
+    };
+</script>
+@endpush

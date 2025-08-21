@@ -35,27 +35,28 @@ class ItemImport implements ToCollection
             DB::beginTransaction();
             try {
                 if ($this->categoryModule) {
-                    $category_name = trim($row[0]);
-                    if (empty($category_name)) {
+                    $category_name = trim((string)($row[0] ?? ''));
+                    if ($category_name === '') {
                         throw new \Exception('Missing required column: category_name');
                     }
+
                     $category = Category::firstOrCreate(
                         ['name' => $category_name, 'restaurant_id' => $this->restaurantId],
                         ['name' => $category_name, 'restaurant_id' => $this->restaurantId]
                     );
                     $category_id = $category->id;
 
-                    $name         = $row[1] ?? null;
-                    $item_type    = $row[2] ?? null;
-                    $short_name   = $row[3] ?? null;
-                    $code         = $row[4] ?? null;
-                    $description  = $row[5] ?? '';
-                    $price        = $row[6] ?? null;
-                    $image_url    = $row[7] ?? '';
-                    $variant_names  = $row[8] ?? '';
-                    $variant_prices = $row[9] ?? '';
-                    $addon_names    = $row[10] ?? '';
-                    $addon_prices   = $row[11] ?? '';
+                    $name          = $row[1] ?? null;
+                    $item_type     = $row[2] ?? null;
+                    $short_name    = $row[3] ?? null;
+                    $code          = $row[4] ?? null;
+                    $description   = $row[5] ?? '';
+                    $price         = $row[6] ?? null;
+                    $image_url     = $row[7] ?? '';
+                    $variant_names = $row[8] ?? '';
+                    $variant_prices= $row[9] ?? '';
+                    $addon_names   = $row[10] ?? '';
+                    $addon_prices  = $row[11] ?? '';
                 } else {
                     $category_id   = null;
                     $name          = $row[0] ?? null;
@@ -65,15 +66,19 @@ class ItemImport implements ToCollection
                     $description   = $row[4] ?? '';
                     $price         = $row[5] ?? null;
                     $image_url     = $row[6] ?? '';
-                    $variant_names   = $row[7] ?? '';
-                    $variant_prices  = $row[8] ?? '';
-                    $addon_names     = $row[9] ?? '';
-                    $addon_prices    = $row[10] ?? '';
+                    $variant_names = $row[7] ?? '';
+                    $variant_prices= $row[8] ?? '';
+                    $addon_names   = $row[9] ?? '';
+                    $addon_prices  = $row[10] ?? '';
                 }
 
-                if (empty($name) || empty($item_type) || empty($price)) {
+                if (($name === null || $name === '') ||
+                    ($item_type === null || $item_type === '') ||
+                    ($price === null || $price === '')) {
                     throw new \Exception('Missing required column(s): name, item_type, price');
                 }
+
+                $price = is_numeric($price) ? (float)$price : $price;
 
                 $isExists = Item::where([
                     'restaurant_id' => $this->restaurantId,
@@ -117,29 +122,43 @@ class ItemImport implements ToCollection
                 }
 
                 // Variants
-                $variantNames = array_filter(array_map('trim', explode(',', (string) $variant_names)));
-                $variantPrices = array_filter(array_map('trim', explode(',', (string) $variant_prices)));
+                $variantNames  = $this->splitCsv($variant_names);   // DO NOT array_filter default
+                $variantPrices = $this->splitCsv($variant_prices);
 
-                foreach ($variantNames as $i => $vName) {
-                    $vPrice = $variantPrices[$i] ?? null;
-                    if (!empty($vName) && $vPrice !== null) {
+                $max = max(count($variantNames), count($variantPrices));
+                for ($i = 0; $i < $max; $i++) {
+                    $vName     = isset($variantNames[$i]) ? trim((string)$variantNames[$i]) : '';
+                    $vPriceRaw = $variantPrices[$i] ?? null;
+
+                    // treat '' or null as missing, but keep 0 / "0"
+                    $vPrice = ($vPriceRaw === null || $vPriceRaw === '')
+                        ? null
+                        : (is_numeric($vPriceRaw) ? (float)$vPriceRaw : $vPriceRaw);
+
+                    if ($vName !== '') {
                         $item->variants()->create([
-                            'name' => $vName,
-                            'price' => $vPrice,
+                            'name'  => $vName,
+                            'price' => $vPrice ?? 0, // default to 0 if empty
                         ]);
                     }
                 }
-
                 // Addons
-                $addonNames = array_filter(array_map('trim', explode(',', (string) $addon_names)));
-                $addonPrices = array_filter(array_map('trim', explode(',', (string) $addon_prices)));
+                $addonNames  = $this->splitCsv($addon_names);
+                $addonPrices = $this->splitCsv($addon_prices);
 
-                foreach ($addonNames as $i => $aName) {
-                    $aPrice = $addonPrices[$i] ?? null;
-                    if (!empty($aName) && $aPrice !== null) {
+                $max = max(count($addonNames), count($addonPrices));
+                for ($i = 0; $i < $max; $i++) {
+                    $aName     = isset($addonNames[$i]) ? trim((string)$addonNames[$i]) : '';
+                    $aPriceRaw = $addonPrices[$i] ?? null;
+
+                    $aPrice = ($aPriceRaw === null || $aPriceRaw === '')
+                        ? null
+                        : (is_numeric($aPriceRaw) ? (float)$aPriceRaw : $aPriceRaw);
+
+                    if ($aName !== '') {
                         $item->addons()->create([
-                            'name' => $aName,
-                            'price' => $aPrice,
+                            'name'  => $aName,
+                            'price' => $aPrice ?? 0, // default to 0 if empty
                         ]);
                     }
                 }
@@ -164,5 +183,19 @@ class ItemImport implements ToCollection
 
             $rowNum++;
         }
+    }
+
+    protected function splitCsv($value): array
+    {
+        $str = (string)$value;
+
+        // explode without array_filter so "0" stays; also preserve empty slots for alignment
+        $parts = explode(',', $str);
+
+        // trim each part, but DO NOT drop "0"
+        return array_map(function ($p) {
+            // Keep as string to preserve "0"
+            return trim((string)$p);
+        }, $parts);
     }
 }

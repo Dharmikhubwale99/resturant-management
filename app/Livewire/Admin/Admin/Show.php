@@ -9,7 +9,7 @@ use App\Models\User;
 class Show extends Component
 {
     public $personal_name, $personal_email, $personal_mobile, $personal_address;
-    public $restaurant_name, $restaurant_email, $restaurant_mobile, $restaurant_address, $restaurant, $gst;
+    public $restaurant_name, $restaurant_email, $restaurant_mobile, $restaurant_address, $restaurant, $gst, $fssai;
     public $bank_name, $ifsc, $holder_name, $account_type, $upi_id, $account_number;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
@@ -37,6 +37,7 @@ class Show extends Component
         $this->restaurant_mobile = $this->restaurant?->mobile;
         $this->restaurant_address = $this->restaurant?->address;
         $this->gst = $this->restaurant?->gstin;
+        $this->fssai = $this->restaurant?->fssai;
         $this->bank_name = $this->restaurant?->bank_name;
         $this->ifsc = $this->restaurant?->ifsc;
         $this->holder_name = $this->restaurant?->holder_name;
