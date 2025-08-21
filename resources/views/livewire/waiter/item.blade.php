@@ -114,21 +114,17 @@
             <div class="flex-1 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
                     <div class="flex flex-wrap items-center gap-3">
-                      <input
-                        type="text"
-                        wire:model.live="search"
-                        placeholder="Search by product, code, or short name..."
-                        class="border px-3 py-2 rounded w-50"
-                        wire:keydown.enter="addTopSearchResult"
-                      />
+                        <input type="text" wire:model.live="search"
+                            placeholder="Search by product, code, or short name..."
+                            class="border px-3 py-2 rounded w-50" wire:keydown.enter="addTopSearchResult" />
 
-                      <!-- ✅ NEW: Show Items checkbox -->
-                      <label class="inline-flex items-center gap-2 select-none">
-                        <input type="checkbox" wire:model.live="showAllItems" class="rounded">
-                        <span class="text-sm text-gray-700">Show Items</span>
-                      </label>
+                        <!-- ✅ NEW: Show Items checkbox -->
+                        <label class="inline-flex items-center gap-2 select-none">
+                            <input type="checkbox" wire:model.live="showAllItems" class="rounded">
+                            <span class="text-sm text-gray-700">Show Items</span>
+                        </label>
                     </div>
-                  </div>
+                </div>
 
                 <x-form.error />
 
@@ -203,14 +199,14 @@
 
                         </div>
                     @empty
-                    <p class="flex items-center col-span-full text-gray-500 text-center py-4">
-                        <!-- NEW: smarter empty message -->
-                        @if(!$showAllItems && trim($search) === '')
-                          Tick “Show Items” to browse all items, or start typing in Search.
-                        @else
-                          No items found.
-                        @endif
-                      </p>
+                        <p class="flex items-center col-span-full text-gray-500 text-center py-4">
+                            <!-- NEW: smarter empty message -->
+                            @if (!$showAllItems && trim($search) === '')
+                                Tick “Show Items” to browse all items, or start typing in Search.
+                            @else
+                                No items found.
+                            @endif
+                        </p>
                     @endforelse
                 </div>
             </div>
@@ -711,44 +707,21 @@
                 <x-form.error />
 
                 <div class="space-y-3">
-                    <x-form.input
-                    name="followupCustomer_name"
-                    label="Customer Name"
-                    placeholder="Customer Name"
-                    :required="true"
-                    wireModel="followupCustomer_name"
-                  />
+                    <x-form.input name="followupCustomer_name" label="Customer Name" placeholder="Customer Name"
+                        :required="true" wireModel="followupCustomer_name" />
 
-                  <x-form.input
-                  name="followupCustomer_mobile"
-                  label="Mobile Number"
-                  placeholder="Mobile Number"
-                  maxlength="10"
-                  oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
-                  wireModel="followupCustomer_mobile"
-                />
+                    <x-form.input name="followupCustomer_mobile" label="Mobile Number" placeholder="Mobile Number"
+                        maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                        wireModel="followupCustomer_mobile" />
 
-                <x-form.input
-                  name="followupCustomer_email"
-                  label="Email (optional)"
-                  type="email"
-                  placeholder="Email (optional)"
-                  wireModel="followupCustomer_email"
-                />
+                    <x-form.input name="followupCustomer_email" label="Email (optional)" type="email"
+                        placeholder="Email (optional)" wireModel="followupCustomer_email" />
 
-                <x-form.input
-                  name="customer_dob"
-                  label="DOB (optional)"
-                  type="date"
-                  wireModel="customer_dob"
-                />
+                    <x-form.input name="customer_dob" label="DOB (optional)" type="date"
+                        wireModel="customer_dob" />
 
-                <x-form.input
-                  name="customer_anniversary"
-                  label="Anniversary (optional)"
-                  type="date"
-                  wireModel="customer_anniversary"
-                />
+                    <x-form.input name="customer_anniversary" label="Anniversary (optional)" type="date"
+                        wireModel="customer_anniversary" />
                 </div>
 
                 <div class="mt-4 flex justify-end gap-2">
@@ -873,9 +846,16 @@
     <script>
         Livewire.on('printKot', (event) => {
             const kotId = event.kotId;
-            // OLD: window.open(`/restaurant/kot-print/${kotId}`, '_blank');
-            // NEW:
-            window.open(`/bluetooth/launch/kot/${kotId}`, '_blank');
+            const isWindows = /Windows/i.test(navigator.userAgent);
+
+            if (isWindows) {
+                window.open(`/windows/kot/launch/${kotId}`, '_blank'); // QZ Tray direct
+                qz.websocket.connect().then(() => console.log("Connected to QZ"));
+
+            } else {
+                // Android direct (તમે પહેલેથી Bluetooth Print વાપરી રહ્યાં છો)
+                window.open(`/bluetooth/launch/kot/${kotId}`, '_blank');
+            }
         });
     </script>
 
@@ -905,11 +885,10 @@
         });
     </script>
 
-
     <script>
-        Livewire.on('printBill', (event) => {
-            const billId = event.billId;
-            window.open(`/restaurant/bill-print/${billId}`, '_blank');
+        Livewire.on('btPrintBill', (event) => {
+            const orderId = event.orderId;
+            window.open(`/bluetooth/launch/bill/${orderId}`, '_blank');
         });
     </script>
 @endpush
