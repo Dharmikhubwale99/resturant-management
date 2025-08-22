@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('meta_title',        'Admin Dashboard | Hubwale')</title>
     <meta name="description" content="@yield('meta_description', 'Hubwale admin panel')">
     <meta name="keywords" content="@yield('meta_keywords', '')">
