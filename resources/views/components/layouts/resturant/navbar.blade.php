@@ -81,6 +81,18 @@
                     <img src="{{ asset('storage/' . ($siteSettings->favicon ?? 'icon/hubwalelogopng.png')) }}"
                         alt="Logo" class="h-10 w-auto">
                 </a>
+
+            </div>
+            <div class="flex md:hidden items-center justify-between ml-3 gap-6">
+                <a href="{{ route('restaurant.waiter.dashboard') }}" class="text-gray-700 hover:text-blue-600">
+                    <i class="fas fa-shopping-cart text-lg"></i>
+                </a>
+                <a href="{{ route('restaurant.party') }}" class="text-gray-700 hover:text-blue-600">
+                    <i class="fas fa-utensils text-lg"></i>
+                </a>
+                <a href="{{ route('restaurant.party') }}" class="text-gray-700 hover:text-blue-600">
+                    <i class="fas fa-user text-lg"></i>
+                </a>
             </div>
 
             <!-- Desktop Menu -->
@@ -155,6 +167,15 @@
 
                 <!-- Profile Dropdown -->
                 <div class="relative">
+                    {{-- <div class="flex justify-start items-center space-x-6">
+                        <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-shopping-cart text-lg"></i>
+                        </a>
+                        <a href="{{ route('users.index') }}" class="text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-user text-lg"></i>
+                        </a>
+                    </div> --}}
+
                     <button @click="profileMenuOpen = !profileMenuOpen"
                         class="flex items-center space-x-2 focus:outline-none">
                         <img src="{{ asset('image/Admin.png') }}" alt="Company Profile"
@@ -176,7 +197,7 @@
                         </div>
 
                         <!-- Mobile Menu in Dropdown -->
-                        <div class="block md:hidden">
+                        <div class="block md:hidden  max-h-60 overflow-y-auto">
                             <template x-for="(link, index) in menuLinks" :key="index">
                                 <a :href="link.href" x-text="link.text"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"></a>
