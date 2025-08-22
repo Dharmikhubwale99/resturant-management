@@ -160,7 +160,7 @@
                                 class="absolute top-1 right-1 w-2 h-2 md:w-3 md:h-3 rounded-full
                      {{ $item->type_dot_class }}"></span>
 
-                            <img src="{{ $item->getFirstMediaUrl('images') ?: asset('icon/hubwalelogopng.png') }}"
+                            <img src="{{ $item->image_url ?: asset('storage/' . ($siteSettings->favicon)) }}"
                                 class="w-full h-20 md:h-28 object-cover rounded mb-1 md:mb-2"
                                 alt="{{ $item->name }}">
                             <h3 class="text-xs md:text-sm font-semibold text-center truncate px-1">{{ $item->name }}
@@ -214,6 +214,9 @@
             <!-- Cart Section - Responsive -->
             <div
                 class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200">
+                <button wire:click="openCustomerModal" class="flex justify-end text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-user text-lg"></i>
+                </button>
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
                 @if (count($cartItems))
                     <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
@@ -311,25 +314,19 @@
 
                     @if (count($cartItems))
                         <div class="border-t pt-2 md:pt-4 mt-2 md:mt-4 space-y-1 md:space-y-2">
-                            <button wire:click="$set('showCartDetailModal', true)"
-                                class="bg-blue-500 text-white px-2 py-1 rounded text-xs md:text-sm">
-                                Cart Details
-                            </button>
+                            <div class="flex items-center justify-between py-1 md:py-2">
+                                <button wire:click="$set('showCartDetailModal', true)"
+                                    class="bg-blue-500 text-white px-2 py-1 rounded text-xs md:text-sm">
+                                    Cart Details
+                                </button>
 
-                            {{-- <div class="flex flex-wrap items-center gap-1 md:gap-2 mb-1 md:mb-2">
-                                <button class="bg-red-500 text-white px-2 py-1 rounded text-xs md:text-sm flex-1">Bogo
-                                    Offer</button>
-                                <button
-                                    class="bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs md:text-sm flex-1">Split</button>
-                            </div> --}}
-
-                            <div class="text-right text-lg md:text-xl font-bold py-1 md:py-2">
-                                {{-- Total: ₹{{ number_format($cartTotal, 2) }}
-
-                                <input type="text" class="border rounded px-2 py-1 ml-2"
-                                       value="{{ number_format($cartTotal, 2) }}" readonly /> --}}
-                                <input type="text" wire:model.live="cartTotal" readonly>
-
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs md:text-sm font-semibold">Total:</span>
+                                    <input type="text"
+                                           wire:model.live="cartTotal"
+                                           readonly
+                                           class="border rounded px-2 py-1 w-20 md:w-28 text-right font-bold" />
+                                </div>
                             </div>
 
 
@@ -468,7 +465,7 @@
                 <div class="mb-4">
                     <label class="block text-sm font-semibold mb-1">Mobile Number</label>
                     <input type="text" wire:model="mobile" maxlength="20" class="border rounded p-2 w-full"
-                        placeholder="9876543210">
+                        placeholder="Enetr Mobile number">
                 </div>
 
                 @foreach ($splits as $index => $row)

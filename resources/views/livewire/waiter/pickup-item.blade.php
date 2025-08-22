@@ -1,5 +1,5 @@
 <div class="font-sans bg-gray-100 min-h-screen">
-    <header class="bg-white shadow-sm border-b">
+    {{-- <header class="bg-white shadow-sm border-b">
         <div class="flex flex-col md:flex-row items-center justify-between px-2 md:px-4 py-2 md:py-3">
             <div class="flex items-center justify-between w-full md:w-auto mb-2 md:mb-0">
                 <div class="flex items-center space-x-2">
@@ -43,7 +43,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </header> --}}
 
     <div class="flex flex-col md:flex-row h-full">
         @if (setting('category_module'))
@@ -51,39 +51,50 @@
                 <div class="p-2 md:p-4 flex justify-between items-center">
                     <div class="text-sm text-gray-400">Categories</div>
                     <button class="md:hidden text-gray-300 hover:text-white focus:outline-none"
-                        onclick="document.querySelector('.category-nav').classList.toggle('hidden')">
+                        onclick="document.getElementById('mobileCats').classList.toggle('hidden')">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
 
                 <nav class="category-nav hidden md:block mb-4">
                     <button wire:click="clearCategory"
-                        class="block w-full text-left px-3 py-2 md:px-4 md:py-3 text-sm md:text-base {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
-                        <i class="fas fa-list mr-2"></i>All Items
+                        class="block w-full text-left px-4 py-3 text-base {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                        <i class="fas fa-list mr-2"></i> All Items
                     </button>
 
-                    @foreach ($categories->take(5) as $category)
+                    @foreach ($categories as $category)
                         <button wire:click="selectCategory({{ $category->id }})"
                             class="block w-full text-left px-3 py-2 md:px-4 md:py-3 flex items-center gap-2 text-sm md:text-base {{ $selectedCategory === $category->id ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                             <span>{{ $category->name }}</span>
                         </button>
                     @endforeach
+                </nav>
 
-                    <div class="mobile-categories hidden md:hidden">
-                        @foreach ($categories->slice(5) as $category)
+                <nav class="md:hidden mb-4">
+                    <button wire:click="clearCategory"
+                        class="block w-full text-left px-3 py-2 text-sm {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                        <i class="fas fa-list mr-2"></i> All Items
+                    </button>
+
+
+
+                    <!-- Extra categories (toggled by both the header + button and the Show More button) -->
+                    <div id="mobileCats" class="mobile-categories hidden">
+                        @foreach ($categories as $category)
                             <button wire:click="selectCategory({{ $category->id }})"
-                                class="block w-full text-left px-3 py-2 md:px-4 md:py-3 flex items-center gap-2 text-sm md:text-base {{ $selectedCategory === $category->id ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                                class="block w-full text-left px-3 py-2 flex items-center gap-2 text-sm {{ $selectedCategory === $category->id ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
                                 <span>{{ $category->name }}</span>
                             </button>
                         @endforeach
                     </div>
 
-                    <button
-                        class="md:hidden w-full text-left px-3 py-2 text-gray-300 hover:text-white flex items-center gap-2 text-sm"
-                        onclick="document.querySelector('.mobile-categories').classList.toggle('hidden'); this.querySelector('span').textContent = this.querySelector('span').textContent === 'Show More +' ? 'Show Less -' : 'Show More +'">
-                        <i class="fas fa-chevron-down"></i>
-                        <span>Show More +</span>
-                    </button>
+                    <!-- Show More/Less toggle for mobile -->
+                    <!--<button-->
+                    <!--    class="w-full text-left px-3 py-2 text-gray-300 hover:text-white flex items-center gap-2 text-sm"-->
+                    <!--    onclick="const m=document.getElementById('mobileCats'); m.classList.toggle('hidden'); this.querySelector('span').textContent = m.classList.contains('hidden') ? 'Show More +' : 'Show Less -'">-->
+                    <!--    <i class="fas fa-chevron-down"></i>-->
+                    <!--    <span>Show More +</span>-->
+                    <!--</button>-->
                 </nav>
             </div>
         @endif
@@ -95,7 +106,12 @@
                     <div class="flex flex-wrap gap-2">
                         <input type="text" wire:model.live="search"
                             placeholder="Search by product, code, or short name..."
-                            class="border px-3 py-2 rounded w-50" />
+                            class="border px-3 py-2 rounded w-50" wire:keydown.enter="addTopSearchResult" />
+
+                        <label class="inline-flex items-center gap-2 select-none">
+                            <input type="checkbox" wire:model.live="showAllItems" class="rounded">
+                            <span class="text-sm text-gray-700">Show Items</span>
+                        </label>
                     </div>
                 </div>
 
@@ -133,9 +149,10 @@
                                 class="absolute top-1 right-1 w-2 h-2 md:w-3 md:h-3 rounded-full
                      {{ $item->type_dot_class }}"></span>
 
-                            <img src="{{ $item->getFirstMediaUrl('images') ?: asset('icon/hubwalelogopng.png') }}"
+                            <img src="{{ $item->image_url ?: asset('storage/' . ($siteSettings->favicon)) }}"
                                 class="w-full h-20 md:h-28 object-cover rounded mb-1 md:mb-2"
                                 alt="{{ $item->name }}">
+
                             <h3 class="text-xs md:text-sm font-semibold text-center truncate px-1">{{ $item->name }}
                             </h3>
                             @php
@@ -170,16 +187,23 @@
                             @endif
                         </div>
                     @empty
-                        <p class="flex items-center col-span-full text-gray-500 text-center py-4">
-                            No items found in this category.
-                        </p>
+                    <p class="flex items-center col-span-full text-gray-500 text-center py-4">
+                        <!-- NEW: smarter empty message -->
+                        @if (!$showAllItems && trim($search) === '')
+                            Tick “Show Items” to browse all items, or start typing in Search.
+                        @else
+                            No items found.
+                        @endif
+                    </p>
                     @endforelse
                 </div>
             </div>
 
             <div
                 class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200">
-
+                <button wire:click="openCustomerModal" class="flex justify-end text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-user text-lg"></i>
+                </button>
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
                 <div class="flex items-center justify-between mb-2">
                     @if (!empty($customerName))
@@ -288,20 +312,19 @@
 
                     @if (count($cartItems))
                         <div class="border-t pt-2 md:pt-4 mt-2 md:mt-4 space-y-1 md:space-y-2">
-                            <button wire:click="$set('showCartDetailModal', true)"
-                                class="bg-blue-500 text-white px-2 py-1 rounded text-xs md:text-sm">
-                                Cart Details
-                            </button>
+                            <div class="flex items-center justify-between py-1 md:py-2">
+                                <button wire:click="$set('showCartDetailModal', true)"
+                                    class="bg-blue-500 text-white px-2 py-1 rounded text-xs md:text-sm">
+                                    Cart Details
+                                </button>
 
-                            {{-- <div class="flex flex-wrap items-center gap-1 md:gap-2 mb-1 md:mb-2">
-                                <button class="bg-red-500 text-white px-2 py-1 rounded text-xs md:text-sm flex-1">Bogo
-                                    Offer</button>
-                                <button
-                                    class="bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs md:text-sm flex-1">Split</button>
-                            </div> --}}
-
-                            <div class="text-right text-lg md:text-xl font-bold py-1 md:py-2">
-                                <input type="text" wire:model.live="cartTotal" readonly>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs md:text-sm font-semibold">Total:</span>
+                                    <input type="text"
+                                           wire:model.live="cartTotal"
+                                           readonly
+                                           class="border rounded px-2 py-1 w-20 md:w-28 text-right font-bold" />
+                                </div>
                             </div>
 
                             <div class="flex flex-wrap justify-center gap-4 mt-3 mb-3">
@@ -439,7 +462,7 @@
                 <div class="mb-4">
                     <label class="block text-sm font-semibold mb-1">Mobile Number</label>
                     <input type="text" wire:model="mobile" maxlength="20" class="border rounded p-2 w-full"
-                        placeholder="9876543210">
+                        placeholder="Enetr Mobile number">
                 </div>
 
                 @foreach ($splits as $index => $row)
@@ -844,9 +867,19 @@
     <script>
         Livewire.on('printKot', (event) => {
             const kotId = event.kotId;
-            window.open(`/restaurant/kot-print/${kotId}`, '_blank');
+            const isWindows = /Windows/i.test(navigator.userAgent);
+
+            if (isWindows) {
+                window.open(`/windows/kot/launch/${kotId}`, '_blank'); // QZ Tray direct
+                qz.websocket.connect().then(() => console.log("Connected to QZ"));
+
+            } else {
+                // Android direct (તમે પહેલેથી Bluetooth Print વાપરી રહ્યાં છો)
+                window.open(`/bluetooth/launch/kot/${kotId}`, '_blank');
+            }
         });
     </script>
+
     <script>
         // Add this to handle the initial state and clicks
         document.addEventListener('DOMContentLoaded', function() {
@@ -873,11 +906,10 @@
         });
     </script>
 
-
     <script>
-        Livewire.on('printBill', (event) => {
-            const billId = event.billId;
-            window.open(`/restaurant/bill-print/${billId}`, '_blank');
+        Livewire.on('btPrintBill', (event) => {
+            const orderId = event.orderId;
+            window.open(`/bluetooth/launch/bill/${orderId}`, '_blank');
         });
     </script>
 @endpush
