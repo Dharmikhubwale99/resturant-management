@@ -89,7 +89,9 @@ use \App\Livewire\Resturant\{
     Report\MoneyOut,
     Report\ExpenseReport,
     Report\ItemSaleReport,
-    Report\ItemSalePaymentReport
+    Report\ItemSalePaymentReport,
+
+    Settings\BillPrintSettings,
 };
 
 use \App\Livewire\Kitchen\{
@@ -254,6 +256,7 @@ Route::prefix('restaurant')->as('restaurant.')->middleware(['web', 'auth', 'role
 
     });
 
+    Route::get('/bill-print-settings', BillPrintSettings::class)->name('bill-print-settings');
 
     Route::get('/waiter-order', WaiterDashboard::class)->name('waiter.dashboard')->middleware('can:order');
 

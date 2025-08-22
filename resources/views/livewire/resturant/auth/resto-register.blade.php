@@ -47,6 +47,15 @@
             <x-form.input name="resto_district_name" label="District" type="text" wireModel="resto_district_name" readonly />
         </div>
         <x-form.input name="address" label="Restaurant Address" type="textarea" wireModel="address" class="md:col-span-2" />
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 items-end">
+            <x-form.input name="logo" label="Resturant Image" type="file" wireModel="logo" />
+            @if ($oldLogo)
+              <div class="md:col-span-2">
+                <p class="text-sm mb-2">Current Logo:</p>
+                <img src="{{ asset('storage/' . $oldLogo) }}" class="w-16 h-16 rounded" />
+              </div>
+            @endif
+          </div>
       </div>
 
       <div class="rounded-lg p-6">

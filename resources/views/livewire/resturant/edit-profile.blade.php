@@ -44,6 +44,15 @@
         </div>
 
         <x-form.input name="restaurant_address" label="Restaurant Address" type="textarea" wireModel="restaurant_address" />
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 items-end">
+            <x-form.input name="logo" label="Resturant Image" type="file" wireModel="logo" />
+            @if ($oldLogo)
+              <div class="md:col-span-2">
+                <p class="text-sm mb-2">Current Logo:</p>
+                <img src="{{ asset('storage/' . $oldLogo) }}" class="w-16 h-16 rounded" />
+              </div>
+            @endif
+          </div>
 
         <h2 class="text-2xl font-bold mb-4 text-gray-700 border-b pb-2">Bank Details</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

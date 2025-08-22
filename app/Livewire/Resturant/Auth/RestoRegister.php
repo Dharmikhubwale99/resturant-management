@@ -18,7 +18,7 @@ class RestoRegister extends Component
     public $name;
     public $email, $username;
     public $mobile, $resto_mobile, $personal_address;
-    public $restaurant_name, $restaurant_email, $address, $gst, $fssai;
+    public $restaurant_name, $restaurant_email, $address, $gst, $fssai, $logo, $oldLogo;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name;
     public $country_id, $state_id, $city_id, $district_id;
     public $meta_title, $meta_description, $meta_keywords, $favicon, $oldFavicon;
@@ -77,6 +77,7 @@ class RestoRegister extends Component
             $this->upi_id = $restaurant->upi_id;
             $this->account_number = $restaurant->account_number;
             $this->fssai = $restaurant->fssai;
+            $this->oldLogo = $restaurant->logo_url;
 
             if ($restaurant->pin_code_id) {
                 $rp = PinCode::with('district.city.state.country')->find($restaurant->pin_code_id);
@@ -280,6 +281,7 @@ class RestoRegister extends Component
                 ],
                 'resto_mobile' => ['regex:/^[0-9]{10}$/'],
                 'fssai' => 'required|string|max:14',
+                'logo' => 'nullable|file|image|max:2048',
 
                 'meta_title' => 'nullable|string|max:255',
                 'meta_description' => 'nullable|string',
@@ -330,6 +332,16 @@ class RestoRegister extends Component
             $faviconPath = $this->favicon->store('icon', 'public');
         }
 
+        $logoPath = $this->oldLogo; // default to existing path
+
+        if ($this->logo) {
+            if ($logoPath && Storage::disk('public')->exists($logoPath)) {
+                Storage::disk('public')->delete($logoPath);
+            }
+            $logoPath = $this->logo->store('restaurant_logos', 'public');
+        }
+
+
         $user = Auth::user();
 
         $user->update([
@@ -357,6 +369,7 @@ class RestoRegister extends Component
                 'upi_id' => $this->upi_id,
                 'account_number' => $this->account_number,
                 'fssai' => $this->fssai,
+                'logo_url' => $logoPath,
             ],
         );
 
