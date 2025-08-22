@@ -842,7 +842,8 @@ class PickupItem extends Component
             $this->totalSale($order->restaurant_id, $order->total_amount);
         }
 
-        $this->dispatch('printBill', billId: $order->id);
+        // $this->dispatch('printBill', billId: $order->id);
+        $this->dispatch('btPrintBill', orderId: $order->id);
         return redirect()->route('restaurant.pickup.create')->with('success', 'Order Payment Complete!');
     }
 
