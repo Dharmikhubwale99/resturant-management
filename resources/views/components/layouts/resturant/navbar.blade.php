@@ -3,93 +3,74 @@
     profileMenuOpen: false,
     start: 0,
     visible: 5,
+    openDropdown: null,
     menuLinks: [
-        @if ('order')
-            @can('order')
+        @if ('order') @can('order')
                 { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
-            @endcan
-        @endif
+                @endcan @endif
 
-        @if (setting('kitchen'))
-            @can('kitchen-dashboard')
+        @if (setting('kitchen')) @can('kitchen-dashboard')
                 { text: 'Kitchen', href: '{{ route('restaurant.kitchen.index') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('user'))
-            @can('user-index')
+        @if (setting('user')) @can('user-index')
                 { text: 'User', href: '{{ route('restaurant.users.index') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('party'))
-            @can('party-index')
+        @if (setting('party')) @can('party-index')
                 { text: 'Party', href: '{{ route('restaurant.party') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('moneyOut'))
-            @can('moneyout-index')
+        @if (setting('moneyOut')) @can('moneyout-index')
                 { text: 'Money Out', href: '{{ route('restaurant.money-out') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('moneyIn'))
-            @can('moneyin-index')
+        @if (setting('moneyIn')) @can('moneyin-index')
                 { text: 'Money In', href: '{{ route('restaurant.money-maintain') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('expenses'))
-            @can('expenses-index')
+        @if (setting('expenses')) @can('expenses-index')
                 { text: 'Expenses', href: '{{ route('restaurant.expenses.index') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('item'))
-            @can('item-index')
+        @if (setting('item')) @can('item-index')
                 { text: 'Item', href: '{{ route('restaurant.items.index') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('discount'))
-            @can('discount-index')
+        @if (setting('discount')) @can('discount-index')
                 { text: 'Discount', href: '{{ route('restaurant.discount.index') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('table'))
-            @can('table-index')
+        @if (setting('table')) @can('table-index')
                 { text: 'Table', href: '{{ route('restaurant.tables.index') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('category_module'))
-            @can('category-index')
+        @if (setting('category_module')) @can('category-index')
                 { text: 'Category', href: '{{ route('restaurant.categories.index') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('area_module'))
-            @can('area-index')
+        @if (setting('area_module')) @can('area-index')
                 { text: 'Area', href: '{{ route('restaurant.areas.index') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
-        @if (setting('expensetype'))
-            @can('expensetype-index')
+        @if (setting('expensetype')) @can('expensetype-index')
                 { text: 'Expense-Type', href: '{{ route('restaurant.expense-types.index') }}' },
-            @endcan
-        @endif
+            @endcan @endif
 
         { text: 'File Manager', href: '{{ url('restaurant/file-manager') }}?type=image', newTab: true },
 
 
-        @if (setting('report'))
-            @can('report-index')
+        @if (setting('report')) @can('report-index')
                 { text: 'Report', href: '{{ route('restaurant.report') }}' },
-            @endcan
-        @endif
+            @endcan @endif
+
+        {
+            text: 'Setting',
+            children: [
+                { text: 'Print Setting', href: '{{ route('restaurant.bill-print-settings') }}' },
+                {{-- { text: 'Meta Setting', href: '{{ route('restaurant.edit-profile') }}' } --}}
+            ]
+        },
     ]
 }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -100,10 +81,22 @@
                     <img src="{{ asset('storage/' . ($siteSettings->favicon ?? 'icon/hubwalelogopng.png')) }}"
                         alt="Logo" class="h-10 w-auto">
                 </a>
+
+            </div>
+            <div class="flex md:hidden items-center justify-between ml-3 gap-6">
+                <a href="{{ route('restaurant.waiter.dashboard') }}" class="text-gray-700 hover:text-blue-600">
+                    <i class="fas fa-shopping-cart text-lg"></i>
+                </a>
+                <a href="{{ route('restaurant.party') }}" class="text-gray-700 hover:text-blue-600">
+                    <i class="fas fa-utensils text-lg"></i>
+                </a>
+                <a href="{{ route('restaurant.party') }}" class="text-gray-700 hover:text-blue-600">
+                    <i class="fas fa-user text-lg"></i>
+                </a>
             </div>
 
             <!-- Desktop Menu -->
-            <div class="hidden md:flex items-center w-full max-w-5xl relative overflow-hidden">
+            <div class="hidden md:flex items-center w-full max-w-5xl relative">
                 <div class="flex items-center justify-between w-full">
                     <!-- Prev Button -->
                     <button @click="if(start > 0) start--"
@@ -115,9 +108,44 @@
                     <div class="flex space-x-6 justify-center items-center flex-1">
                         <template x-for="(link, index) in menuLinks.slice(start, start + visible)"
                             :key="index">
-                            <a :href="link.href" x-text="link.text"
-                                class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 whitespace-nowrap"></a>
+                            <div class="relative">
+                                <!-- Simple link -->
+                                <template x-if="!link.children">
+                                    <a :href="link.href" :target="link.newTab ? '_blank' : null" x-text="link.text"
+                                        class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 whitespace-nowrap">
+                                    </a>
+                                </template>
+
+                                <!-- Dropdown parent -->
+                                <template x-if="link.children">
+                                    <div class="relative" @click.outside="openDropdown = null">
+                                        <button @click="openDropdown = openDropdown === index ? null : index"
+                                            class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 whitespace-nowrap inline-flex items-center gap-1"
+                                            type="button">
+                                            <span x-text="link.text"></span>
+                                            <svg class="w-4 h-4 transition-transform"
+                                                :class="{ 'rotate-180': openDropdown === index }" viewBox="0 0 20 20"
+                                                fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Dropdown menu -->
+                                        <div x-show="openDropdown === index" x-transition
+                                        class="absolute left-1/2 -translate-x-1/2 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black/5 z-[60]">
+                                            <template x-for="child in link.children" :key="child.text">
+                                                <a :href="child.href" @click="openDropdown = null"
+                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    x-text="child.text"></a>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
                         </template>
+
                     </div>
 
                     <!-- Next Button -->
@@ -139,6 +167,15 @@
 
                 <!-- Profile Dropdown -->
                 <div class="relative">
+                    {{-- <div class="flex justify-start items-center space-x-6">
+                        <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-shopping-cart text-lg"></i>
+                        </a>
+                        <a href="{{ route('users.index') }}" class="text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-user text-lg"></i>
+                        </a>
+                    </div> --}}
+
                     <button @click="profileMenuOpen = !profileMenuOpen"
                         class="flex items-center space-x-2 focus:outline-none">
                         <img src="{{ asset('image/Admin.png') }}" alt="Company Profile"
@@ -160,7 +197,7 @@
                         </div>
 
                         <!-- Mobile Menu in Dropdown -->
-                        <div class="block md:hidden">
+                        <div class="block md:hidden  max-h-60 overflow-y-auto">
                             <template x-for="(link, index) in menuLinks" :key="index">
                                 <a :href="link.href" x-text="link.text"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"></a>

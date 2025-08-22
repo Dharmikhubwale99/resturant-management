@@ -38,7 +38,8 @@ class Restaurant extends Model
         'storage_quota_mb',
         'max_file_size_kb',
         'storage_used_kb',
-        'fssai'
+        'fssai',
+        'logo_url',
     ];
 
     /**
@@ -136,5 +137,11 @@ class Restaurant extends Model
     {
         return $this->hasMany(RestaurantConfiguration::class);
     }
+
+    public function billPrintSetting()
+    {
+        return $this->hasOne(\App\Models\BillPrintSetting::class);
+    }
+
 
 }

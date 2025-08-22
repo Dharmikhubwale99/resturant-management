@@ -1,4 +1,4 @@
-<div class="font-sans bg-gray-100 min-h-screen">
+<div class="font-sans bg-gray-100 h-[100dvh] md:h-screen overflow-auto md:overflow-hidden">
     <!-- Header - Responsive -->
     {{-- <header class="bg-white shadow-sm border-b">
         <div class="flex flex-col md:flex-row items-center justify-between px-2 md:px-4 py-2 md:py-3">
@@ -49,10 +49,10 @@
         </div>
     </header> --}}
 
-    <div class="flex flex-col md:flex-row h-full">
+    <div class="flex flex-col md:flex-row h-full min-h-0">
         <!-- Sidebar - Responsive -->
         @if (setting('category_module'))
-            <div class="w-full md:w-64 h-full md:min-h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col">
+            <div class="w-full md:w-64 max-h-screen md:h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col overflow-y-auto">
                 <div class="p-2 md:p-4 flex justify-between items-center">
                     <div class="text-sm text-gray-400">Categories</div>
                     <!-- Mobile expand button (hidden on desktop) -->
@@ -83,8 +83,6 @@
                         <i class="fas fa-list mr-2"></i> All Items
                     </button>
 
-
-
                     <!-- Extra categories (toggled by both the header + button and the Show More button) -->
                     <div id="mobileCats" class="mobile-categories hidden">
                         @foreach ($categories as $category)
@@ -94,14 +92,6 @@
                             </button>
                         @endforeach
                     </div>
-
-                    <!-- Show More/Less toggle for mobile -->
-                    <!--<button-->
-                    <!--    class="w-full text-left px-3 py-2 text-gray-300 hover:text-white flex items-center gap-2 text-sm"-->
-                    <!--    onclick="const m=document.getElementById('mobileCats'); m.classList.toggle('hidden'); this.querySelector('span').textContent = m.classList.contains('hidden') ? 'Show More +' : 'Show Less -'">-->
-                    <!--    <i class="fas fa-chevron-down"></i>-->
-                    <!--    <span>Show More +</span>-->
-                    <!--</button>-->
                 </nav>
             </div>
 
@@ -109,9 +99,9 @@
 
 
         <!-- Main Content - Responsive -->
-        <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden md:h-screen h-full min-h-0">
             <!-- Menu Items - Responsive -->
-            <div class="flex-1 p-2 md:p-4 overflow-y-auto">
+            <div class="flex-1 min-h-0 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
                     <div class="flex flex-wrap items-center gap-3">
                         <input type="text" wire:model.live="search"
@@ -219,7 +209,7 @@
                 </button>
                 <h2 class="text-md md:text-lg font-bold mb-2 md:mb-4 text-center">Cart</h2>
                 @if (count($cartItems))
-                    <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
+                    <div class="flex-1 min-h-0 overflow-y-auto space-y-2 md:space-y-3 pb-36">
                         @if ($editMode)
                             <p class="text-xs md:text-sm font-semibold text-blue-600">Previous KOT Items:</p>
                         @endif
@@ -313,7 +303,7 @@
                     </div>
 
                     @if (count($cartItems))
-                        <div class="border-t pt-2 md:pt-4 mt-2 md:mt-4 space-y-1 md:space-y-2">
+                        <div class="sticky bottom-0 left-0 right-0 bg-white border-t pt-2 md:pt-4 mt-2 md:mt-4 space-y-1 md:space-y-2 z-10">
                             <div class="flex items-center justify-between py-1 md:py-2">
                                 <button wire:click="$set('showCartDetailModal', true)"
                                     class="bg-blue-500 text-white px-2 py-1 rounded text-xs md:text-sm">
@@ -396,7 +386,7 @@
                             class="text-sm font-normal">(optional)</span>
                     </h3>
 
-                    <div class="space-y-2 mb-6">
+                    <div class="space-y-2 mb-6 overflow-y-auto max-h-[60vh]">
                         @foreach ($variantOptions as $opt)
                             <label class="flex items-center gap-2">
                                 <input type="radio" wire:model="selectedVariantId" value="{{ $opt['id'] }}">
@@ -409,7 +399,7 @@
                 @endif
 
                 @if (count($addonOptions))
-                    <div class="mb-4">
+                    <div class="mb-4 overflow-y-auto max-h-[40vh]">
                         <h4 class="text-sm font-semibold mb-2">Select Addons</h4>
                         @foreach ($addonOptions as $addon)
                             <label class="flex items-center space-x-2 mb-1">
@@ -615,10 +605,10 @@
                                 <div class="flex flex-row justify-between text-blue-600 font-semibold">
                                     Total: ₹{{ number_format($item['qty'] * $item['price'], 2) }}
                                     <button class="text-xs bg-yellow-100 text-yellow-700 px-1 md:px-2 rounded mt-1"
-                                        wire:click="openPriceModal('{{ $row['id'] }}')">Edit Price</button>
+                                        wire:click="openPriceModal('{{ $item['id'] ?? $key }}')">Edit Price</button>
                                     <div class="flex justify-end items-center">
                                         <button class="text-red-500 text-xs md:text-sm"
-                                            wire:click="remove('{{ $row['id'] }}')">✕</button>
+                                            wire:click="remove('{{ $item['id'] ?? $key }}')">✕</button>
                                     </div>
                                 </div>
                             </div>

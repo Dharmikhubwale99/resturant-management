@@ -17,7 +17,7 @@ class EditProfile extends Component
     public $personal_name, $personal_email, $personal_mobile, $personal_address, $username;
     public $password, $confirm_password;
 
-    public $restaurant_name, $restaurant_email, $restaurant_mobile, $restaurant_address, $restaurant, $gst, $fssai;
+    public $restaurant_name, $restaurant_email, $restaurant_mobile, $restaurant_address, $restaurant, $gst, $fssai, $logo, $oldLogo;
 
     public $bank_name, $ifsc, $holder_name, $account_type, $upi_id, $account_number;
 
@@ -51,6 +51,7 @@ class EditProfile extends Component
         $this->restaurant_address = $this->restaurant?->address;
         $this->fssai = $this->restaurant?->fssai;
         $this->gst = $this->restaurant?->gstin;
+        $this->oldLogo = $this->restaurant->logo_url;
         if ($this->restaurant->pin_code_id) {
             $rp = PinCode::with('district.city.state.country')->find($this->restaurant->pin_code_id);
             if ($rp) {
@@ -258,6 +259,7 @@ class EditProfile extends Component
             'restaurant_mobile' => 'required',
             'resto_pincode' => 'required|digits:6',
             'fssai' => 'required|string|max:14',
+            'logo' => 'nullable|file|image|max:2048',
 
             'bank_name' => 'nullable|string|max:255',
             'ifsc' => 'nullable|string|max:20',
@@ -296,6 +298,15 @@ class EditProfile extends Component
             }
         }
 
+        $logoPath = $this->oldLogo;
+
+        if ($this->logo) {
+            if ($logoPath && Storage::disk('public')->exists($logoPath)) {
+                Storage::disk('public')->delete($logoPath);
+            }
+            $logoPath = $this->logo->store('restaurant_logos', 'public');
+        }
+
         $user = Auth::user();
 
         $hashedPassword = $user->password;
@@ -332,6 +343,7 @@ class EditProfile extends Component
                 'account_number' => $this->account_number,
                 'pin_code_id' => $this->resto_pincode_id,
                 'fssai' => $this->fssai,
+                'logo_url' => $logoPath,
             ]);
         }
 

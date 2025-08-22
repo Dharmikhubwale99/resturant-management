@@ -1,4 +1,4 @@
-<div class="font-sans bg-gray-100 min-h-screen">
+<div class="font-sans bg-gray-100 h-[100dvh] md:h-screen overflow-auto md:overflow-hidden">
     {{-- <header class="bg-white shadow-sm border-b">
         <div class="flex flex-col md:flex-row items-center justify-between px-2 md:px-4 py-2 md:py-3">
             <div class="flex items-center justify-between w-full md:w-auto mb-2 md:mb-0">
@@ -45,9 +45,9 @@
         </div>
     </header> --}}
 
-    <div class="flex flex-col md:flex-row h-full">
+    <div class="flex flex-col md:flex-row h-full min-h-0">
         @if (setting('category_module'))
-            <div class="w-full md:w-64 h-full md:min-h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col">
+            <div class="w-full md:w-64 max-h-screen md:h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col overflow-y-auto">
                 <div class="p-2 md:p-4 flex justify-between items-center">
                     <div class="text-sm text-gray-400">Categories</div>
                     <button class="md:hidden text-gray-300 hover:text-white focus:outline-none"
@@ -100,10 +100,10 @@
         @endif
 
 
-        <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
-            <div class="flex-1 p-2 md:p-4 overflow-y-auto">
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden md:h-screen h-full min-h-0">
+            <div class="flex-1 min-h-0 p-2 md:p-4 overflow-y-auto">
                 <div class="mb-4">
-                    <div class="flex flex-wrap gap-2">
+                    <div class="flex flex-wrap items-center gap-3">
                         <input type="text" wire:model.live="search"
                             placeholder="Search by product, code, or short name..."
                             class="border px-3 py-2 rounded w-50" wire:keydown.enter="addTopSearchResult" />
@@ -149,7 +149,7 @@
                                 class="absolute top-1 right-1 w-2 h-2 md:w-3 md:h-3 rounded-full
                      {{ $item->type_dot_class }}"></span>
 
-                            <img src="{{ $item->image_url ?: asset('storage/' . ($siteSettings->favicon)) }}"
+                            <img src="{{ $item->image_url ?: asset('storage/' . $siteSettings->favicon) }}"
                                 class="w-full h-20 md:h-28 object-cover rounded mb-1 md:mb-2"
                                 alt="{{ $item->name }}">
 
@@ -187,14 +187,14 @@
                             @endif
                         </div>
                     @empty
-                    <p class="flex items-center col-span-full text-gray-500 text-center py-4">
-                        <!-- NEW: smarter empty message -->
-                        @if (!$showAllItems && trim($search) === '')
-                            Tick “Show Items” to browse all items, or start typing in Search.
-                        @else
-                            No items found.
-                        @endif
-                    </p>
+                        <p class="flex items-center col-span-full text-gray-500 text-center py-4">
+                            <!-- NEW: smarter empty message -->
+                            @if (!$showAllItems && trim($search) === '')
+                                Tick “Show Items” to browse all items, or start typing in Search.
+                            @else
+                                No items found.
+                            @endif
+                        </p>
                     @endforelse
                 </div>
             </div>
@@ -218,7 +218,7 @@
                     @endif
                 </div>
                 @if (count($cartItems))
-                    <div class="flex-1 overflow-y-auto space-y-2 md:space-y-3">
+                    <div class="flex-1 min-h-0 overflow-y-auto space-y-2 md:space-y-3 pb-36">
                         @if ($editMode)
                             <p class="text-xs md:text-sm font-semibold text-blue-600">Previous KOT Items:</p>
                         @endif
@@ -311,7 +311,7 @@
                     </div>
 
                     @if (count($cartItems))
-                        <div class="border-t pt-2 md:pt-4 mt-2 md:mt-4 space-y-1 md:space-y-2">
+                    <div class="sticky bottom-0 left-0 right-0 bg-white border-t pt-2 md:pt-4 mt-2 md:mt-4 space-y-1 md:space-y-2 z-10">
                             <div class="flex items-center justify-between py-1 md:py-2">
                                 <button wire:click="$set('showCartDetailModal', true)"
                                     class="bg-blue-500 text-white px-2 py-1 rounded text-xs md:text-sm">
@@ -320,10 +320,8 @@
 
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs md:text-sm font-semibold">Total:</span>
-                                    <input type="text"
-                                           wire:model.live="cartTotal"
-                                           readonly
-                                           class="border rounded px-2 py-1 w-20 md:w-28 text-right font-bold" />
+                                    <input type="text" wire:model.live="cartTotal" readonly
+                                        class="border rounded px-2 py-1 w-20 md:w-28 text-right font-bold" />
                                 </div>
                             </div>
 
@@ -707,44 +705,21 @@
                 <x-form.error />
 
                 <div class="space-y-3">
-                    <x-form.input
-                    name="followupCustomer_name"
-                    label="Customer Name"
-                    placeholder="Customer Name"
-                    :required="true"
-                    wireModel="followupCustomer_name"
-                  />
+                    <x-form.input name="followupCustomer_name" label="Customer Name" placeholder="Customer Name"
+                        :required="true" wireModel="followupCustomer_name" />
 
-                  <x-form.input
-                  name="followupCustomer_mobile"
-                  label="Mobile Number"
-                  placeholder="Mobile Number"
-                  maxlength="10"
-                  oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
-                  wireModel="followupCustomer_mobile"
-                />
+                    <x-form.input name="followupCustomer_mobile" label="Mobile Number" placeholder="Mobile Number"
+                        maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                        wireModel="followupCustomer_mobile" />
 
-                <x-form.input
-                  name="followupCustomer_email"
-                  label="Email (optional)"
-                  type="email"
-                  placeholder="Email (optional)"
-                  wireModel="followupCustomer_email"
-                />
+                    <x-form.input name="followupCustomer_email" label="Email (optional)" type="email"
+                        placeholder="Email (optional)" wireModel="followupCustomer_email" />
 
-                <x-form.input
-                  name="customer_dob"
-                  label="DOB (optional)"
-                  type="date"
-                  wireModel="customer_dob"
-                />
+                    <x-form.input name="customer_dob" label="DOB (optional)" type="date"
+                        wireModel="customer_dob" />
 
-                <x-form.input
-                  name="customer_anniversary"
-                  label="Anniversary (optional)"
-                  type="date"
-                  wireModel="customer_anniversary"
-                />
+                    <x-form.input name="customer_anniversary" label="Anniversary (optional)" type="date"
+                        wireModel="customer_anniversary" />
                 </div>
 
                 <div class="mt-4 flex justify-end gap-2">
@@ -877,6 +852,32 @@
                 // Android direct (તમે પહેલેથી Bluetooth Print વાપરી રહ્યાં છો)
                 window.open(`/bluetooth/launch/kot/${kotId}`, '_blank');
             }
+        });
+    </script>
+
+    <script>
+        // Add this to handle the initial state and clicks
+        document.addEventListener('DOMContentLoaded', function() {
+            // For mobile, we want to show the first 5 categories by default
+            const categoryNav = document.querySelector('.category-nav');
+            const mobileCategories = document.querySelector('.mobile-categories');
+
+            // On mobile, hide the nav initially (will be toggled by button)
+            if (window.innerWidth < 768) {
+                categoryNav.classList.add('hidden');
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    // Desktop - show all categories
+                    categoryNav.classList.remove('hidden');
+                    mobileCategories.classList.remove('hidden');
+                } else {
+                    // Mobile - hide extra categories
+                    mobileCategories.classList.add('hidden');
+                }
+            });
         });
     </script>
 

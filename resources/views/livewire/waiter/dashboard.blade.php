@@ -1,34 +1,32 @@
 <div class="p-4" x-data="{ selectedTable: null, showModal: false }">
     <x-form.error />
 
-    <div class="flex justify-end gap-6 mb-8">
-         {{-- <a href="{{ route('restaurant.pickup.create') }}">
-            <button
-                class="bg-red-500 text-white px-3 py-1 md:px-4 md:py-2 rounded hover:bg-red-600 text-sm md:text-base">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6 mb-6 md:mb-8">
+        <div class="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4 md:order-2">
+            <x-form.button :route="'restaurant.pickup.create'" class="bg-red-500 text-white w-full sm:w-auto justify-center">
                 Pick Up
-            </button>
-        </a> --}}
-        <x-form.button :route="'restaurant.pickup.create'" class="bg-red-500 text-white ">
-            Pick Up
-        </x-form.button>
-        <x-form.button :route="'restaurant.advance-booking.create'" class="bg-gray-500 text-white">
-            Advance Booking
-        </x-form.button>
-        <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-green-300 rounded"></div>
-            <span class="text-sm font-medium text-gray-700">Available</span>
-        </div>
-        <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-red-300 rounded"></div>
-            <span class="text-sm font-medium text-gray-700">Occupied</span>
-        </div>
-        <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-yellow-300 rounded"></div>
-            <span class="text-sm font-medium text-gray-700">Reserved</span>
+            </x-form.button>
+            <x-form.button :route="'restaurant.advance-booking.create'" class="bg-gray-600 text-white w-full sm:w-auto justify-center">
+                Advance Booking
+            </x-form.button>
         </div>
 
+        <div class="flex flex-wrap items-center gap-3 md:order-1">
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-4 bg-green-300 rounded"></span>
+                <span class="text-sm font-medium text-gray-700">Available</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-4 bg-red-300 rounded"></span>
+                <span class="text-sm font-medium text-gray-700">Occupied</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-4 bg-yellow-300 rounded"></span>
+                <span class="text-sm font-medium text-gray-700">Reserved</span>
+            </div>
+        </div>
     </div>
-    <h2>Pending Pickup Orders :- {{$pickupOrders}}</h2>
+    <h2>Pending Pickup Orders :- {{ $pickupOrders }}</h2>
     @foreach ($tablesByArea as $areaName => $tables)
         <h2 class="text-xl font-bold mb-2 mt-6">{{ $areaName }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
@@ -45,25 +43,39 @@
                 <div class="table-card rounded-2xl p-6 cursor-pointer relative {{ $statusColor }}
                 transition-transform transform hover:scale-105 hover:shadow-xl"
                     wire:click="openConfirm({{ $table->id }})">
-
-                    <div
-                        class="absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-xs font-medium text-gray-700">
-                        {{ $table->capacity }} Seats
+                    <div class="absolute top-4 right-4 flex justify-end gap-2">
+                        <div
+                            class=" bg-white px-3 py-1 rounded-full text-xs font-medium text-gray-700">
+                            {{ $table->capacity }} Seats
+                        </div>
                     </div>
+
 
                     <div class="text-2xl font-bold text-gray-800 mb-2">{{ $table->name }}</div>
                     @if (setting('area_module'))
                         <div class="text-sm text-black mb-1">{{ $table->area->name ?? '' }}</div>
                     @endif
-                    <div class="text-sm text-black mb-1">{{ ucfirst($table->status) }}</div>
+                    <div class="flex justify-start gap-4">
+                        <div class="text-sm text-black mb-1">{{ ucfirst($table->status) }}</div>
+                        <div class="bg-white px-2 py-1 rounded-full flex items-center gap-1">
+                            <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12,6 12,12 16,14"></polyline>
+                            </svg>
+                            <span class="text-xs font-medium text-gray-700">
+                                {{ \Carbon\Carbon::parse($table->updated_at)->diffForHumans(null, true) }}
+                            </span>
+                        </div>
+
+                    </div>
 
                     @if ($table->status === 'occupied')
-                        <div class="absolute bottom-4 right-4 flex items-center gap-2">
+                        <div class="absolute bottom-4 right-4 flex items-center gap-4">
 
                             <button wire:click.stop="editTable({{ $table->id }})"
                                 class="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors"
                                 title="View / Edit order">
-                                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor"
+                                <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -76,23 +88,12 @@
                             <button wire:click.stop="printTableBill({{ $table->id }})"
                                 class="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors"
                                 title="Print Bill">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-600" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2V9a2 2 0 012-2h16a2 2 0 012 2v7a2 2 0 01-2 2h-2m-4 0h-4" />
                                 </svg>
                             </button>
-
-                            <div class="bg-white px-2 py-1 rounded-full flex items-center gap-1">
-                                <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12,6 12,12 16,14"></polyline>
-                                </svg>
-                                <span class="text-xs font-medium text-gray-700">
-                                    {{ \Carbon\Carbon::parse($table->updated_at)->diffForHumans(null, true) }}
-                                </span>
-                            </div>
 
                         </div>
                     @endif
@@ -135,11 +136,13 @@
 </div>
 
 @push('scripts')
-<script>
-    Livewire.on('printBill', ({ billId }) => {
-        const url = `{{ url('/restaurant/bill-print') }}/${billId}`;
-        const printWindow = window.open(url, '_blank');
-        printWindow.focus();
-    });
-</script>
+    <script>
+        Livewire.on('printBill', ({
+            billId
+        }) => {
+            const url = `{{ url('/restaurant/bill-print') }}/${billId}`;
+            const printWindow = window.open(url, '_blank');
+            printWindow.focus();
+        });
+    </script>
 @endpush
