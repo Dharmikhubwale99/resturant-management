@@ -1,16 +1,20 @@
     <div class="p-6 bg-white rounded shadow">
 
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">Category List</h2>
-            <div class="flex items-center gap-4">
+        <div>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Category List</h2>
+                <div class="flex items-center gap-4">
+                    @can('category-create')
+                        @if (setting('category_module'))
+                            <x-form.button title="+ Add" route="restaurant.categories.create"
+                                class="bg-blue-600 hover:bg-blue-700 text-white" />
+                        @endif
+                    @endcan
+                </div>
+            </div>
+            <div class="flex flex-row justify-end sm:flex-row sm:items-center w-full">
                 <x-form.input name="search" placeholder="Search by name" wireModelLive="search" wrapperClass="mb-0"
                     inputClass="w-72" />
-                @can('category-create')
-                    @if (setting('category_module'))
-                        <x-form.button title="+ Add" route="restaurant.categories.create"
-                            class="bg-blue-600 hover:bg-blue-700 text-white" />
-                    @endif
-                @endcan
             </div>
         </div>
         <x-form.error />

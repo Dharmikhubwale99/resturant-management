@@ -7,9 +7,9 @@
             <x-form.input name="name" label="Name" wireModel="name" required placeholder="Enter name" />
 
             <div class="flex flex-row text-center  space-x-3">
-                <x-form.button type="submit" title="Save" wireClick="submit" wireTarget="submit" />
                 <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
-                    route="restaurant.categories.index" />
+                route="restaurant.categories.index" />
+                <x-form.button type="submit" title="Save" wireClick="submit" wireTarget="submit" />
             </div>
         </form>
     </div>

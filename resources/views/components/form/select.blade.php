@@ -3,7 +3,7 @@
     'label' => null,
     'options' => [],
     'value' => null,
-    'placeholder' => 'Select an option',
+    'placeholder' => '',
     'required' => false,
     'disabled' => false,
     'readonly' => false,

@@ -12,11 +12,11 @@
 
 
             <div class="flex gap-3">
-                <x-form.button title="Save" type="submit" wireTarget="save" />
-
                 <x-form.button :route="'restaurant.party'" class="bg-gray-500 text-white">
                     Back
                 </x-form.button>
+
+                <x-form.button title="Save" type="submit" wireTarget="save" />
             </div>
         </form>
     </div>
