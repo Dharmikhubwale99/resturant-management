@@ -159,26 +159,26 @@ Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFr
 
  Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
-    Route::get('/settings', Settings::class)->name('settings');
+    Route::get('/settings', Settings::class)->name('settings')->middleware('can:settings-index');
     Route::get('/edit-profile', AdminEditProfile::class)->name('edit-profile');
 
     Route::prefix('admin')->as('admin.')->group(function () {
 
-        Route::get('/', Index::class)->name('index');
-        Route::get('/create', Create::class)->name('create');
-        Route::get('/edit/{id}', Edit::class)->name('edit');
-        Route::get('/show/{id}', Show::class)->name('show');
+        Route::get('/', Index::class)->name('index')->middleware('can:admin-index');
+        Route::get('/create', Create::class)->name('create')->middleware('can:admin-create');
+        Route::get('/edit/{id}', Edit::class)->name('edit')->middleware('can:admin-edit');
+        Route::get('/show/{id}', Show::class)->name('show')->middleware('can:admin-show');
+        Route::get('/access/{id}', UserAccess::class)->name('access')->middleware('can:admin-access');
 
-        Route::get('/', Index::class)->name('index');
+        // Route::get('/', Index::class)->name('index');
 
-        Route::get('/access/{id}', UserAccess::class)->name('access');
     });
 
     Route::prefix('plans')->as('plans.')->group(function () {
-        Route::get('/', PlanIndex::class)->name('index');
-        Route::get('/create', PlanCreate::class)->name('create');
-        Route::get('/edit/{id}', PlanEdit::class)->name('edit');
-        Route::get('/report', PlanReport::class)->name('report');
+        Route::get('/', PlanIndex::class)->name('index')->middleware('can:plan-index');
+        Route::get('/create', PlanCreate::class)->name('create')->middleware('can:plan-create');
+        Route::get('/edit/{id}', PlanEdit::class)->name('edit')->middleware('can:plan-edit');
+        Route::get('/report', PlanReport::class)->name('report')->middleware('can:plan-report');
 
     });
  });

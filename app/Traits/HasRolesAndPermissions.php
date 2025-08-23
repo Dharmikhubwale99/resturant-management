@@ -11,7 +11,43 @@ trait HasRolesAndPermissions
             'manager',
             'waiter',
             'kitchen',
+            'dealer',
         ];
+    }
+
+    public function getSuperAdminPermissions(){
+        return [
+            'admin-index',
+            'admin-create',
+            'admin-edit',
+            'admin-show',
+            'admin-delete',
+            'admin-active',
+            'admin-access',
+
+            'dealer-index',
+            'dealer-create',
+            'dealer-edit',
+            'dealer-delete',
+
+            'plan-index',
+            'plan-create',
+            'plan-edit',
+            'plan-active',
+            'plan-delete',
+            'plan-report',
+
+            'settings-index',
+        ];
+    }
+
+    public function getAllAdminPermissionGroups()
+    {
+        foreach ($this->getAdminPermissions() as $permission) {
+            $data[explode('-', $permission)[0]][$permission] = $permission;
+        }
+
+        return $data;
     }
 
     public function getAllPermissions(){
@@ -87,13 +123,6 @@ trait HasRolesAndPermissions
         }
 
         return $data;
-    }
-
-    public function getAdminPermissions()
-    {
-        return [
-
-        ];
     }
 
     protected function mapModuleToConfigId($moduleName)

@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
         ]);
 
         $admin->assignRole('superadmin');
-        $admin->syncPermissions(array_merge($this->getAllPermissions(), $this->getAdminPermissions()));
+        $admin->syncPermissions(array_merge($this->getAllPermissions(), $this->getSuperAdminPermissions()));
 
     }
 }

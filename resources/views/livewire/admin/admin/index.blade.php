@@ -11,8 +11,10 @@
                 wrapperClass="mb-0"
                 inputClass="w-72"
             />
-            <x-form.button title="+ Add" route="superadmin.admin.create"
-                class="bg-blue-600 hover:bg-blue-700 text-white" />
+            @can('admin-create')
+                <x-form.button title="+ Add" route="superadmin.admin.create"
+                    class="bg-blue-600 hover:bg-blue-700 text-white" />
+            @endcan
         </div>
     </div>
     <x-form.error />
@@ -68,47 +70,59 @@
 
                         <td class="px-6 text-sm text-gray-900">
                             <div class="flex flex-row items-center space-x-3">
-                                <x-form.button title=""
-                                    class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                    wireClick="confirmBlock({{ $user->id }})">
-                                    @if ($user->is_active)
+                                @can('admin-active')
+                                    <x-form.button title=""
+                                        class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                        wireClick="confirmBlock({{ $user->id }})">
+                                        @if ($user->is_active)
+                                            <span class="w-5 h-1 flex items-center justify-center">
+                                                {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
+                                        @else
+                                            <span class="w-5 h-1 flex items-center justify-center">
+                                                {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
+                                        @endif
+                                    </x-form.button>
+                                @endcan
+
+                                @can('admin-show')
+                                    <x-form.button title=""
+                                            class="w-8 h-8 rounded flex items-center justify-center" :route="['superadmin.admin.show', $user->id]">
+                                            <span class="w-4 h-4 text-yellow-700">
+                                                {!! file_get_contents(public_path('icon/view.svg')) !!}
+                                            </span>
+                                        </x-form.button>
+                                @endcan
+
+                                @can('admin-edit')
+                                    <x-form.button title=""
+                                        class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                        :route="['superadmin.admin.edit', ['id' => $user->id]]">
                                         <span class="w-5 h-1 flex items-center justify-center">
-                                            {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
-                                    @else
-                                        <span class="w-5 h-1 flex items-center justify-center">
-                                            {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
-                                    @endif
-                                </x-form.button>
-                                <x-form.button title=""
-                                        class="w-8 h-8 rounded flex items-center justify-center" :route="['superadmin.admin.show', $user->id]">
-                                        <span class="w-4 h-4 text-yellow-700">
-                                            {!! file_get_contents(public_path('icon/view.svg')) !!}
+                                            {!! file_get_contents(public_path('icon/edit.svg')) !!}
                                         </span>
                                     </x-form.button>
-                                <x-form.button title=""
-                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                    :route="['superadmin.admin.edit', ['id' => $user->id]]">
-                                    <span class="w-5 h-1 flex items-center justify-center">
-                                        {!! file_get_contents(public_path('icon/edit.svg')) !!}
-                                    </span>
-                                </x-form.button>
+                                @endcan
 
-                                <x-form.button title=""
-                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                    wire:click="confirmDelete({{ $user->id }})">
-                                    <span class="w-5 h-1 flex items-center justify-center">
-                                        {!! file_get_contents(public_path('icon/delete.svg')) !!}
-                                    </span>
-                                </x-form.button>
-
-                                @if ($user->restaurant()->exists())
+                                @can('admin-delete')
                                     <x-form.button title=""
-                                        class="p-1 w-15 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition mt-4"
-                                        :route="['superadmin.admin.access', ['id' => $user->id]]">
-                                        <img src="{{ asset('icon/access.png') }}" alt="Access"
-                                            class="w-6 h-6 object-contain" />
+                                        class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                        wire:click="confirmDelete({{ $user->id }})">
+                                        <span class="w-5 h-1 flex items-center justify-center">
+                                            {!! file_get_contents(public_path('icon/delete.svg')) !!}
+                                        </span>
                                     </x-form.button>
-                                @endif
+                                @endcan
+
+                                @can('admin-access')
+                                    @if ($user->restaurant()->exists())
+                                        <x-form.button title=""
+                                            class="p-1 w-15 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition mt-4"
+                                            :route="['superadmin.admin.access', ['id' => $user->id]]">
+                                            <img src="{{ asset('icon/access.png') }}" alt="Access"
+                                                class="w-6 h-6 object-contain" />
+                                        </x-form.button>
+                                    @endif
+                                @endcan
 
 
                             </div>
