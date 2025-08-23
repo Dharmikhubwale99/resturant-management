@@ -87,7 +87,7 @@
                 <a href="{{ route('restaurant.waiter.dashboard') }}" class="text-gray-700 hover:text-blue-600">
                     <i class="fas fa-shopping-cart text-lg"></i>
                 </a>
-                <a href="{{ route('restaurant.party') }}" class="text-gray-700 hover:text-blue-600">
+                <a href="{{ route('restaurant.kitchen.index') }}" class="text-gray-700 hover:text-blue-600">
                     <i class="fas fa-utensils text-lg"></i>
                 </a>
                 <a href="{{ route('restaurant.party') }}" class="text-gray-700 hover:text-blue-600">
