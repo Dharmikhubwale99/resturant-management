@@ -16,7 +16,7 @@ use Illuminate\Validation\Rule;
 class Create extends Component
 {
     use WithFileUploads, HasRolesAndPermissions;
-    public $user_name, $email, $mobile, $passwordm,$personal_address;
+    public $user_name, $email, $mobile, $password,$personal_address;
     public $pincode, $pincode_id, $country_name, $state_name, $city_name, $district_name, $username, $resto_mobile;
     public $country_id, $state_id, $city_id, $district_id;
     public $restaurant_name, $restaurant_address, $gst_no, $password_confirmation, $restaurant_email, $fssai;
