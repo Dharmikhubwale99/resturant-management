@@ -8,25 +8,38 @@
             </div>
 
             <div class="hidden md:flex space-x-8 items-center">
+                @can('dealer-index')
+                    <a href="{{ route('superadmin.dealer.index') }}"
+                        class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Dealers
+                    </a>
+                @endcan
+                @can('admin-index')
+                    <a href="{{ route('superadmin.admin.index') }}"
+                        class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Resturants
+                    </a>
+                @endcan
+                @can('plan-index')
+                    <a href="{{ route('superadmin.plans.index') }}"
+                        class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Plan
+                    </a>
+                @endcan
 
-                <a href="{{ route('superadmin.admin.index') }}"
-                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                    Admin
-                </a>
-                <a href="{{ route('superadmin.plans.index') }}"
-                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                    Plan
-                </a>
+                @can('settings-index')
+                    <a href="{{ route('superadmin.settings') }}"
+                        class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Setting
+                    </a>
+                @endcan
 
-                <a href="{{ route('superadmin.settings') }}"
-                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                    Setting
-                </a>
-
-                <a href="{{ route('superadmin.plans.report') }}"
-                    class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
-                    Report
-                </a>
+                @can('plan-report')
+                    <a href="{{ route('superadmin.plans.report') }}"
+                        class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Report
+                    </a>
+                @endcan
             </div>
 
             <div class="flex items-center space-x-4">
@@ -57,7 +70,8 @@
 
                         <div class="block md:hidden ">
 
-                            <a href="{{ route('superadmin.admin.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admins</a>
+                            <a href="{{ route('superadmin.admin.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admins</a>
 
                             <a href="{{ route('superadmin.settings') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
@@ -73,7 +87,8 @@
                         <div class="py-1">
                             {{-- <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">View
                                 Profile</a> --}}
-                            <a href="{{ route('superadmin.edit-profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit
+                            <a href="{{ route('superadmin.edit-profile') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit
                                 Profile</a>
 
                             {{-- @if (auth()->check() && auth()->user()->refer_code)

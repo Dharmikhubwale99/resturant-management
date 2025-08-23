@@ -1,46 +1,61 @@
 <div class="p-6 bg-white rounded shadow">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold">User List</h2>
+    <div class="mb-4">
+        <div class="flex flex-col gap-3 md:gap-4">
 
-        <div class="flex items-center gap-4">
-            <x-form.input name="search" placeholder="Search by name, email, mobile or referrer" wireModelLive="search"
-                wrapperClass="mb-0" inputClass="w-72 border border-gray-300 focus:ring focus:ring-blue-300" />
+            <div class="flex items-center justify-between min-w-0">
 
-            <x-form.select name="role" wireModelLive="role" :options="['all' => 'All', 'manager' => 'Manager', 'waiter' => 'Waiter', 'kitchen' => 'Kitchen']" wrapperClass="mb-0"
-                inputClass="w-48 border border-gray-300 focus:ring focus:ring-blue-300" />
+                <h2 class="text-xl font-bold truncate">User List</h2>
 
-            @can('user-create')
-                <x-form.button title="+ Add" route="restaurant.users.create"
-                    class="bg-blue-600 hover:bg-blue-700 text-white" />
-            @endcan
+                <div class="shrink-0 md:ml-4 flex flex-row gap-3">
+                    <x-form.select name="role" wireModelLive="role" :options="['all' => 'All', 'manager' => 'Manager', 'waiter' => 'Waiter', 'kitchen' => 'Kitchen']" wrapperClass="mb-0 sm:w-auto"
+                        inputClass="md:w-30 border border-gray-300 focus:ring focus:ring-blue-300" />
+
+                    @can('user-create')
+                        <x-form.button title="+ Add" route="restaurant.users.create"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2" />
+                    @endcan
+
+                </div>
+
+            </div>
+
+            <div class="flex flex-row justify-end sm:flex-row sm:items-center w-full">
+
+                <x-form.input name="search" placeholder="Search by name, email, mobile " wireModelLive="search"
+                    wrapperClass="mb-0"
+                    inputClass="w-full border border-gray-300 focus:ring focus:ring-blue-300" />
+
+            </div>
+
         </div>
     </div>
+
     <x-form.error />
 
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Username</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">#</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Username</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Email</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Role</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
                 @foreach ($users as $index => $user)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-3 text-sm text-gray-900">{{ $user->id }}</td>
-                        <td class="px-6 py-3 text-sm text-gray-900">{{ $user->name }}</td>
-                        <td class="px-6 py-3 text-sm text-gray-900">{{ $user->username }}</td>
-                        <td class="px-6 py-3 text-sm text-gray-900">{{ $user->email }}</td>
-                        <td class="px-6 py-3 text-sm text-gray-900">{{ $user->mobile }}</td>
-                        <td class="px-6 py-3 text-sm text-gray-900">{{ $user->role }}</td>
-                        <td class="px-6 text-sm">
+                        <td class="px-6 whitespace-nowrap py-3 text-sm text-gray-900">{{ $user->id }}</td>
+                        <td class="px-6 whitespace-nowrap py-3 text-sm text-gray-900">{{ $user->name }}</td>
+                        <td class="px-6 whitespace-nowrap py-3 text-sm text-gray-900">{{ $user->username }}</td>
+                        <td class="px-6 whitespace-nowrap py-3 text-sm text-gray-900">{{ $user->email }}</td>
+                        <td class="px-6 whitespace-nowrap py-3 text-sm text-gray-900">{{ $user->mobile }}</td>
+                        <td class="px-6 whitespace-nowrap py-3 text-sm text-gray-900">{{ $user->role }}</td>
+                        <td class="px-6 whitespace-nowrap text-sm">
 
                             @if ($user->is_active)
                                 <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">

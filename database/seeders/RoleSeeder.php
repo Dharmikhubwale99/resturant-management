@@ -25,7 +25,7 @@ class RoleSeeder extends Seeder
             ]);
         }
 
-        $permissions = array_merge($this->getAllPermissions(), $this->getAdminPermissions());
+        $permissions = array_merge($this->getAllPermissions(), $this->getSuperAdminPermissions());
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate([

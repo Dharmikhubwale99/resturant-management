@@ -11,7 +11,9 @@
                 wrapperClass="mb-0"
                 inputClass="w-72"
             />
-            <x-form.button title="+ Add" route="superadmin.plans.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
+            @can('plan-create')
+                <x-form.button title="+ Add" route="superadmin.plans.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
+            @endcan
         </div>
     </div>
     <x-form.error />
@@ -52,30 +54,38 @@
                                 @endif
                             </td>
                         <td class="px-6 text-sm text-gray-900 flex flex-row">
-                            <x-form.button title=""
-                                        class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                        wireClick="confirmBlock({{ $plan->id }})">
-                                        @if ($plan->is_active)
-                                        <span class="w-5 h-1 flex items-center justify-center">
-                                                {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
-                                        @else
-                                        <span class="w-5 h-1 flex items-center justify-center">
-                                            {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
-                                        @endif
-                            </x-form.button>
-                            <x-form.button title="" class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                 :route="['superadmin.plans.edit', $plan->id]">
-                                <span class="w-5 h-1 flex items-center justify-center">
-                                    {!! file_get_contents(public_path('icon/edit.svg')) !!}
-                                </span>
-                            </x-form.button>
-                            <x-form.button title=""
-                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                    wireClick="confirmDelete({{ $plan->id }})">
+                            @can('plan-active')
+                                <x-form.button title=""
+                                            class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                            wireClick="confirmBlock({{ $plan->id }})">
+                                            @if ($plan->is_active)
+                                            <span class="w-5 h-1 flex items-center justify-center">
+                                                    {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
+                                            @else
+                                            <span class="w-5 h-1 flex items-center justify-center">
+                                                {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
+                                            @endif
+                                </x-form.button>
+                            @endcan
+
+                            @can('plan-edit')
+                                <x-form.button title="" class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                    :route="['superadmin.plans.edit', $plan->id]">
                                     <span class="w-5 h-1 flex items-center justify-center">
-                                        {!! file_get_contents(public_path('icon/delete.svg')) !!}
+                                        {!! file_get_contents(public_path('icon/edit.svg')) !!}
                                     </span>
-                            </x-form.button>
+                                </x-form.button>
+                            @endcan
+
+                            @can('plan-delete')
+                                <x-form.button title=""
+                                        class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                        wireClick="confirmDelete({{ $plan->id }})">
+                                        <span class="w-5 h-1 flex items-center justify-center">
+                                            {!! file_get_contents(public_path('icon/delete.svg')) !!}
+                                        </span>
+                                </x-form.button>
+                            @endcan
                         </td>
                     </tr>
                 @endforeach

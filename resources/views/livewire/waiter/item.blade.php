@@ -1,4 +1,14 @@
-<div class="font-sans bg-gray-100 h-[100dvh] md:h-screen overflow-auto md:overflow-hidden">
+@push('css')
+<style>
+    /* Android Chrome pull-to-refresh OFF */
+    html, body { overscroll-behavior-y: none; }
+    .overscroll-contain {
+      overscroll-behavior: contain;
+      overscroll-behavior-y: contain;
+    }
+  </style>
+@endpush
+<div class="font-sans bg-gray-100 h-[100dvh] md:h-screen overflow-auto md:overflow-hidden overscroll-contain">
     <!-- Header - Responsive -->
     {{-- <header class="bg-white shadow-sm border-b">
         <div class="flex flex-col md:flex-row items-center justify-between px-2 md:px-4 py-2 md:py-3">
@@ -52,7 +62,8 @@
     <div class="flex flex-col md:flex-row h-full min-h-0">
         <!-- Sidebar - Responsive -->
         @if (setting('category_module'))
-            <div class="w-full md:w-64 max-h-screen md:h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col overflow-y-auto">
+            <div
+                class="w-full md:w-64 max-h-screen md:h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col overflow-y-auto  overscroll-contain">
                 <div class="p-2 md:p-4 flex justify-between items-center">
                     <div class="text-sm text-gray-400">Categories</div>
                     <!-- Mobile expand button (hidden on desktop) -->
@@ -101,7 +112,7 @@
         <!-- Main Content - Responsive -->
         <div class="flex-1 flex flex-col md:flex-row overflow-hidden md:h-screen h-full min-h-0">
             <!-- Menu Items - Responsive -->
-            <div class="flex-1 min-h-0 p-2 md:p-4 overflow-y-auto">
+            <div class="flex-1 min-h-0 p-2 md:p-4 overflow-y-auto overscroll-contain">
                 <div class="mb-4">
                     <div class="flex flex-wrap items-center gap-3">
                         <input type="text" wire:model.live="search"
@@ -150,7 +161,7 @@
                                 class="absolute top-1 right-1 w-2 h-2 md:w-3 md:h-3 rounded-full
                      {{ $item->type_dot_class }}"></span>
 
-                            <img src="{{ $item->image_url ?: asset('storage/' . ($siteSettings->favicon)) }}"
+                            <img src="{{ $item->image_url ?: asset('storage/' . $siteSettings->favicon) }}"
                                 class="w-full h-20 md:h-28 object-cover rounded mb-1 md:mb-2"
                                 alt="{{ $item->name }}">
                             <h3 class="text-xs md:text-sm font-semibold text-center truncate px-1">{{ $item->name }}
@@ -202,8 +213,8 @@
             </div>
 
             <!-- Cart Section - Responsive -->
-            <div
-                class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200">
+            <div id="cartPanel"
+                class="w-full md:w-2/5 lg:w-1/3 bg-white p-2 md:p-4 rounded shadow flex flex-col border-t lg:border-t-0 lg:border-l border-gray-200 overscroll-contain">
                 <button wire:click="openCustomerModal" class="flex justify-end text-gray-600 hover:text-gray-800">
                     <i class="fas fa-user text-lg"></i>
                 </button>
@@ -303,7 +314,8 @@
                     </div>
 
                     @if (count($cartItems))
-                        <div class="sticky bottom-0 left-0 right-0 bg-white border-t pt-2 md:pt-4 mt-2 md:mt-4 space-y-1 md:space-y-2 z-10">
+                        <div
+                            class="sticky bottom-0 left-0 right-0 bg-white border-t pt-2 md:pt-4 mt-2 md:mt-4 space-y-1 md:space-y-2 z-10">
                             <div class="flex items-center justify-between py-1 md:py-2">
                                 <button wire:click="$set('showCartDetailModal', true)"
                                     class="bg-blue-500 text-white px-2 py-1 rounded text-xs md:text-sm">
@@ -312,10 +324,8 @@
 
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs md:text-sm font-semibold">Total:</span>
-                                    <input type="text"
-                                           wire:model.live="cartTotal"
-                                           readonly
-                                           class="border rounded px-2 py-1 w-20 md:w-28 text-right font-bold" />
+                                    <input type="text" wire:model.live="cartTotal" readonly
+                                        class="border rounded px-2 py-1 w-20 md:w-28 text-right font-bold" />
                                 </div>
                             </div>
 
@@ -377,6 +387,52 @@
             </div>
         </div>
     </div>
+    <style id="android-cart-css">
+        #cartToggle {
+            position: fixed;
+            display: none;
+            /* no !important */
+            z-index: 2147483647;
+            pointer-events: auto;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ✅ Only show on Android-mobile when our body state classes are present */
+        @media (max-width: 767px) {
+
+            body.android-cart-hidden #cartToggle,
+            body.android-cart-visible #cartToggle {
+                display: flex !important;
+                /* show on Android mobile only */
+            }
+        }
+
+        /* Cart visibility via body classes (same as before) */
+        @media (max-width: 767px) {
+            body.android-cart-hidden #cartPanel {
+                display: none !important;
+            }
+
+            body.android-cart-visible #cartPanel {
+                display: flex !important;
+                overflow-y: auto !important;
+            }
+
+            body.android-cart-visible .font-sans {
+                overflow-y: auto !important;
+            }
+        }
+    </style>
+
+
+    <!-- Floating Arrow Toggle (Android only) - never hide on open -->
+    <button id="cartToggle"
+        class="fixed bottom-4 right-4 md:!hidden bg-red-500 text-white rounded-full w-12 h-12 shadow-lg flex items-center justify-center pointer-events-auto !z-[2147483647]"
+        style="position:fixed">
+        <i class="fas fa-chevron-up text-xl"></i>
+    </button>
+
 
     @if ($showVariantModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-transparent bg-opacity-40 backdrop-blur-lg">
@@ -877,5 +933,98 @@
             const orderId = event.orderId;
             window.open(`/bluetooth/launch/bill/${orderId}`, '_blank');
         });
+    </script>
+
+    <script>
+        (function() {
+            const MD_BREAKPOINT = 768;
+            let cartVisible = false; // toggled only by arrow on Android-mobile
+
+            const isAndroid = () => /Android/i.test(navigator.userAgent);
+            const isMobile = () => window.innerWidth < MD_BREAKPOINT;
+
+            function applyVisibility() {
+                if (!isAndroid() || !isMobile()) {
+                    document.body.classList.remove('android-cart-hidden', 'android-cart-visible');
+                    return;
+                }
+                document.body.classList.toggle('android-cart-visible', cartVisible);
+                document.body.classList.toggle('android-cart-hidden', !cartVisible);
+
+                // keep toggle always visible
+                const t = document.getElementById('cartToggle');
+                if (t) {
+                    t.style.display = 'flex';
+                    t.classList.remove('hidden');
+                    t.setAttribute('aria-hidden', 'false');
+                }
+            }
+
+            function portalCartToggleToBody() {
+                const t = document.getElementById('cartToggle');
+                if (t && t.parentElement !== document.body) {
+                    document.body.appendChild(t);
+                }
+            }
+
+            function wireToggleIcon() {
+                const t = document.getElementById('cartToggle');
+                if (!t) return;
+                const icon = t.querySelector('i');
+                if (!icon) return;
+                // show “down” when cart open, “up” when closed
+                icon.classList.toggle('fa-chevron-down', cartVisible);
+                icon.classList.toggle('fa-chevron-up', !cartVisible);
+            }
+
+            function ensureButton() {
+                portalCartToggleToBody();
+                const t = document.getElementById('cartToggle');
+                if (isAndroid() && isMobile()) {
+                    if (t) {
+                        t.classList.remove('hidden');
+                        t.style.display = 'flex';
+                    }
+                } else if (t) {
+                    t.classList.add('hidden');
+                }
+            }
+
+            function init() {
+                // initial state: cart closed on Android-mobile
+                cartVisible = (isAndroid() && isMobile()) ? false : true;
+                ensureButton();
+                applyVisibility();
+                wireToggleIcon();
+            }
+
+            // 🔑 Event delegation (survives Livewire re-renders)
+            document.body.addEventListener('click', function(e) {
+                const btn = e.target.closest('#cartToggle');
+                if (!btn) return;
+                cartVisible = !cartVisible;
+                applyVisibility();
+                wireToggleIcon();
+            });
+
+            // keep state across resize + Livewire
+            window.addEventListener('resize', () => {
+                ensureButton();
+                applyVisibility();
+                wireToggleIcon();
+            });
+            document.addEventListener('livewire:update', () => {
+                ensureButton();
+                applyVisibility();
+                wireToggleIcon();
+            });
+            window.addEventListener('livewire:navigated', () => {
+                ensureButton();
+                applyVisibility();
+                wireToggleIcon();
+            });
+
+            document.addEventListener('DOMContentLoaded', init);
+        })();
     </script>
 @endpush
