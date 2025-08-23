@@ -17,6 +17,10 @@ use \App\Livewire\Admin\{
     Admin\Edit,
     Admin\Show,
 
+    Dealer\Index as DealerIndex,
+    Dealer\Create as DealerCreate,
+    Dealer\Edit as DealerEdit,
+
     Plan\Index as PlanIndex,
     Plan\Create as PlanCreate,
     Plan\Edit as PlanEdit,
@@ -157,10 +161,10 @@ Route::post('/razorpay/callback', [PaymentController::class, 'handleCallback'])-
 Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFreePlan']);
 
 
- Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin'])->group(function () {
-    Route::get('/', Dashboard::class)->name('dashboard');
-    Route::get('/settings', Settings::class)->name('settings')->middleware('can:settings-index');
-    Route::get('/edit-profile', AdminEditProfile::class)->name('edit-profile');
+ Route::prefix('superadmin')->as('superadmin.')->middleware(['web', 'auth', 'role:superadmin|dealer'])->group(function () {
+        Route::get('/', Dashboard::class)->name('dashboard');
+        Route::get('/settings', Settings::class)->name('settings')->middleware('can:settings-index');
+        Route::get('/edit-profile', AdminEditProfile::class)->name('edit-profile');
 
     Route::prefix('admin')->as('admin.')->group(function () {
 
@@ -172,6 +176,12 @@ Route::post('/activate-free-plan/{plan}', [PaymentController::class, 'activateFr
 
         // Route::get('/', Index::class)->name('index');
 
+    });
+
+    Route::prefix('dealer')->as('dealer.')->group(function () {
+        Route::get('/', DealerIndex::class)->name('index')->middleware('can:dealer-index');
+        Route::get('/create', DealerCreate::class)->name('create')->middleware('can:dealer-create');
+        Route::get('/edit/{id}', DealerEdit::class)->name('edit')->middleware('can:dealer-edit');
     });
 
     Route::prefix('plans')->as('plans.')->group(function () {

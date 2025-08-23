@@ -29,6 +29,7 @@ trait HasRolesAndPermissions
             'dealer-create',
             'dealer-edit',
             'dealer-delete',
+            'dealer-active',
 
             'plan-index',
             'plan-create',
