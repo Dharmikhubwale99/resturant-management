@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\{MoneyOut, Expense};
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 
 class MoneyOutIndex extends Component
 {
@@ -42,26 +43,29 @@ class MoneyOutIndex extends Component
         }
 
         $moneyOuts = $moneyOutQuery->get()->map(function ($item) {
-            return [
+            return collect([
                 'date' => $item->date,
                 'amount' => $item->amount,
                 'party_name' => $item->party_name,
                 'description' => $item->description,
                 'type' => 'money_out',
-            ];
+            ]);
         });
 
         $expenses = $expenseQuery->get()->map(function ($item) {
-            return [
+            return collect([
                 'date' => $item->paid_at,
                 'amount' => $item->amount,
                 'party_name' => $item->name,
                 'description' => $item->description,
                 'type' => 'expense',
-            ];
+            ]);
         });
 
-        $combined = $moneyOuts->merge($expenses)->sortByDesc('date')->values();
+        $combined = $moneyOuts
+        ->concat($expenses)
+        ->sortByDesc(fn ($i) => $i['date'] instanceof \Carbon\Carbon ? $i['date'] : Carbon::parse($i['date']))
+        ->values();
 
         $perPage = 15;
         $currentPage = request()->get('page', 1);

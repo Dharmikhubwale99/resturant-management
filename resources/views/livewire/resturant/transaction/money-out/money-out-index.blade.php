@@ -1,21 +1,24 @@
 <div class="p-6 bg-white rounded shadow">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold">Money Out List</h2>
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-4">
+        <h2 class="text-xl font-bold truncate">Money Out List</h2>
 
-        <div class="flex items-center gap-4">
+        <div class="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div class="flex flex-row gap-3">
+            <x-form.input type="date" name="from_date" wireModelLive="from_date" wrapperClass="mb-0 w-full sm:w-auto"
+                inputClass="w-full sm:w-auto border border-gray-300 focus:ring focus:ring-blue-300" />
+
+            <x-form.input type="date" name="to_date" wireModelLive="to_date" wrapperClass="mb-0 w-full sm:w-auto"
+                inputClass="w-full sm:w-auto border border-gray-300 focus:ring focus:ring-blue-300" />
+
+            </div>
             <x-form.input name="search" placeholder="Search by party or description" wireModelLive="search"
-                wrapperClass="mb-0" inputClass="w-72 border border-gray-300 focus:ring focus:ring-blue-300" />
-
-            <x-form.input type="date" name="from_date" wireModelLive="from_date" wrapperClass="mb-0"
-                inputClass="border border-gray-300 focus:ring focus:ring-blue-300" />
-
-            <x-form.input type="date" name="to_date" wireModelLive="to_date" wrapperClass="mb-0"
-                inputClass="border border-gray-300 focus:ring focus:ring-blue-300" />
+                wrapperClass="mb-0 w-full sm:w-auto"
+                inputClass="w-full sm:w-72 border border-gray-300 focus:ring focus:ring-blue-300" />
 
             @can('moneyout-create')
                 @if (setting('moneyOut'))
                     <x-form.button title="+ Add" route="restaurant.money-out.create"
-                        class="bg-blue-600 hover:bg-blue-700 text-white" />
+                        class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white" />
                 @endif
             @endcan
         </div>

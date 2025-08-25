@@ -1,14 +1,23 @@
     <div class="p-6 bg-white rounded shadow">
 
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">Expense-Type List</h2>
-            <div class="flex items-center gap-4">
-                <x-form.input name="search" placeholder="Search by name" wireModelLive="search" wrapperClass="mb-0"
-                    inputClass="w-72" />
-                @can('expensetype-create')
-                    <x-form.button title="+ Add" route="restaurant.expense-types.create"
-                        class="bg-blue-600 hover:bg-blue-700 text-white" />
-                @endcan
+        <div class="mb-4">
+            <div class="flex flex-col gap-3 md:gap-4">
+
+                <div class="flex items-center justify-between min-w-0">
+                    <h2 class="text-xl font-bold truncate">Expense-Type List</h2>
+                    <div class="shrink-0 md:ml-4 flex flex-row gap-3">
+                        @can('expensetype-create')
+                            <x-form.button title="+ Add" route="restaurant.expense-types.create"
+                                class="bg-blue-600 hover:bg-blue-700 text-white" />
+                        @endcan
+                    </div>
+
+                </div>
+                <div class="flex flex-row justify-end sm:flex-row sm:items-center w-full">
+                    <x-form.input name="search" placeholder="Search by name" wireModelLive="search" wrapperClass="mb-0"
+                        inputClass="w-72" />
+                </div>
+
             </div>
         </div>
         <x-form.error />
@@ -29,8 +38,7 @@
                             <td class="px-6 text-sm text-gray-900">{{ $expenseType->name }}</td>
                             <td class="px-6 text-sm">
                                 @if ($expenseType->is_active)
-                                    <span
-                                        class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                                    <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">
                                         Inactive
                                     </span>
                                 @else
@@ -43,16 +51,16 @@
                             <td class="px-2 text-sm text-gray-900">
                                 <div class="flex items-center justify-start space-x-2">
                                     <x-form.button title=""
-                                            class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                            wireClick="confirmBlock({{ $expenseType->id }})">
-                                            @if ($expenseType->is_active)
-                                                <span class="w-5 h-1 flex items-center justify-center">
-                                                    {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
-                                            @else
-                                                <span class="w-5 h-1 flex items-center justify-center">
-                                                    {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
-                                            @endif
-                                        </x-form.button>
+                                        class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                        wireClick="confirmBlock({{ $expenseType->id }})">
+                                        @if ($expenseType->is_active)
+                                            <span class="w-5 h-1 flex items-center justify-center">
+                                                {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
+                                        @else
+                                            <span class="w-5 h-1 flex items-center justify-center">
+                                                {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
+                                        @endif
+                                    </x-form.button>
                                     @can('expensetype-edit')
                                         <x-form.button title=""
                                             class="w-8 h-8 rounded flex items-center justify-center" :route="['restaurant.expense-types.edit', $expenseType->id]">
@@ -84,7 +92,8 @@
                 <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
                     <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
                         <h3 class="text-lg font-semibold mb-4 text-red-600">Confirm Delete</h3>
-                        <p class="text-gray-700 mb-6">Are you sure you want to delete this expense type? This action
+                        <p class="text-gray-700 mb-6">Are you sure you want to delete this expense type? This
+                            action
                             cannot
                             be
                             undone.</p>

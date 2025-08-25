@@ -15,7 +15,11 @@
             <x-form.input name="amount" label="Amount" type="number" wireModel="amount" required="true"
                 placeholder="Enter amount paid" />
 
-            <x-form.button title="Save Payment" type="submit" wireTarget="save" class="bg-green-600 text-white" />
+            <div class="flex flex-row text-center  space-x-3">
+                <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
+                    route="restaurant.money-maintain" />
+                <x-form.button title="Save Payment" type="submit" wireTarget="save" class="bg-green-600 text-white" />
+            </div>
         </form>
     </div>
 </div>

@@ -24,8 +24,11 @@
             <textarea wire:model="description" class="w-full border px-3 py-2 rounded"></textarea>
         </div>
 
-        <div>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+        <div class="flex flex-row text-center  space-x-3">
+            <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
+                route="restaurant.money-out" />
+
+            <x-form.button title="Save" type="submit" wireTarget="save" class="bg-green-600 text-white" />
         </div>
     </form>
 </div>
