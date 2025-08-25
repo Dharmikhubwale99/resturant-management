@@ -6,7 +6,7 @@
             <x-form.button :route="'restaurant.pickup.create'" class="bg-red-500 text-white w-full sm:w-auto justify-center">
                 Pick Up
             </x-form.button>
-            <x-form.button :route="'restaurant.advance-booking.create'" class="bg-gray-600 text-white w-full sm:w-auto justify-center">
+            <x-form.button :route="'restaurant.advance-booking'" class="bg-gray-600 text-white w-full sm:w-auto justify-center">
                 Advance Booking
             </x-form.button>
         </div>
