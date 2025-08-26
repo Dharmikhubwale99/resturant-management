@@ -10,9 +10,9 @@
                 placeholder="Enter description" />
 
             <div class="flex flex-row text-center  space-x-3">
-                <x-form.button type="submit" title="Save" wireClick="submit" wireTarget="submit" />
                 <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
-                    route="restaurant.areas.index" />
+                route="restaurant.areas.index" />
+                <x-form.button type="submit" title="Save" wireClick="submit" wireTarget="submit" />
             </div>
         </form>
     </div>

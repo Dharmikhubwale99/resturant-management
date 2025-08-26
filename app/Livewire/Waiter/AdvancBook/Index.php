@@ -5,19 +5,40 @@ namespace App\Livewire\Waiter\AdvancBook;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\{Table, TableBooking, Order};
+use Livewire\WithPagination;
 
 class Index extends Component
 {
+    use WithPagination;
     public $reservedTables;
+    protected $paginationTheme = 'tailwind';
+
+    public $search = '';
 
     #[Layout('components.layouts.resturant.app')]
     public function render()
     {
-        $this->reservedTables = TableBooking::where('status', 'booked')->get();
+        $bookings = TableBooking::query()
+            ->where('status', 'booked')
+            ->with(['customer', 'table'])
+            ->when($this->search !== '', function ($q) {
+                $term = trim($this->search);
+                $q->whereHas('customer', function ($qc) use ($term) {
+                    $qc->where('name', 'like', "%{$term}%")
+                       ->orWhere('mobile', 'like', "%{$term}%");
+                });
+            })
+            ->latest('booking_time')
+            ->paginate(10);
 
         return view('livewire.waiter.advanc-book.index', [
-            'reservedTables' => $this->reservedTables
+            'bookings' => $bookings,
         ]);
+    }
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
     }
 
     public function startOrder($bookingId)

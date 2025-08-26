@@ -14,9 +14,9 @@
                 <label for="qr_enabled">QR Enabled</label>
             </div>
             <div class="flex flex-row text-center space-x-3">
-                <x-form.button type="submit" title="Save" wireTarget="submit" />
                 <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
-                    route="restaurant.tables.index" />
+                route="restaurant.tables.index" />
+                <x-form.button type="submit" title="Save" wireTarget="submit" />
             </div>
         </form>
     </div>

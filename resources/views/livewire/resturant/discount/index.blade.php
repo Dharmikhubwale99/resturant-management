@@ -1,21 +1,28 @@
     <div class="p-6 bg-white rounded shadow">
 
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">Discount List</h2>
-            <div class="flex items-center gap-4">
-                <x-form.input name="search" placeholder="Search..." wireModelLive="search" wrapperClass="mb-0"
-                    inputClass="w-72" />
+        <div class="mb-4">
+            <div class="flex flex-col gap-3 md:gap-4">
 
-                <x-form.select name="filterDiscountType" wireModelLive="filterDiscountType" :options="[
-                    'fixed' => 'Fixed',
-                    'percentage' => 'Percentage',
-                ]"
-                    placeholder="All Types" wrapperClass="mb-0" inputClass="text-sm" />
+                <div class="flex items-center justify-between min-w-0">
+                    <h2 class="text-xl font-bold truncate">Discount List</h2>
+                    <div class="shrink-0 md:ml-4 flex flex-row gap-3">
 
-                @can('discount-create')
-                    <x-form.button title="+ Add" route="restaurant.discount.create"
-                        class="bg-blue-600 hover:bg-blue-700 text-white" />
-                @endcan
+                        <x-form.select name="filterDiscountType" wireModelLive="filterDiscountType" :options="[
+                            'fixed' => 'Fixed',
+                            'percentage' => 'Percentage',
+                        ]"
+                            placeholder="All Types" wrapperClass="mb-0" inputClass="text-sm" />
+
+                        @can('discount-create')
+                            <x-form.button title="+ Add" route="restaurant.discount.create"
+                                class="bg-blue-600 hover:bg-blue-700 text-white" />
+                        @endcan
+                    </div>
+                </div>
+                <div class="flex flex-row justify-end sm:flex-row sm:items-center w-full">
+                    <x-form.input name="search" placeholder="Search..." wireModelLive="search" wrapperClass="mb-0"
+                        inputClass="w-72" />
+                </div>
             </div>
         </div>
         <x-form.error />
@@ -107,7 +114,8 @@
                 <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
                     <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
                         <h3 class="text-lg font-semibold mb-4 text-red-600">Confirm Delete</h3>
-                        <p class="text-gray-700 mb-6">Are you sure you want to delete this discount? This action cannot
+                        <p class="text-gray-700 mb-6">Are you sure you want to delete this discount? This action
+                            cannot
                             be
                             undone.</p>
 
@@ -129,7 +137,8 @@
                         </h3>
                         <p class="text-gray-700 mb-6">
                             Are you sure you want to
-                            {{ optional(\App\Models\Discount::find($blockId))->is_active ? 'unblock' : 'block' }} this
+                            {{ optional(\App\Models\Discount::find($blockId))->is_active ? 'unblock' : 'block' }}
+                            this
                             discount?
                         </p>
 

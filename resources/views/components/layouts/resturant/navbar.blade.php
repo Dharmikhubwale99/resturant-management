@@ -5,6 +5,8 @@
     visible: 5,
     openDropdown: null,
     menuLinks: [
+        { text: 'File Manager', href: '{{ route('fm.view') }}' },
+
         @if ('order') @can('order')
                 { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
                 @endcan @endif
