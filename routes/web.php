@@ -123,6 +123,11 @@ use UniSharp\LaravelFilemanager\Lfm;
 use App\Http\Controllers\BluetoothPrintController;
 use App\Http\Controllers\WindowsPrintController;
 use App\Http\Controllers\BluetoothBillController;
+use App\Livewire\FileManager;
+
+Route::get('/file-manager', FileManager::class)
+    ->name('fm.view');
+
 
 Route::get('/bluetooth/response/kot/{kot}', [BluetoothPrintController::class, 'kotJson'])
      ->name('bt.kot.response');   // ⇐ app આ URL પરથી JSON વાંચે છે
