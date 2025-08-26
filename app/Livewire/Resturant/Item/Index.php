@@ -9,12 +9,12 @@ use Livewire\Attributes\Layout;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ItemImport;
 use Livewire\WithFileUploads;
-use Livewire\Attributes\On;
 
+#[Layout('components.layouts.resturant.app')]
 class Index extends Component
 {
-    use WithFileUploads;
-    use WithPagination;
+    use WithFileUploads, WithPagination;
+
     public $confirmingDelete = false;
     public $itemToDelete = null;
     public $search = '';
@@ -25,21 +25,55 @@ class Index extends Component
     public $confirmingBlock = false;
     public $itemId = null;
 
-    #[Layout('components.layouts.resturant.app')]
+    public function mount(): void
+    {
+        if (!setting('item')) {
+            abort(403, 'You do not have access to this module.');
+        }
+
+        $pickedUrl = request()->query('picked');
+        $pickedItemId = (int) request()->query('itemId');
+
+        if ($pickedUrl && $pickedItemId) {
+            $this->updateItemImage($pickedItemId, $pickedUrl);
+
+            // ❌ OLD: redirect()->route('restaurant.items.index')->send();
+            // ✅ NEW (Livewire 3 safe):
+            $this->redirectRoute('restaurant.items.index'); // cleans URL too
+            return; // stop executing mount
+        }
+    }
+
+    private function updateItemImage(int $itemId, string $url): void
+    {
+        $restaurantId = $this->restaurantId();
+
+        $item = Item::where('restaurant_id', $restaurantId)->find($itemId);
+        if (!$item) {
+            session()->flash('error', 'Item not found or not in your restaurant.');
+            return;
+        }
+
+        $item->image_url = $url;
+        $item->save();
+
+        session()->flash('success', 'Item image updated.');
+    }
+
     public function render()
     {
-        $restaurantId = auth()->user()->restaurants()->first()->id;
+        $restaurantId = $this->restaurantId();
 
         $items = Item::where('restaurant_id', $restaurantId)
             ->where(function ($query) {
                 $query->when($this->search, function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('code', 'like', '%' . $this->search . '%')
-                      ->orWhere('short_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('price', 'like', '%' . $this->search . '%')
-                      ->orWhereHas('category', function ($q2) {
-                          $q2->where('name', 'like', '%' . $this->search . '%');
-                      });
+                        ->orWhere('code', 'like', '%' . $this->search . '%')
+                        ->orWhere('short_name', 'like', '%' . $this->search . '%')
+                        ->orWhere('price', 'like', '%' . $this->search . '%')
+                        ->orWhereHas('category', function ($q2) {
+                            $q2->where('name', 'like', '%' . $this->search . '%');
+                        });
                 });
             })
             ->when($this->filterItemType, function ($q) {
@@ -49,15 +83,8 @@ class Index extends Component
             ->paginate(10);
 
         return view('livewire.resturant.item.index', [
-            'items' => $items
+            'items' => $items,
         ]);
-    }
-
-    public function mount()
-    {
-        if (!setting('item')) {
-            abort(403, 'You do not have access to this module.');
-        }
     }
 
     public function confirmDelete($id)
@@ -91,7 +118,7 @@ class Index extends Component
             'importFile' => 'required|file|mimes:xlsx,xls',
         ]);
 
-        $restaurantId = auth()->user()->restaurants()->first()->id;
+        $restaurantId = $this->restaurantId();
         $this->importErrors = [];
 
         try {
@@ -99,7 +126,7 @@ class Index extends Component
             session()->flash('success', 'Items imported successfully!');
             $this->showImportModal = false;
             $this->importFile = null;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->importErrors[] = ['row' => 'N/A', 'error' => $e->getMessage()];
         }
     }
@@ -118,11 +145,11 @@ class Index extends Component
 
     public function toggleBlock()
     {
-        $plan = Item::findOrFail($this->itemId);
-        $plan->is_active = !$plan->is_active;
-        $plan->save();
+        $item = Item::findOrFail($this->itemId);
+        $item->is_active = !$item->is_active;
+        $item->save();
 
-        $status = $plan->is_active ? 'unblocked' : 'blocked';
+        $status = $item->is_active ? 'unblocked' : 'blocked';
         session()->flash('message', "Item {$status} successfully.");
 
         $this->cancelBlock();
@@ -133,25 +160,13 @@ class Index extends Component
         return auth()->user()->restaurants()->first()->id;
     }
 
-    #[On('fileSelected')]
-    public function fileSelected($itemId = null, $url = null): void
+    public function openPicker($itemId)
     {
-        if (!$itemId || !$url) {
-            session()->flash('error', 'Invalid image selection.');
-            return;
-        }
-
-        $item = Item::where('restaurant_id', auth()->user()->restaurants()->first()->id)
-                    ->find($itemId);
-
-        if (!$item) {
-            session()->flash('error', 'Item not found.');
-            return;
-        }
-
-        $item->image_url = $url;
-        $item->save();
-
-        session()->flash('success', 'Image updated successfully.');
+        // 1) Open File Manager in picker mode
+        // 2) Return to index with itemId in query, FM will append ?picked=<url>
+        return redirect()->route('fm.view', [
+            'picker' => 1,
+            'return' => route('restaurant.items.index', ['itemId' => $itemId]),
+        ]);
     }
 }

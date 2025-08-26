@@ -30,11 +30,13 @@
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">#</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Image</th>
                     @if (setting('category_module'))
-                        <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Category</th>
+                        <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Category
+                        </th>
                     @endif
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Item Type</th>
-                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Short Name</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Short Name
+                    </th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Price</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Action</th>
@@ -54,8 +56,8 @@
                         @endphp
                         <td class="px-6 whitespace-nowrap text-sm text-gray-900">
                             @can('file-manager')
-                                <button type="button" class="group relative" onclick="openLfmForItem({{ $item->id }})"
-                                    title="Click to change image">
+                                <button type="button" class="group relative" title="Click to change image"
+                                    wire:click="openPicker({{ $item->id }})">
                                     <img src="{{ $displayUrl }}" alt="Item Image"
                                         class="w-12 h-8 object-cover rounded ring-1 ring-gray-200 group-hover:ring-blue-400 transition" />
                                     <span
@@ -66,10 +68,12 @@
                             @else
                                 <img src="{{ $displayUrl }}" alt="Item Image" class="w-12 h-8 object-cover rounded">
                             @endcan
+
                         </td>
 
                         @if (setting('category_module'))
-                            <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $item->category->name ?? '' }}</td>
+                            <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $item->category->name ?? '' }}
+                            </td>
                         @endif
                         <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $item->name }}</td>
                         <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $item->item_type }}</td>
@@ -230,7 +234,7 @@
     </div>
 @endif
 </div>
-@push('scripts')
+{{-- @push('scripts')
     <script>
         function openLfmForItem(itemId) {
             window.__lfmActiveItemId = itemId;
@@ -262,4 +266,4 @@
             window.__lfmActiveItemId = null;
         };
     </script>
-@endpush
+@endpush --}}

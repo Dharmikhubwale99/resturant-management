@@ -46,7 +46,7 @@
             <x-form.input name="description" label="Description" type="textarea" wireModel="description"
                 placeholder="Enter description" />
 
-            <div class="mt-2">
+            {{-- <div class="mt-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">
                     Main Image (from File Manager)
                 </label>
@@ -64,6 +64,22 @@
                             Remove
                         </button>
                     @endif
+            </div> --}}
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                <div class="flex items-center gap-3">
+                    {{-- Button → server redirect; no SPA GET /livewire/update --}}
+                    <button type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded"
+                        wire:click="openPicker">
+                        Choose from File Manager
+                    </button>
+
+                    @if ($picked_image_url)
+                        <img src="{{ $picked_image_url }}" class="w-16 h-16 object-cover rounded border" />
+                        <button type="button" class="text-red-500" wire:click="clearPickedImage">Remove</button>
+                    @endif
+                </div>
             </div>
 
             <div class="mb-4">
@@ -106,11 +122,11 @@
         </form>
     </div>
 </div>
-@push('scripts')
+{{-- @push('scripts')
     <script>
         window.SetUrl = function(items) {
             const url = items && items.length ? items[0].url : null; // single-select
             window.Livewire.find(@this.__instance.id).set('picked_image_url', url);
         }
     </script>
-@endpush
+@endpush --}}

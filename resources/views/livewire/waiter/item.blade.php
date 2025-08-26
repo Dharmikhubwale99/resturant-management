@@ -64,20 +64,20 @@
         @if (setting('category_module'))
             <div
                 class="w-full md:w-64 max-h-screen md:h-screen bg-gray-800 text-white flex-shrink-0 flex flex-col overflow-y-auto  overscroll-contain">
-                <div class="p-2 md:p-4 flex justify-between items-center">
-                    <div class="text-sm text-gray-400">Categories</div>
-                    <!-- Mobile expand button (hidden on desktop) -->
+                {{-- <div class="p-2 md:p-4 flex justify-between items-center">
+                     <div class="text-sm text-gray-400">Categories</div>
+
                     <button class="md:hidden text-gray-300 hover:text-white focus:outline-none"
                         onclick="document.getElementById('mobileCats').classList.toggle('hidden')">
                         <i class="fas fa-plus"></i>
                     </button>
-                </div>
+                </div> --}}
 
                 <!-- DESKTOP: all categories (never toggled) -->
                 <nav class="category-nav hidden md:block mb-4">
                     <button wire:click="clearCategory"
                         class="block w-full text-left px-4 py-3 text-base {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
-                        <i class="fas fa-list mr-2"></i> All Items
+                        <i class="fas fa-list mr-2"></i> All Items (Categories)
                     </button>
 
                     @foreach ($categories as $category)
@@ -89,11 +89,16 @@
                 </nav>
 
                 <nav class="md:hidden mb-4">
+                    <div class="flex justify-between items-center">
                     <button wire:click="clearCategory"
                         class="block w-full text-left px-3 py-2 text-sm {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
-                        <i class="fas fa-list mr-2"></i> All Items
+                        <i class="fas fa-list mr-2"></i> All Items (Categories)
                     </button>
-
+                    <button class="md:hidden text-gray-300 hover:text-white focus:outline-none"
+                        onclick="document.getElementById('mobileCats').classList.toggle('hidden')">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    </div>
                     <!-- Extra categories (toggled by both the header + button and the Show More button) -->
                     <div id="mobileCats" class="mobile-categories hidden">
                         @foreach ($categories as $category)

@@ -59,7 +59,7 @@
             <x-form.input name="description" label="Description" type="textarea" wireModel="description"
                 placeholder="Enter description" />
 
-            <div class="mt-3">
+            {{-- <div class="mt-3">
                 <button type="button" class="px-3 py-2 bg-gray-200 rounded"
                     x-on:click="window.open('{{ url(config('lfm.url_prefix')) }}?type=image','fm','width=1200,height=600')">
                     Choose from File Manager
@@ -73,7 +73,29 @@
                         Remove
                     </button>
                 </div>
-            @endif
+            @endif --}}
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+
+                <div class="flex items-center gap-3">
+                    <button
+                    type="button"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded"
+                    wire:click="openPicker"
+                  >
+                    Choose from File Manager
+                  </button>
+
+
+
+                    @if ($picked_image_url)
+                        <img src="{{ $picked_image_url }}" class="w-16 h-16 object-cover rounded border" />
+                        <button type="button" class="text-red-500"
+                            wire:click="$set('picked_image_url', null)">Remove</button>
+                    @endif
+                </div>
+            </div>
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Variants</label>
@@ -115,11 +137,11 @@
         </form>
     </div>
 </div>
-@push('scripts')
+{{-- @push('scripts')
 <script>
     window.SetUrl = function (items) {
         const url = items[0]?.url || null;
         window.Livewire.find(@this.__instance.id).set('picked_image_url', url);
     }
   </script>
-@endpush
+@endpush --}}
