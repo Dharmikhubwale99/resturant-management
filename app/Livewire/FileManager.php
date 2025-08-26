@@ -16,56 +16,78 @@ class FileManager extends Component
     public Restaurant $restaurant;
 
     // Upload state
-    public $uploads = [];              // DO NOT typehint as array
+    public $uploads = [];
     public bool $multi = true;
-    public string $subpath = '';       // current folder (relative to root)
+    public string $subpath = '';
     public float $usedMb = 0.0;
     public float $quotaMb = 0.0;
     public string $status = '';
 
     // Modals
     public bool $showUploadModal = false;
-    public bool $showNewFolderModal = false;   // NEW: folder modal toggle
+    public bool $showNewFolderModal = false;
+    public bool $showRenameFolderModal = false;
+    public bool $showDeleteFolderModal = false;
+    public bool $showBulkDeleteModal = false;
 
-    // Detail/rename
+    // 🆕 single file delete modal
+    public bool $showDeleteFileModal = false;
+
+    // Bulk delete state
+    public array $bulkDeleteFolders = [];
+    public array $bulkDeleteFiles = [];
+
+    // Detail/rename (file)
     public ?array $selected = null;
     public ?string $renaming = null;
     public string $renameTo = '';
 
-    // New folder name
+    // New/Rename/Delete folder state
     public string $newFolder = '';
+    public string $folderOldName = '';
+    public string $folderNewName = '';
+
+    // Set Picker
+    public bool $picker = false;         // open as picker?
+    public ?string $returnTo = null;
 
     public function mount(): void
     {
-        $restaurantId = auth()->user()->restaurant_id
-            ?? Restaurant::where('user_id', auth()->id())->value('id');
+        $restaurantId = auth()->user()->restaurant_id ?? Restaurant::where('user_id', auth()->id())->value('id');
 
         abort_unless($restaurantId, 403, 'No restaurant assigned.');
 
         $this->restaurant = Restaurant::findOrFail($restaurantId);
-        $this->usedMb     = round(($this->restaurant->storage_used_kb ?? 0) / 1024, 2);
-        $this->quotaMb    = (float) ($this->restaurant->storage_quota_mb ?? 0);
+        $this->usedMb = round(($this->restaurant->storage_used_kb ?? 0) / 1024, 2);
+        $this->quotaMb = (float) ($this->restaurant->storage_quota_mb ?? 0);
+
+        $this->picker   = (bool) request('picker', false);
+        $ret            = request('return');
+        $this->returnTo = $ret ? urldecode($ret) : url()->previous();
     }
 
-    /** DB-driven per-file max (KB). Fallback = 5120 (5MB) */
-    private function perFileMaxKb(): int
-    {
-        $kb = (int) ($this->restaurant->max_file_size_kb ?? 5120);
-        return $kb > 0 ? $kb : 5120;
-    }
 
-    /** restaurants/{restaurant-name} */
+    /** ROOT: restaurants/<restaurant-name>-<id> (no slug) */
     private function folderRoot(): string
     {
-        $name = $this->restaurant->name ?: "restaurant-{$this->restaurant->id}";
-        return "restaurants/" . trim($name, '/');
+        $name = trim((string) ($this->restaurant->name ?? ''));
+        $name = $name === '' ? 'restaurant' : $name;
+        $name = str_replace(['/', '\\'], '-', $name);
+        $id = (int) $this->restaurant->id;
+
+        return "restaurants/{$name}-{$id}";
     }
 
-    /** current path (root or subfolder) */
     private function currentPath(): string
     {
         $root = $this->folderRoot();
         return $this->subpath ? $root . '/' . trim($this->subpath, '/') : $root;
+    }
+
+    private function perFileMaxKb(): int
+    {
+        $kb = (int) ($this->restaurant->max_file_size_kb ?? 5120);
+        return $kb > 0 ? $kb : 5120;
     }
 
     /* ---------------- Upload flows ---------------- */
@@ -76,10 +98,15 @@ class FileManager extends Component
         $removed = [];
 
         foreach ($files as $file) {
-            if (!$file) continue;
+            if (!$file) {
+                continue;
+            }
             $sizeKb = (int) ceil(($file->getSize() ?? 0) / 1024);
             if ($sizeKb > $maxKb) {
-                try { $file->delete(); } catch (\Throwable $e) {}
+                try {
+                    $file->delete();
+                } catch (\Throwable $e) {
+                }
                 $removed[] = basename($file->getClientOriginalName());
                 continue;
             }
@@ -96,14 +123,23 @@ class FileManager extends Component
     public function updatedUploads(): void
     {
         $files = is_array($this->uploads) ? $this->uploads : [$this->uploads];
-        if (!$this->multi && count($files) > 1) $files = [$files[0]];
+        if (!$this->multi && count($files) > 1) {
+            $files = [$files[0]];
+        }
         $this->uploads = $this->filterOversize($files, $this->perFileMaxKb());
     }
 
     public function clearSelection(): void
     {
         $files = is_array($this->uploads) ? $this->uploads : [$this->uploads];
-        foreach ($files as $file) if ($file) { try { $file->delete(); } catch (\Throwable $e) {} }
+        foreach ($files as $file) {
+            if ($file) {
+                try {
+                    $file->delete();
+                } catch (\Throwable $e) {
+                }
+            }
+        }
         $this->reset('uploads');
         $this->resetErrorBag('uploads');
     }
@@ -127,11 +163,13 @@ class FileManager extends Component
         $quotaKb = $this->quotaMb * 1024;
 
         foreach ($files as $file) {
-            if (!$file) continue;
+            if (!$file) {
+                continue;
+            }
 
             $sizeKb = ($file->getSize() ?? 0) / 1024;
 
-            if ($quotaKb > 0 && ($this->restaurant->storage_used_kb + $sizeKb > $quotaKb)) {
+            if ($quotaKb > 0 && $this->restaurant->storage_used_kb + $sizeKb > $quotaKb) {
                 $this->addError('uploads', 'Storage limit exceed thayi gayu.');
                 break;
             }
@@ -140,12 +178,18 @@ class FileManager extends Component
 
             if (Storage::disk('public')->exists($path . '/' . $origName)) {
                 $this->addError('uploads', "File already exists: {$origName}");
-                try { $file->delete(); } catch (\Throwable $e) {}
+                try {
+                    $file->delete();
+                } catch (\Throwable $e) {
+                }
                 continue;
             }
 
             $file->storeAs($path, $origName, 'public');
-            try { $file->delete(); } catch (\Throwable $e) {}
+            try {
+                $file->delete();
+            } catch (\Throwable $e) {
+            }
 
             $this->restaurant->storage_used_kb = round(($this->restaurant->storage_used_kb ?? 0) + $sizeKb, 2);
             $this->restaurant->save();
@@ -168,20 +212,18 @@ class FileManager extends Component
         $name = preg_replace('/[^\pL\pN _-]+/u', '_', $name);
         $name = preg_replace('/\s+/', ' ', $name);
         $name = preg_replace('/_+/', '_', $name);
-        return trim($name, " _-.");
+        return trim($name, ' _-.');
     }
 
-    /** list subfolders in current path */
     public function getFoldersProperty()
     {
         $path = $this->currentPath();
         Storage::disk('public')->makeDirectory($path);
 
         $dirs = collect(Storage::disk('public')->directories($path));
-        return $dirs->map(fn ($d) => basename($d))->values();
+        return $dirs->map(fn($d) => basename($d))->values();
     }
 
-    /** breadcrumbs for UI */
     public function getBreadcrumbsProperty(): array
     {
         $crumbs = [];
@@ -193,7 +235,6 @@ class FileManager extends Component
         return $crumbs;
     }
 
-    /** create a folder in current path and jump into it */
     public function createFolder(): void
     {
         $this->validate(['newFolder' => 'required|string|min:1|max:100']);
@@ -212,15 +253,12 @@ class FileManager extends Component
 
         Storage::disk('public')->makeDirectory($path);
 
-        // open the new folder
-        // $this->subpath = trim(($this->subpath ? $this->subpath . '/' : '') . $name, '/');
         $this->newFolder = '';
-        $this->showNewFolderModal = false; // close modal
+        $this->showNewFolderModal = false;
         $this->status = "Folder created: {$name}";
         $this->dispatch('$refresh');
     }
 
-    /** open a child folder of current path */
     public function openFolder(string $name): void
     {
         $name = basename($name);
@@ -236,10 +274,11 @@ class FileManager extends Component
         $this->dispatch('$refresh');
     }
 
-    /** go up one level */
     public function up(): void
     {
-        if (!$this->subpath) return;
+        if (!$this->subpath) {
+            return;
+        }
         $parts = explode('/', trim($this->subpath, '/'));
         array_pop($parts);
         $this->subpath = implode('/', array_filter($parts));
@@ -247,7 +286,115 @@ class FileManager extends Component
         $this->dispatch('$refresh');
     }
 
-    /* --------- Detail panel + rename --------- */
+    /* --------- Folder rename & delete (single) --------- */
+
+    public function startRenameFolder(string $name): void
+    {
+        $this->folderOldName = basename($name);
+        $this->folderNewName = $this->folderOldName;
+        $this->resetErrorBag('folderNewName');
+        $this->showRenameFolderModal = true;
+    }
+
+    public function startDeleteFolder(string $name): void
+    {
+        $this->folderOldName = basename($name);
+        $this->showDeleteFolderModal = true;
+    }
+
+    public function confirmRenameFolder(): void
+    {
+        $this->validate(['folderNewName' => 'required|string|min:1|max:100']);
+        $from = $this->sanitizeFolder($this->folderOldName);
+        $to = $this->sanitizeFolder($this->folderNewName);
+
+        if ($to === '') {
+            $this->addError('folderNewName', 'Invalid folder name.');
+            return;
+        }
+        if (strcasecmp($from, $to) === 0) {
+            $this->status = 'No changes.';
+            $this->showRenameFolderModal = false;
+            return;
+        }
+
+        $old = $this->currentPath() . '/' . $from;
+        $new = $this->currentPath() . '/' . $to;
+
+        if (!Storage::disk('public')->exists($old)) {
+            $this->addError('folderNewName', 'Original folder not found.');
+            return;
+        }
+        if (Storage::disk('public')->exists($new)) {
+            $this->addError('folderNewName', "A folder named {$to} already exists.");
+            return;
+        }
+
+        $moved = false;
+        try {
+            $moved = Storage::disk('public')->move($old, $new);
+        } catch (\Throwable $e) {
+            $moved = false;
+        }
+        if (!$moved) {
+            $moved = $this->safeMoveDirectory($old, $new);
+        }
+        if (!$moved) {
+            $this->addError('folderNewName', 'Rename failed.');
+            return;
+        }
+
+        $this->showRenameFolderModal = false;
+        $this->status = "Folder renamed to {$to}.";
+        $this->dispatch('folderActionDone');
+        $this->dispatch('$refresh');
+    }
+
+    public function confirmDeleteFolder(): void
+    {
+        $name = $this->sanitizeFolder($this->folderOldName);
+        $full = $this->currentPath() . '/' . $name;
+
+        if (!Storage::disk('public')->exists($full)) {
+            $this->status = 'Folder not found.';
+            $this->showDeleteFolderModal = false;
+            return;
+        }
+
+        $ok = false;
+        try {
+            $ok = Storage::disk('public')->deleteDirectory($full);
+        } catch (\Throwable $e) {
+            $ok = false;
+        }
+
+        $this->status = $ok ? "Folder deleted: {$name}" : 'Delete failed.';
+        $this->showDeleteFolderModal = false;
+        $this->dispatch('folderActionDone');
+        $this->dispatch('$refresh');
+        $this->recalcUsageFromDisk();
+    }
+
+    private function safeMoveDirectory(string $from, string $to): bool
+    {
+        $disk = Storage::disk('public');
+
+        try {
+            $disk->makeDirectory($to);
+            foreach ($disk->allDirectories($from) as $dir) {
+                $disk->makeDirectory(str_replace($from, $to, $dir));
+            }
+            foreach ($disk->allFiles($from) as $file) {
+                $disk->copy($file, str_replace($from, $to, $file));
+            }
+            $disk->deleteDirectory($from);
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /* --------- File detail + rename & delete (single) --------- */
 
     private function sanitizeBasename(string $name): string
     {
@@ -270,9 +417,9 @@ class FileManager extends Component
         }
 
         $this->selected = [
-            'name'      => $name,
-            'size_kb'   => round(Storage::disk('public')->size($full) / 1024, 2),
-            'url'       => Storage::disk('public')->url($full),
+            'name' => $name,
+            'size_kb' => round(Storage::disk('public')->size($full) / 1024, 2),
+            'url' => Storage::disk('public')->url($full),
             'disk_path' => $full,
         ];
 
@@ -291,7 +438,9 @@ class FileManager extends Component
 
     public function saveRename(): void
     {
-        if (!$this->selected || !$this->renaming) return;
+        if (!$this->selected || !$this->renaming) {
+            return;
+        }
 
         $this->validate(['renameTo' => 'required|string|min:1|max:120']);
         $base = $this->sanitizeBasename($this->renameTo);
@@ -309,8 +458,8 @@ class FileManager extends Component
         }
 
         $path = $this->currentPath();
-        $old  = $path . '/' . $this->renaming;
-        $new  = $path . '/' . $newName;
+        $old = $path . '/' . $this->renaming;
+        $new = $path . '/' . $newName;
 
         if (Storage::disk('public')->exists($new)) {
             $this->addError('renameTo', "A file named {$newName} already exists.");
@@ -331,13 +480,53 @@ class FileManager extends Component
         $this->dispatch('$refresh');
     }
 
+    /** 🆕 Open/confirm delete of the selected file */
+    public function openDeleteFile(): void
+    {
+        if (!$this->selected) {
+            $this->status = 'No file selected.';
+            return;
+        }
+        $this->showDeleteFileModal = true;
+    }
+
+    public function confirmDeleteFile(): void
+    {
+        if (!$this->selected) {
+            $this->showDeleteFileModal = false;
+            return;
+        }
+
+        $path = $this->currentPath();
+        $file = $path . '/' . basename($this->selected['name']);
+
+        $ok = false;
+        try {
+            if (Storage::disk('public')->exists($file)) {
+                $ok = Storage::disk('public')->delete($file);
+            }
+        } catch (\Throwable $e) {
+            $ok = false;
+        }
+
+        $this->showDeleteFileModal = false;
+
+        if ($ok) {
+            $this->status = 'File deleted: ' . $this->selected['name'];
+            $this->clearSelected();
+            $this->dispatch('$refresh');
+            $this->recalcUsageFromDisk();
+        } else {
+            $this->status = 'Delete failed or file not found.';
+        }
+    }
+
     /* ---------------- Utility ---------------- */
 
     public function recalcUsageFromDisk(): void
     {
-        $root  = $this->folderRoot();
-        $bytes = collect(Storage::disk('public')->allFiles($root))
-            ->sum(fn ($f) => Storage::disk('public')->size($f));
+        $root = $this->folderRoot();
+        $bytes = collect(Storage::disk('public')->allFiles($root))->sum(fn($f) => Storage::disk('public')->size($f));
 
         $this->restaurant->storage_used_kb = round($bytes / 1024, 2);
         $this->restaurant->save();
@@ -351,18 +540,90 @@ class FileManager extends Component
         $path = $this->currentPath();
         Storage::disk('public')->makeDirectory($path);
 
-        $files = collect(Storage::disk('public')->files($path))
-            ->filter(fn ($p) => preg_match('/\.(png|jpe?g|gif|webp|svg)$/i', $p));
+        $files = collect(Storage::disk('public')->files($path))->filter(fn($p) => preg_match('/\.(png|jpe?g|gif|webp|svg)$/i', $p));
 
-        return $files->map(fn ($p) => [
-            'name'    => basename($p),
-            'size_kb' => round(Storage::disk('public')->size($p) / 1024, 2),
-            'url'     => Storage::disk('public')->url($p),
-        ]);
+        return $files->map(
+            fn($p) => [
+                'name' => basename($p),
+                'size_kb' => round(Storage::disk('public')->size($p) / 1024, 2),
+                'url' => Storage::disk('public')->url($p),
+            ],
+        );
     }
 
     public function render()
     {
         return view('livewire.file-manager');
+    }
+
+    /* --------- BULK DELETE --------- */
+
+    public function openBulkDelete(): void
+    {
+        $this->reset('bulkDeleteFolders', 'bulkDeleteFiles');
+        $this->showBulkDeleteModal = true;
+    }
+
+    public function confirmBulkDelete(): void
+    {
+        $path = $this->currentPath();
+        $disk = Storage::disk('public');
+
+        $deletedFolders = 0;
+        $deletedFiles = 0;
+
+        foreach ($this->bulkDeleteFolders as $name) {
+            $name = $this->sanitizeFolder(basename($name));
+            if ($name === '') {
+                continue;
+            }
+
+            $full = $path . '/' . $name;
+            try {
+                if ($disk->exists($full) && $disk->deleteDirectory($full)) {
+                    $deletedFolders++;
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+
+        foreach ($this->bulkDeleteFiles as $name) {
+            $base = basename($name);
+            if ($base === '') {
+                continue;
+            }
+
+            $full = $path . '/' . $base;
+            try {
+                if ($disk->exists($full) && $disk->delete($full)) {
+                    $deletedFiles++;
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+
+        $this->showBulkDeleteModal = false;
+        $this->reset('bulkDeleteFolders', 'bulkDeleteFiles');
+        $this->status = "Deleted {$deletedFolders} folder(s) & {$deletedFiles} file(s).";
+        $this->dispatch('folderActionDone');
+        $this->dispatch('$refresh');
+        $this->recalcUsageFromDisk();
+    }
+
+    public function pickImage(string $name)
+    {
+        $base = basename($name);
+        $full = $this->currentPath() . '/' . $base;
+
+        if (!Storage::disk('public')->exists($full)) {
+            $this->status = 'File not found.';
+            return;
+        }
+
+
+        $url = Storage::disk('public')->url($full);
+        $ret = $this->returnTo ?: url()->previous();
+        $sep = str_contains($ret, '?') ? '&' : '?';
+        return redirect()->to($ret . $sep . 'picked=' . urlencode($url));
     }
 }
