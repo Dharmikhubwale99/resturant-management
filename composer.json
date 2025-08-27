@@ -19,8 +19,7 @@
         "razorpay/razorpay": "^2.9",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-medialibrary": "^11.13",
-        "spatie/laravel-permission": "^6.20",
-        "unisharp/laravel-filemanager": "^2.10"
+        "spatie/laravel-permission": "^6.20"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
