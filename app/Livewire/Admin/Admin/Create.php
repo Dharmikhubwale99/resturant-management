@@ -252,6 +252,8 @@ class Create extends Component
             $selectedPlan = Plan::find($this->plan_id);
             $planId = $selectedPlan->id;
             $expiryDate = now()->addDays($selectedPlan->duration_days ?? 30);
+            $fileStorage = $selectedPlan->storage_quota_mb ?? 500;
+            $maxUploadSize = $selectedPlan->max_file_size_kb ?? 10;
         } else {
             $selectedPlan = null;
             $planId = null;
@@ -316,6 +318,8 @@ class Create extends Component
             'fssai' => $this->fssai,
             'plan_id' => $planId,
             'plan_expiry_at' => $expiryDate,
+            'storage_quota_mb' => $fileStorage ?? 500,
+            'max_file_size_kb' => $maxUploadSize ?? 10,
         ]);
 
         Setting::create([

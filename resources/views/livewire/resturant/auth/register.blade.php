@@ -20,8 +20,8 @@
                 <x-form.input name="email" label="Personal Email" type="email" required wireModel="email"
                     inputClass="focus:ring-[#C9894B] focus:border-[#C9894B]" />
 
-                <x-form.input name="mobile" label="Personal Mobile" required wireModel="mobile"
-                    inputClass="focus:ring-[#C9894B] focus:border-[#C9894B]" />
+                <x-form.input name="mobile" label="Personal Mobile" required wireModel="mobile" maxlength="10"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" inputClass="focus:ring-[#C9894B] focus:border-[#C9894B]" />
 
                 <x-form.input name="password" label="Password" type="password" required wireModel="password"
                     autocomplete="current-password" showToggle="true"
