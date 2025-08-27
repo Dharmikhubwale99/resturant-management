@@ -13,9 +13,9 @@
             showToggle="true" />
 
         <div class="flex flex-row text-center  space-x-3">
-            <x-form.button title="Update Profile" wireClick="updateProfile" wireTarget="updateProfile"/>
             <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
-                route="superadmin.admin.index" />
+            route="superadmin.admin.index" />
+            <x-form.button title="Update Profile" wireClick="updateProfile" wireTarget="updateProfile"/>
         </div>
     </div>
 </div>

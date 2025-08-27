@@ -1,19 +1,19 @@
 <div class="p-6 bg-white rounded shadow">
-       <div class="p-6 bg-white rounded shadow">
+    <div class="mb-4">
+        <div class="flex flex-col gap-3 md:gap-4">
 
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold">Plan List</h2>
-         <div class="flex items-center gap-4">
-            <x-form.input
-                name="search"
-                placeholder="Search by name"
-                wireModelLive="search"
-                wrapperClass="mb-0"
-                inputClass="w-72"
-            />
-            @can('plan-create')
-                <x-form.button title="+ Add" route="superadmin.plans.create" class="bg-blue-600 hover:bg-blue-700 text-white" />
-            @endcan
+            <div class="flex items-center justify-between min-w-0">
+                <h2 class="text-xl font-bold">Plan List</h2>
+
+                @can('plan-create')
+                    <x-form.button title="+ Add" route="superadmin.plans.create"
+                        class="bg-blue-600 hover:bg-blue-700 text-white" />
+                @endcan
+            </div>
+            <div class="flex flex-row justify-end sm:flex-row sm:items-center w-full">
+                <x-form.input name="search" placeholder="Search by name" wireModelLive="search" wrapperClass="mb-0"
+                    inputClass="w-72" />
+            </div>
         </div>
     </div>
     <x-form.error />
@@ -42,35 +42,34 @@
                         <td class="px-6 text-sm text-gray-900">{{ $plan->amount }}</td>
                         <td class="px-6 text-sm">
 
-                                @if ($plan->is_active)
-                                    <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                                        Inactive
-                                    </span>
-                                @else
-                                    <span
-                                        class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                                        Active
-                                    </span>
-                                @endif
-                            </td>
+                            @if ($plan->is_active)
+                                <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                                    Inactive
+                                </span>
+                            @else
+                                <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                                    Active
+                                </span>
+                            @endif
+                        </td>
                         <td class="px-6 text-sm text-gray-900 flex flex-row">
                             @can('plan-active')
                                 <x-form.button title=""
-                                            class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                            wireClick="confirmBlock({{ $plan->id }})">
-                                            @if ($plan->is_active)
-                                            <span class="w-5 h-1 flex items-center justify-center">
-                                                    {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
-                                            @else
-                                            <span class="w-5 h-1 flex items-center justify-center">
-                                                {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
-                                            @endif
+                                    class=" p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                    wireClick="confirmBlock({{ $plan->id }})">
+                                    @if ($plan->is_active)
+                                        <span class="w-5 h-1 flex items-center justify-center">
+                                            {!! file_get_contents(public_path('icon/xmark.svg')) !!} </span>
+                                    @else
+                                        <span class="w-5 h-1 flex items-center justify-center">
+                                            {!! file_get_contents(public_path('icon/check.svg')) !!} </span>
+                                    @endif
                                 </x-form.button>
                             @endcan
 
                             @can('plan-edit')
-                                <x-form.button title="" class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                    :route="['superadmin.plans.edit', $plan->id]">
+                                <x-form.button title=""
+                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3" :route="['superadmin.plans.edit', $plan->id]">
                                     <span class="w-5 h-1 flex items-center justify-center">
                                         {!! file_get_contents(public_path('icon/edit.svg')) !!}
                                     </span>
@@ -79,11 +78,11 @@
 
                             @can('plan-delete')
                                 <x-form.button title=""
-                                        class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
-                                        wireClick="confirmDelete({{ $plan->id }})">
-                                        <span class="w-5 h-1 flex items-center justify-center">
-                                            {!! file_get_contents(public_path('icon/delete.svg')) !!}
-                                        </span>
+                                    class="p-1 w-5 h-10 rounded flex items-center justify-center mt-3"
+                                    wireClick="confirmDelete({{ $plan->id }})">
+                                    <span class="w-5 h-1 flex items-center justify-center">
+                                        {!! file_get_contents(public_path('icon/delete.svg')) !!}
+                                    </span>
                                 </x-form.button>
                             @endcan
                         </td>
@@ -112,28 +111,28 @@
             </div>
         @endif
 
-         @if ($confirmingBlock)
-                <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
-                    <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
-                        <h3 class="text-lg font-semibold mb-4 text-yellow-600">
-                            {{ optional(\App\Models\Plan::find($blockId))->is_active ? 'Confirm UnBlock' : 'Confirm Block' }}
-                        </h3>
-                        <p class="text-gray-700 mb-6">
-                            Are you sure you want to
-                            {{ optional(\App\Models\Plan::find($blockId))->is_active ? 'unblock' : 'block' }} this
-                            plan?
-                        </p>
+        @if ($confirmingBlock)
+            <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
+                <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
+                    <h3 class="text-lg font-semibold mb-4 text-yellow-600">
+                        {{ optional(\App\Models\Plan::find($blockId))->is_active ? 'Confirm UnBlock' : 'Confirm Block' }}
+                    </h3>
+                    <p class="text-gray-700 mb-6">
+                        Are you sure you want to
+                        {{ optional(\App\Models\Plan::find($blockId))->is_active ? 'unblock' : 'block' }} this
+                        plan?
+                    </p>
 
-                        <div class="flex justify-end space-x-3">
-                            <button wire:click="cancelBlock"
-                                class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
-                            <button wire:click="toggleBlock"
-                                class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
-                                {{ optional(\App\Models\Plan::find($blockId))->is_active ? 'UnBlock' : 'Block' }}
-                            </button>
-                        </div>
+                    <div class="flex justify-end space-x-3">
+                        <button wire:click="cancelBlock"
+                            class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
+                        <button wire:click="toggleBlock"
+                            class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                            {{ optional(\App\Models\Plan::find($blockId))->is_active ? 'UnBlock' : 'Block' }}
+                        </button>
                     </div>
                 </div>
-            @endif
+            </div>
+        @endif
     </div>
 </div>
