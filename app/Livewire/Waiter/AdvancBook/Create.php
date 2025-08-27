@@ -23,7 +23,20 @@ class Create extends Component
 
     public function mount()
     {
-        $this->tables = Table::all();
+        if (auth()->user()->restaurant_id) {
+            $restaurantId = auth()->user()->restaurant_id;
+        } else {
+            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
+        }
+
+        $this->tables = Table::with('area')
+            ->where('restaurant_id', $restaurantId)
+            ->where('is_active', 0)
+            ->where(function ($query) {
+                $query->whereNull('area_id')
+                    ->orWhereHas('area', fn($q) => $q->where('is_active', 0));
+            })
+            ->get();
     }
 
     public function saveBooking()

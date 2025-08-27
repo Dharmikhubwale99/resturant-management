@@ -74,13 +74,24 @@ class Index extends Component
     public function deleteTable()
     {
         $table = Table::find($this->tableToDelete);
-        if ($table) {
-            $table->delete();
-            session()->flash('success', 'Table deleted successfully.');
-        } else {
+
+        if (!$table) {
             session()->flash('error', 'Table not found.');
+            return $this->cancelDelete();
         }
+
+        // ✅ Guard: occupied/reserved હોય તો delete ન કરો
+        if (in_array(strtolower($table->status), ['occupied', 'reserved'])) {
+            session()->flash('error', 'Occupied or Reserved tables cannot be deleted.');
+            return $this->cancelDelete();
+        }
+
+        $table->delete();
+        session()->flash('success', 'Table deleted successfully.');
         $this->cancelDelete();
+
+        // વૈકલ્પિક: પેજ રીફ્રેશ pagination માટે
+        $this->resetPage();
     }
 
     public function confirmBlock($id)
