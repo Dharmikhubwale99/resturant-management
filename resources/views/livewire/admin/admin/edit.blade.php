@@ -88,9 +88,9 @@
         </div>
 
         <div class="flex justify-start gap-4">
-            <x-form.button type="submit" title="Update" wireTarget="update" />
             <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
-                           route="superadmin.admin.index" />
+            route="superadmin.admin.index" />
+            <x-form.button type="submit" title="Update" wireTarget="update" />
         </div>
     </form>
 </div>

@@ -70,8 +70,11 @@
 
                         <div class="block md:hidden ">
 
+                            <a href="{{ route('superadmin.dealer.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dealers</a>
+
                             <a href="{{ route('superadmin.admin.index') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admins</a>
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Resturants</a>
 
                             <a href="{{ route('superadmin.settings') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>

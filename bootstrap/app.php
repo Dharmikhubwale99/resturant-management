@@ -16,7 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'check.restaurant.plan' => \App\Http\Middleware\CheckRestaurantPlan::class,
-            'enforce.restaurant.storage' => \App\Http\Middleware\EnforceRestaurantStorage::class,
         ]);
         $middleware->group('api', [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,

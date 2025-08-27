@@ -1,20 +1,25 @@
 <div class="p-6 bg-white rounded shadow">
-    <div class="flex justify-between items-center mb-4">
+    <div class="mb-4">
+        <div class="flex flex-col gap-3 md:gap-4">
 
-        <h2 class="text-xl font-bold">Admin List</h2>
+            <div class="flex items-center justify-between min-w-0">
+                <h2 class="text-xl font-bold">Admin List</h2>
 
-        <div class="flex items-center gap-4">
-            <x-form.input
-                name="search"
-                placeholder="Search..."
-                wireModelLive="search"
-                wrapperClass="mb-0"
-                inputClass="w-72"
-            />
-            @can('admin-create')
-                <x-form.button title="+ Add" route="superadmin.admin.create"
-                    class="bg-blue-600 hover:bg-blue-700 text-white" />
-            @endcan
+                @can('admin-create')
+                    <x-form.button title="+ Add" route="superadmin.admin.create"
+                        class="bg-blue-600 hover:bg-blue-700 text-white" />
+                @endcan
+            </div>
+
+            <div class="flex flex-row justify-end sm:flex-row sm:items-center w-full">
+                <x-form.input
+                    name="search"
+                    placeholder="Search..."
+                    wireModelLive="search"
+                    wrapperClass="mb-0"
+                    inputClass="w-72"
+                />
+            </div>
         </div>
     </div>
     <x-form.error />
@@ -22,40 +27,40 @@
         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">User Name</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Resturant Name</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Resturant no</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Created At</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Plan Expiry Date</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">#</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">User Name</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Email</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Resturant Name</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Resturant no</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Role</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Created At</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Plan Expiry Date</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
                 @foreach ($users as $index => $user)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 text-sm text-gray-900">
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">
                             {{ $users->total() - (($users->currentPage() - 1) * $users->perPage() + $index) }}
                         </td>
-                        <td class="px-6 text-sm text-gray-900">{{ $user->username }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $user->name }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $user->mobile }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $user->email }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $user->restaurant?->name }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $user->restaurant?->mobile }}</td>
-                        <td class="px-6 text-sm text-gray-900">{{ $user->role }}</td>
-                        <td class="px-6 text-sm text-gray-900">
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->username }}</td>
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->name }}</td>
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->mobile }}</td>
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->email }}</td>
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->restaurant?->name }}</td>
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->restaurant?->mobile }}</td>
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->role }}</td>
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">
                             {{ $user->restaurant?->created_at ? $user->restaurant->created_at->format('d-m-Y') : '' }}
                         </td>
-                        <td class="px-6 text-sm text-gray-900">
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">
                             {{ $user->restaurant?->plan_expiry_at ? $user->restaurant->plan_expiry_at->format('d-m-Y') : '' }}
                         </td>
-                        <td class="px-6 text-sm">
+                        <td class="px-6 whitespace-nowrap text-sm">
 
                             @if ($user->is_active)
                                 <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">
@@ -68,7 +73,7 @@
                             @endif
                         </td>
 
-                        <td class="px-6 text-sm text-gray-900">
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">
                             <div class="flex flex-row items-center space-x-3">
                                 @can('admin-active')
                                     <x-form.button title=""
