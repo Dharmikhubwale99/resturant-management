@@ -81,7 +81,10 @@ class Login extends Component
                 'username' => 'Your restaurant is inactive.',
             ]);
         } else {
-            return to_route('restaurant.dashboard')->with('success', 'Login successfully.');
+            
+            return redirect()->route('restaurant.dashboard')
+    ->with('success', 'Login successfully.');
+
         }
 
     }
