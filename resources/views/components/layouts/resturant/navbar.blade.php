@@ -5,7 +5,6 @@
     visible: 5,
     openDropdown: null,
     menuLinks: [
-        { text: 'File Manager', href: '{{ route('fm.view') }}' },
 
         @if ('order') @can('order')
                 { text: 'Order', href: '{{ route('restaurant.waiter.dashboard') }}' },
@@ -59,7 +58,7 @@
                 { text: 'Expense-Type', href: '{{ route('restaurant.expense-types.index') }}' },
             @endcan @endif
 
-        { text: 'File Manager', href: '{{ url('restaurant/file-manager') }}?type=image', newTab: true },
+        { text: 'File Manager', href: '{{ route('fm.view') }}' },
 
 
         @if (setting('report')) @can('report-index')
