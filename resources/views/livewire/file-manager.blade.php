@@ -267,7 +267,7 @@
         .list {
             border: 1px solid #e5e7eb;
             border-radius: 12px;
-            overflow: hidden
+            overflow: hidden;
         }
 
         .list .item {
@@ -404,6 +404,79 @@
             font-size: .9rem;
             color: #6b7280;
             margin-bottom: 6px
+        }
+
+        .kebab {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            color: #111827;
+            cursor: pointer;
+            transition: background .15s ease, box-shadow .15s ease, border-color .15s ease;
+        }
+
+        .kebab:hover {
+            background: #f8fafc;
+        }
+
+        .kebab:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #e5e7eb;
+        }
+
+        /* Dropdown menu container */
+        .menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            min-width: 160px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(2, 6, 23, .12), 0 2px 6px rgba(2, 6, 23, .06);
+            padding: 6px;
+            z-index: 20;
+        }
+
+        /* Dropdown menu items */
+        .menu button {
+            width: 100%;
+            display: block;
+            text-align: left;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: #fff;
+            border: none;
+            font-size: .9rem;
+        }
+
+        .menu button:hover {
+            background: #f8fafc;
+        }
+
+        .menu .danger {
+            color: #b91c1c;
+        }
+
+        .scrollable {
+            max-height: min(44vh, 420px);
+            overflow: auto;
+            overscroll-behavior: contain;
+        }
+
+        @media (max-width: 640px) {
+            .scrollable {
+                max-height: 46vh;
+            }
+        }
+
+        .card {
+            overflow: hidden;
         }
     </style>
 
@@ -548,7 +621,7 @@
             @else
                 {{-- ============== LIST VIEW ============== --}}
                 <h3 class="mt-5 mb-2 font-semibold">Folders</h3>
-                <div class="list">
+                <div class="list scrollable">
                     @forelse ($this->folderInfos as $fi)
                         @php $key = md5(($subpath ?: '') . '/' . $fi['name']); @endphp
                         <div class="item" wire:key="dirlist-{{ $key }}" x-data="{ myKey: '{{ $key }}' }"
@@ -589,7 +662,7 @@
                 </div>
 
                 <h3 class="mt-6 mb-2 font-semibold">Images</h3>
-                <div class="list">
+                <div class="list scrollable">
                     @forelse ($this->existingFiles as $f)
                         <button type="button" class="item hover:bg-gray-50 text-left"
                             wire:key="filelist-{{ $loop->index }}-{{ crc32($f['name']) }}" x-data
