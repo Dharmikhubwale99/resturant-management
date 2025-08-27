@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Restaurant;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -30,51 +31,64 @@ class FileManager extends Component
     public bool $showDeleteFolderModal = false;
     public bool $showBulkDeleteModal = false;
 
-    // 🆕 single file delete modal
+    // Move modals
+    public bool $showMoveFileModal = false;
+    public bool $showBulkMoveModal = false;
+
+    // Move state
+    public string $moveTargetSubpath = '';
+    public array $bulkMoveFolders = [];
+    public array $bulkMoveFiles = [];
+    public string $bulkMoveTargetSubpath = '';
+
+    // Delete (single file)
     public bool $showDeleteFileModal = false;
 
     // Bulk delete state
     public array $bulkDeleteFolders = [];
     public array $bulkDeleteFiles = [];
 
-    // Detail/rename (file)
+    // File detail/rename
     public ?array $selected = null;
     public ?string $renaming = null;
     public string $renameTo = '';
 
-    // New/Rename/Delete folder state
+    // Folder rename/delete state
     public string $newFolder = '';
     public string $folderOldName = '';
     public string $folderNewName = '';
 
-    // Set Picker
-    public bool $picker = false;         // open as picker?
+    // Picker
+    public bool $picker = false;
     public ?string $returnTo = null;
+
+    // 🆕 Sort & View
+    public string $sortMode = 'time';
+    public string $viewMode = 'thumb';
+
+    public bool $showDetailModal = false;
 
     public function mount(): void
     {
         $restaurantId = auth()->user()->restaurant_id ?? Restaurant::where('user_id', auth()->id())->value('id');
-
         abort_unless($restaurantId, 403, 'No restaurant assigned.');
 
         $this->restaurant = Restaurant::findOrFail($restaurantId);
         $this->usedMb = round(($this->restaurant->storage_used_kb ?? 0) / 1024, 2);
         $this->quotaMb = (float) ($this->restaurant->storage_quota_mb ?? 0);
 
-        $this->picker   = (bool) request('picker', false);
-        $ret            = request('return');
+        $this->picker = (bool) request('picker', false);
+        $ret = request('return');
         $this->returnTo = $ret ? urldecode($ret) : url()->previous();
     }
 
-
-    /** ROOT: restaurants/<restaurant-name>-<id> (no slug) */
+    /** ROOT: restaurants/<restaurant-name>-<id> */
     private function folderRoot(): string
     {
         $name = trim((string) ($this->restaurant->name ?? ''));
         $name = $name === '' ? 'restaurant' : $name;
         $name = str_replace(['/', '\\'], '-', $name);
         $id = (int) $this->restaurant->id;
-
         return "restaurants/{$name}-{$id}";
     }
 
@@ -82,6 +96,11 @@ class FileManager extends Component
     {
         $root = $this->folderRoot();
         return $this->subpath ? $root . '/' . trim($this->subpath, '/') : $root;
+    }
+
+    private function normalizeSub(string $sub): string
+    {
+        return trim($sub, '/');
     }
 
     private function perFileMaxKb(): int
@@ -96,7 +115,6 @@ class FileManager extends Component
     {
         $kept = [];
         $removed = [];
-
         foreach ($files as $file) {
             if (!$file) {
                 continue;
@@ -112,21 +130,68 @@ class FileManager extends Component
             }
             $kept[] = $file;
         }
-
         if ($removed) {
             $this->addError('uploads', 'Removed (over ' . number_format($maxKb) . ' KB): ' . implode(', ', $removed));
         }
-
         return $kept;
     }
 
     public function updatedUploads(): void
     {
+        $this->resetErrorBag('uploads'); // 👈 ખાતરીથી error દેખાશે
+
         $files = is_array($this->uploads) ? $this->uploads : [$this->uploads];
         if (!$this->multi && count($files) > 1) {
             $files = [$files[0]];
         }
-        $this->uploads = $this->filterOversize($files, $this->perFileMaxKb());
+
+        // Per-file limit filter (e.g. 5 MB)
+        $files = $this->filterOversize($files, $this->perFileMaxKb());
+
+        // Optional: quota-fit preview (only while choosing)
+        [$keep, $skipped] = $this->capToRemainingQuota($files);
+        $this->uploads = $keep;
+
+        if (!empty($skipped)) {
+            $this->addError('uploads', 'Skipped (quota full): ' . implode(', ', $skipped));
+        }
+    }
+
+    private function remainingQuotaKb(): float
+    {
+        if ($this->quotaMb <= 0) {
+            return INF;
+        } // unlimited
+        return max(0, $this->quotaMb * 1024 - (float) ($this->restaurant->storage_used_kb ?? 0));
+    }
+
+    /** Selection-stage capping: returns [keptFiles, skippedNames] */
+    private function capToRemainingQuota(array $files): array
+    {
+        $remain = $this->remainingQuotaKb();
+        if ($remain === INF) {
+            return [$files, []];
+        }
+
+        $keep = [];
+        $skipNames = [];
+        foreach ($files as $file) {
+            if (!$file) {
+                continue;
+            }
+            $sizeKb = (float) (($file->getSize() ?? 0) / 1024);
+            if ($sizeKb <= $remain) {
+                $keep[] = $file;
+                $remain -= $sizeKb;
+            } else {
+                $skipNames[] = basename($file->getClientOriginalName());
+                try {
+                    $file->delete();
+                } catch (\Throwable $e) {
+                }
+            }
+        }
+        return [$keep, $skipNames];
     }
 
     public function clearSelection(): void
@@ -141,43 +206,42 @@ class FileManager extends Component
             }
         }
         $this->reset('uploads');
-        $this->resetErrorBag('uploads');
+        $this->resetErrorBag('uploads'); // 👈
     }
 
     public function storeUploads(): void
     {
+        $this->resetErrorBag('uploads');
+
         $files = is_array($this->uploads) ? $this->uploads : [$this->uploads];
         $files = $this->filterOversize($files, $this->perFileMaxKb());
-        $this->uploads = $files;
 
         if (empty($files) || (count($files) === 1 && $files[0] === null)) {
             $this->addError('uploads', 'Please choose at least one image.');
             return;
         }
 
+        // MIME validation
         $this->validate(['uploads.*' => 'file|mimetypes:image/*,image/svg+xml']);
 
         $path = $this->currentPath();
         Storage::disk('public')->makeDirectory($path);
 
-        $quotaKb = $this->quotaMb * 1024;
+        $skippedQuota = []; // filenames skipped due to quota
+        $skippedExists = []; // filenames skipped because already exists
+        $saved = 0;
 
         foreach ($files as $file) {
             if (!$file) {
                 continue;
             }
 
-            $sizeKb = ($file->getSize() ?? 0) / 1024;
+            $sizeKb = (float) (($file->getSize() ?? 0) / 1024);
+            $remain = $this->remainingQuotaKb();
 
-            if ($quotaKb > 0 && $this->restaurant->storage_used_kb + $sizeKb > $quotaKb) {
-                $this->addError('uploads', 'Storage limit exceed thayi gayu.');
-                break;
-            }
-
-            $origName = basename($file->getClientOriginalName());
-
-            if (Storage::disk('public')->exists($path . '/' . $origName)) {
-                $this->addError('uploads', "File already exists: {$origName}");
+            // 👉 quota check: save only if it fits
+            if ($remain !== INF && $sizeKb > $remain) {
+                $skippedQuota[] = basename($file->getClientOriginalName());
                 try {
                     $file->delete();
                 } catch (\Throwable $e) {
@@ -185,18 +249,41 @@ class FileManager extends Component
                 continue;
             }
 
+            $origName = basename($file->getClientOriginalName());
+            if (Storage::disk('public')->exists($path . '/' . $origName)) {
+                $skippedExists[] = $origName;
+                try {
+                    $file->delete();
+                } catch (\Throwable $e) {
+                }
+                continue;
+            }
+
+            // Save
             $file->storeAs($path, $origName, 'public');
             try {
                 $file->delete();
             } catch (\Throwable $e) {
             }
 
+            // Update usage (immediately so next file sees reduced space)
             $this->restaurant->storage_used_kb = round(($this->restaurant->storage_used_kb ?? 0) + $sizeKb, 2);
             $this->restaurant->save();
+            $saved++;
         }
 
+        // Refresh meters
         $this->usedMb = round(($this->restaurant->storage_used_kb ?? 0) / 1024, 2);
-        $this->status = 'Upload complete.';
+        $this->status = $saved > 0 ? "Upload complete. Saved {$saved} file(s)." : 'No files saved.';
+
+        // Show reasons for skips
+        if ($skippedQuota) {
+            $this->addError('uploads', 'Skipped (quota full): ' . implode(', ', $skippedQuota));
+        }
+        if ($skippedExists) {
+            $this->addError('uploads', 'Skipped (already exists): ' . implode(', ', $skippedExists));
+        }
+
         $this->reset('uploads');
         $this->showUploadModal = false;
 
@@ -215,13 +302,50 @@ class FileManager extends Component
         return trim($name, ' _-.');
     }
 
-    public function getFoldersProperty()
+    /** Sorted folder names for grid & bulk modals */
+    public function getFoldersProperty(): Collection
     {
         $path = $this->currentPath();
-        Storage::disk('public')->makeDirectory($path);
+        $disk = Storage::disk('public');
+        $disk->makeDirectory($path);
 
-        $dirs = collect(Storage::disk('public')->directories($path));
-        return $dirs->map(fn($d) => basename($d))->values();
+        $infos = collect($disk->directories($path))->map(function ($d) use ($path) {
+            $name = basename($d);
+            $full = rtrim($path, '/') . '/' . $name;
+            return [
+                'name' => $name,
+                'mtime' => $this->dirLastModified($full),
+            ];
+        });
+
+        if ($this->sortMode === 'alpha') {
+            $infos = $infos->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE);
+        } else {
+            $infos = $infos->sortByDesc('mtime');
+        }
+        return $infos->pluck('name')->values();
+    }
+
+    /** Folder infos (name + mtime) for LIST view */
+    public function getFolderInfosProperty(): Collection
+    {
+        $path = $this->currentPath();
+        $disk = Storage::disk('public');
+        $disk->makeDirectory($path);
+
+        $infos = collect($disk->directories($path))->map(function ($d) use ($path) {
+            $name = basename($d);
+            $full = rtrim($path, '/') . '/' . $name;
+            return [
+                'name' => $name,
+                'mtime' => $this->dirLastModified($full),
+            ];
+        });
+
+        if ($this->sortMode === 'alpha') {
+            return $infos->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
+        }
+        return $infos->sortByDesc('mtime')->values();
     }
 
     public function getBreadcrumbsProperty(): array
@@ -286,7 +410,7 @@ class FileManager extends Component
         $this->dispatch('$refresh');
     }
 
-    /* --------- Folder rename & delete (single) --------- */
+    /* --------- Folder rename & delete --------- */
 
     public function startRenameFolder(string $name): void
     {
@@ -394,7 +518,7 @@ class FileManager extends Component
         }
     }
 
-    /* --------- File detail + rename & delete (single) --------- */
+    /* --------- File detail + rename + delete --------- */
 
     private function sanitizeBasename(string $name): string
     {
@@ -426,6 +550,7 @@ class FileManager extends Component
         $this->renaming = $name;
         $this->renameTo = pathinfo($name, PATHINFO_FILENAME);
         $this->resetErrorBag('renameTo');
+        $this->dispatch('fileSelected');
     }
 
     public function clearSelected(): void
@@ -433,6 +558,7 @@ class FileManager extends Component
         $this->selected = null;
         $this->renaming = null;
         $this->renameTo = '';
+        $this->showDetailModal = false;
         $this->resetErrorBag('renameTo');
     }
 
@@ -480,7 +606,6 @@ class FileManager extends Component
         $this->dispatch('$refresh');
     }
 
-    /** 🆕 Open/confirm delete of the selected file */
     public function openDeleteFile(): void
     {
         if (!$this->selected) {
@@ -521,7 +646,192 @@ class FileManager extends Component
         }
     }
 
+    /* --------- Move (single + bulk) --------- */
+
+    public function openMoveFile(): void
+    {
+        if (!$this->selected) {
+            $this->status = 'No file selected.';
+            return;
+        }
+        $this->moveTargetSubpath = '';
+        $this->resetErrorBag('moveTargetSubpath');
+        $this->showMoveFileModal = true;
+    }
+
+    public function confirmMoveFile(): void
+    {
+        if (!$this->selected) {
+            $this->showMoveFileModal = false;
+            return;
+        }
+
+        $fromDir = $this->currentPath();
+        $fileName = basename($this->selected['name']);
+        $from = $fromDir . '/' . $fileName;
+
+        $destSub = $this->normalizeSub($this->moveTargetSubpath);
+        $destDir = $destSub ? $this->folderRoot() . '/' . $destSub : $this->folderRoot();
+
+        if ($destDir === $fromDir) {
+            $this->addError('moveTargetSubpath', 'Already in this folder.');
+            return;
+        }
+
+        Storage::disk('public')->makeDirectory($destDir);
+
+        $to = $destDir . '/' . $fileName;
+
+        if (!Storage::disk('public')->exists($from)) {
+            $this->status = 'Source file missing.';
+            $this->showMoveFileModal = false;
+            return;
+        }
+        if (Storage::disk('public')->exists($to)) {
+            $this->addError('moveTargetSubpath', "A file named {$fileName} already exists in destination.");
+            return;
+        }
+
+        $ok = false;
+        try {
+            $ok = Storage::disk('public')->move($from, $to);
+        } catch (\Throwable $e) {
+            $ok = false;
+        }
+
+        $this->showMoveFileModal = false;
+
+        if ($ok) {
+            $this->status = "Moved {$fileName}.";
+            if ($destDir !== $fromDir) {
+                $this->clearSelected();
+            }
+            $this->dispatch('$refresh');
+        } else {
+            $this->status = 'Move failed.';
+        }
+    }
+
+    public function openBulkMove(): void
+    {
+        $this->reset('bulkMoveFolders', 'bulkMoveFiles');
+        $this->bulkMoveTargetSubpath = '';
+        $this->showBulkMoveModal = true;
+    }
+
+    public function confirmBulkMove(): void
+    {
+        $path = $this->currentPath();
+        $disk = Storage::disk('public');
+
+        $destSub = $this->normalizeSub($this->bulkMoveTargetSubpath);
+        $destDir = $destSub ? $this->folderRoot() . '/' . $destSub : $this->folderRoot();
+
+        if ($destDir === $path) {
+            $this->addError('bulkMoveTargetSubpath', 'Destination is same as current.');
+            return;
+        }
+
+        $disk->makeDirectory($destDir);
+
+        $movedFolders = 0;
+        $skippedFolders = 0;
+        $movedFiles = 0;
+        $skippedFiles = 0;
+
+        foreach ($this->bulkMoveFolders as $name) {
+            $name = $this->sanitizeFolder(basename($name));
+            if ($name === '') {
+                continue;
+            }
+
+            $src = $path . '/' . $name;
+            $dst = $destDir . '/' . $name;
+
+            $destInsideSrc = str_starts_with($destDir . '/', $src . '/');
+            if ($destInsideSrc) {
+                $skippedFolders++;
+                continue;
+            }
+
+            if (!$disk->exists($src)) {
+                $skippedFolders++;
+                continue;
+            }
+            if ($disk->exists($dst)) {
+                $skippedFolders++;
+                continue;
+            }
+
+            $ok = false;
+            try {
+                $ok = $disk->move($src, $dst);
+            } catch (\Throwable $e) {
+                $ok = false;
+            }
+            if (!$ok) {
+                $ok = $this->safeMoveDirectory($src, $dst);
+            }
+
+            $ok ? $movedFolders++ : $skippedFolders++;
+        }
+
+        foreach ($this->bulkMoveFiles as $name) {
+            $base = basename($name);
+            if ($base === '') {
+                continue;
+            }
+
+            $src = $path . '/' . $base;
+            $dst = $destDir . '/' . $base;
+
+            if (!$disk->exists($src)) {
+                $skippedFiles++;
+                continue;
+            }
+            if ($disk->exists($dst)) {
+                $skippedFiles++;
+                continue;
+            }
+
+            $ok = false;
+            try {
+                $ok = $disk->move($src, $dst);
+            } catch (\Throwable $e) {
+                $ok = false;
+            }
+            $ok ? $movedFiles++ : $skippedFiles++;
+        }
+
+        $this->showBulkMoveModal = false;
+        $this->reset('bulkMoveFolders', 'bulkMoveFiles');
+        $this->status = "Moved {$movedFolders} folder(s) & {$movedFiles} file(s). Skipped {$skippedFolders} folder(s) & {$skippedFiles} file(s).";
+        $this->dispatch('folderActionDone');
+        $this->dispatch('$refresh');
+    }
+
     /* ---------------- Utility ---------------- */
+
+    private function dirLastModified(string $dir): int
+    {
+        $disk = Storage::disk('public');
+        try {
+            $files = $disk->allFiles($dir);
+            if (empty($files)) {
+                return 0;
+            }
+            $max = 0;
+            foreach ($files as $f) {
+                $t = $disk->lastModified($f);
+                if ($t > $max) {
+                    $max = $t;
+                }
+            }
+            return $max;
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
 
     public function recalcUsageFromDisk(): void
     {
@@ -535,20 +845,26 @@ class FileManager extends Component
         $this->status = 'Usage refreshed.';
     }
 
-    public function getExistingFilesProperty()
+    /** Files in current path (sorted + mtime) */
+    public function getExistingFilesProperty(): Collection
     {
         $path = $this->currentPath();
-        Storage::disk('public')->makeDirectory($path);
+        $disk = Storage::disk('public');
+        $disk->makeDirectory($path);
 
-        $files = collect(Storage::disk('public')->files($path))->filter(fn($p) => preg_match('/\.(png|jpe?g|gif|webp|svg)$/i', $p));
-
-        return $files->map(
+        $files = collect($disk->files($path))->filter(fn($p) => preg_match('/\.(png|jpe?g|gif|webp|svg)$/i', $p))->map(
             fn($p) => [
                 'name' => basename($p),
-                'size_kb' => round(Storage::disk('public')->size($p) / 1024, 2),
-                'url' => Storage::disk('public')->url($p),
+                'size_kb' => round($disk->size($p) / 1024, 2),
+                'url' => $disk->url($p),
+                'mtime' => $disk->lastModified($p),
             ],
         );
+
+        if ($this->sortMode === 'alpha') {
+            return $files->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
+        }
+        return $files->sortByDesc('mtime')->values();
     }
 
     public function render()
@@ -620,10 +936,26 @@ class FileManager extends Component
             return;
         }
 
-
         $url = Storage::disk('public')->url($full);
         $ret = $this->returnTo ?: url()->previous();
         $sep = str_contains($ret, '?') ? '&' : '?';
         return redirect()->to($ret . $sep . 'picked=' . urlencode($url));
+    }
+
+    /** All folders (root + recursive) relative to root ('' means root) */
+    public function getAllFoldersProperty(): \Illuminate\Support\Collection
+    {
+        $root = $this->folderRoot();
+        Storage::disk('public')->makeDirectory($root);
+
+        $list = collect(Storage::disk('public')->allDirectories($root))
+            ->map(fn($p) => trim(preg_replace('#^' . preg_quote($root, '#') . '/?#', '', $p), '/'))
+            ->filter() // remove empty
+            ->values();
+
+        // add root as ''
+        return collect([''])
+            ->merge($list)
+            ->values();
     }
 }
