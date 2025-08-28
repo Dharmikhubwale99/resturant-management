@@ -8,7 +8,7 @@ use App\Models\{Plan, Restaurant};
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use App\Models\{PlanFeature, AppConfiguration, RestaurantConfiguration};
+use App\Models\{PlanFeature, AppConfiguration, RestaurantConfiguration, User};
 use App\Traits\HasRolesAndPermissions;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Http;
@@ -143,6 +143,22 @@ class PaymentController extends Controller
                 $user->givePermissionTo($permissions);
 
                 $this->syncRestaurantFeatures($restaurant, $plan);
+                try {
+                    // 1) paid amount (in INR)
+                    $paidPaise = (int) ($p['amount'] ?? (session('order_amount_paise') ?? 0));
+                    $paidAmountInINR = $paidPaise > 0 ? $paidPaise / 100 : 0;
+
+                    // 2) find dealer = referrer of purchasing user
+                    $referrerId = $user->referred_by ?? null;
+                    $dealer = $referrerId ? User::find($referrerId) : null;
+
+                    // 3) credit commission
+                    $this->creditDealerCommission($dealer, $paidAmountInINR);
+                } catch (\Throwable $e) {
+                    Log::error('Dealer commission credit failed', ['error' => $e->getMessage()]);
+                    // commission fail shouldn’t block user success flow
+                }
+
 
                 session()->forget(['razorpay_order_id', 'plan_id']);
 
@@ -215,4 +231,24 @@ class PaymentController extends Controller
             }
         }
     }
+
+
+    private function creditDealerCommission(?User $dealer, float $paidAmountInINR): void
+    {
+        if (!$dealer) return;
+        $rate = (float) ($dealer->commission_rate ?? 0);
+        if ($rate <= 0 || $paidAmountInINR <= 0) return;
+
+        $commission = round(($paidAmountInINR * $rate) / 100, 2);
+
+        // race condition ટાળવા optimistic way:
+        DB::transaction(function () use ($dealer, $commission) {
+            // fresh() to reload latest value inside tx
+            $freshDealer = User::lockForUpdate()->find($dealer->id);
+            $current = (float) ($freshDealer->dealer_commission ?? 0);
+            $freshDealer->dealer_commission = round($current + $commission, 2);
+            $freshDealer->save();
+        });
+    }
+
 }

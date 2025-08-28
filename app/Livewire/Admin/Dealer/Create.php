@@ -21,6 +21,7 @@ class Create extends Component
     public $password_confirmation;
     public $mobile;
     public $role;
+    public $commission_rate;
     public $permissions = [];
     public $data = [
         'roles' => [],
@@ -61,6 +62,7 @@ class Create extends Component
                 'password' => ['required', 'min:6', 'max:20', 'confirmed'],
                 'role' => ['required'],
                 'username' => ['required', 'min:6', 'max:50', 'unique:users,username'],
+                'permissions' => ['nullable'],
             ]);
 
 
@@ -72,6 +74,7 @@ class Create extends Component
                 'username' => $this->username,
                 'mobile' => $this->mobile,
                 'password' => bcrypt($this->password),
+                'commission_rate' => $this->commission_rate ?? 0,
             ]);
 
             $user->assignRole($this->role);

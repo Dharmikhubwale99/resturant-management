@@ -27,6 +27,7 @@ class Edit extends Component
     public $password_confirmation;
     public $mobile;
     public $role;
+    public $commission_rate;
     public $roles = [];
     public $permissions = [];
 
@@ -53,6 +54,7 @@ class Edit extends Component
         $this->email    = $this->dealer->email;
         $this->username = $this->dealer->username;
         $this->mobile   = $this->dealer->mobile;
+        $this->commission_rate = $this->dealer->commission_rate;
         $this->role = $this->dealer->roles->pluck('name')->first();
         $this->permissions = $this->dealer->getPermissionNames()->toArray();
 
@@ -103,7 +105,7 @@ class Edit extends Component
             $this->dealer->email    = $this->email;
             $this->dealer->username = $this->username;
             $this->dealer->mobile   = $this->mobile;
-
+            $this->dealer->commission_rate = $this->commission_rate;
 
             if (!empty($this->password)) {
                 $this->dealer->password = Hash::make($this->password);

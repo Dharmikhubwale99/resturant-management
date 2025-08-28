@@ -34,7 +34,9 @@ class User extends Authenticatable
         'is_active',
         'pin_code_id',
         'address',
-        'referred_by'
+        'referred_by',
+        'commission_rate',
+        'dealer_commission',
     ];
 
     /**
