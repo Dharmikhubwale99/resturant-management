@@ -23,9 +23,9 @@ class Login extends Component
        if (Auth::check()) {
             $user = Auth::user();
             if (in_array($user->role,['superadmin','dealer'])) {
-                return to_route('superadmin.dashboard')->with('success', 'Login successfully.');
+                return redirect()->route('superadmin.dashboard')->with('success', 'Login successfully.');
             } elseif ($user->role == ['admin','waiter','kitchen']) {
-                return to_route('restaurant.dashboard')->with('success', 'Login successfully.');
+                return redirect()->route('restaurant.dashboard')->with('success', 'Login successfully.');
             }
         }
     }
@@ -61,7 +61,7 @@ class Login extends Component
         }
 
         if (in_array($user->role, ['superadmin','dealer'])) {
-            return to_route('superadmin.dashboard')->with('success', 'Login successfully.');
+            return redirect()->route('superadmin.dashboard')->with('success', 'Login successfully.');
         }
 
         if ($user->role === 'admin') {
@@ -82,8 +82,7 @@ class Login extends Component
             ]);
         } else {
             
-            return redirect()->route('restaurant.dashboard')
-    ->with('success', 'Login successfully.');
+            return redirect()->route('restaurant.dashboard')->with('success', 'Login successfully.');
 
         }
 
