@@ -29,17 +29,17 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                     </svg>
-                    <span class="hidden sm:inline">Export</span>
+                    <span class="sm:inline">Export</span>
                 </button>
             </div>
-            
+
             <div class="grid grid-cols-1 sm:flex sm:flex-row gap-2">
                 <select wire:model.live="planType" class="border rounded px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm">
                     <option value="all">All Plans</option>
                     <option value="free">Free Only</option>
                     <option value="paid">Paid Only</option>
                 </select>
-                
+
                 <select wire:model.live="filterPeriod" class="border rounded px-2 py-1 sm:px-3 sm:py-1 text-xs sm:text-sm">
                     <option value="today">Today</option>
                     <option value="monthly">Month</option>
@@ -47,7 +47,7 @@
                     <option value="all">All</option>
                 </select>
             </div>
-            
+
             @if($showCustomRange)
                 <div class="grid grid-cols-2 sm:flex sm:flex-row gap-2">
                     <input type="date" wire:model="startDate" class="border rounded px-2 py-1 text-xs sm:text-sm">
@@ -58,7 +58,7 @@
                 </div>
             @endif
         </div>
-        
+
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
                 <thead class="bg-gray-50">

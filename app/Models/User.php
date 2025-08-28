@@ -34,6 +34,7 @@ class User extends Authenticatable
         'is_active',
         'pin_code_id',
         'address',
+        'referred_by'
     ];
 
     /**
@@ -117,4 +118,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Expense::class);
     }
+
+    public function referredBy()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
 }

@@ -290,6 +290,8 @@ class Create extends Component
             $faviconPath = $this->favicon->store('icon', 'public');
         }
 
+        $admin = auth()->user();
+
         $user = User::create([
             'name' => $this->user_name,
             'email' => $this->email,
@@ -298,6 +300,7 @@ class Create extends Component
             'password' => Hash::make($this->password),
             'pin_code_id' => $this->pincode_id,
             'is_active' =>  0,
+            'referred_by' => $admin->id,
         ]);
 
         $user->assignRole('admin');

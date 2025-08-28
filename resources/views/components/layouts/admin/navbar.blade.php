@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
             <div class="flex items-center">
-                <a href="#" class="text-xl font-bold text-gray-800">
+                <a href="{{ route('superadmin.dashboard')}}" class="text-xl font-bold text-gray-800">
                     <img src="{{ asset('icon/Jobhubwale_Final_01.png') }}" alt="Logo" class="h-10 w-auto">
                 </a>
             </div>
@@ -94,12 +94,12 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit
                                 Profile</a>
 
-                            {{-- @if (auth()->check() && auth()->user()->refer_code)
+                            @if (auth()->check() && auth()->user()->refer_code)
                                 <input type="text" id="referralLink"
                                     value="{{ route('register', ['ref' => auth()->user()->refer_code]) }}"
                                     class="hidden" readonly>
                                 <button onclick="copyReferralLink()" class="block py-2 px-4 text-sm w-full text-left hover:bg-gray-100">Copy Referral Link</button>
-                            @endif --}}
+                            @endif
 
                             <a href="{{ route('logout') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>

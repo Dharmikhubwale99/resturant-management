@@ -21,26 +21,29 @@ class Index extends Component
 
     #[Layout('components.layouts.admin.app')]
     public function render()
-{
-    $users = User::role(['admin'])
-        ->with('restaurant')
-        ->leftJoin('restaurants', 'users.id', '=', 'restaurants.user_id')
-        ->where(function ($query) {
-            $query->where('users.name', 'like', '%' . $this->search . '%')
-                  ->orWhere('users.mobile', 'like', '%' . $this->search . '%')
-                  ->orWhere('restaurants.name', 'like', '%' . $this->search . '%')
-                  ->orWhere('restaurants.mobile', 'like', '%' . $this->search . '%')
-                  ->orWhere('restaurants.plan_expiry_at', 'like', '%' . $this->search . '%');
-        })
-        ->select('users.*')
-        ->orderBy('users.created_at', 'desc')
-        ->paginate(10);
+    {
+        $users = User::role(['admin'])
+            ->with('restaurant', 'referredBy')
+            ->leftJoin('restaurants', 'users.id', '=', 'restaurants.user_id')
+            ->where(function ($query) {
+                $query
+                    ->where('users.name', 'like', '%' . $this->search . '%')
+                    ->orWhere('users.mobile', 'like', '%' . $this->search . '%')
+                    ->orWhere('restaurants.name', 'like', '%' . $this->search . '%')
+                    ->orWhere('restaurants.mobile', 'like', '%' . $this->search . '%')
+                    ->orWhere('restaurants.plan_expiry_at', 'like', '%' . $this->search . '%');
+            })
+            ->when(auth()->user()->hasRole('dealer'), function ($q) {
+                $q->where('users.referred_by', auth()->id());
+            })
+            ->select('users.*')
+            ->orderBy('users.created_at', 'desc')
+            ->paginate(10);
 
-    return view('livewire.admin.admin.index', [
-        'users' => $users,
-    ]);
-}
-
+        return view('livewire.admin.admin.index', [
+            'users' => $users,
+        ]);
+    }
 
     public function confirmDelete($id)
     {
@@ -83,7 +86,7 @@ class Index extends Component
         $user->is_active = !$user->is_active;
         $user->save();
         $restaurant->update([
-            'is_active' => $user->is_active
+            'is_active' => $user->is_active,
         ]);
 
         $status = $user->is_active ? 'unblocked' : 'blocked';
