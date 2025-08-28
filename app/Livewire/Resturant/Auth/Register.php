@@ -18,11 +18,19 @@ class Register extends Component
     public $name, $email, $mobile, $password, $confirm_password, $generatedOtp, $otpSentAt, $otp, $username;
     public $showOtpForm = false;
     public $tempData = [];
+    public $referredBy;
 
     #[Layout('components.layouts.auth.plain')]
     public function render()
     {
         return view('livewire.resturant.auth.register');
+    }
+
+    public function mount()
+    {
+        if (request()->has('ref')) {
+            $this->referredBy = request()->get('ref');
+        }
     }
 
     public function register()
@@ -62,6 +70,7 @@ class Register extends Component
             'mobile' => $this->mobile,
             'password' => $this->password,
             'username' => $this->username,
+            'referred_by' => $this->referredBy,
         ];
 
         $this->sendOTP($this->mobile, $this->generatedOtp);
@@ -92,6 +101,11 @@ class Register extends Component
             return;
         }
 
+        $referrer = null;
+        if (!empty($this->tempData['referred_by'])) {
+            $referrer = User::where('refer_code', $this->tempData['referred_by'])->first();
+        }
+
         $user = User::create([
             'name' => $this->tempData['name'],
             'email' => $this->tempData['email'],
@@ -102,6 +116,7 @@ class Register extends Component
             'otp_expires_at' => null,
             'email_verified_at' => now(),
             'is_active' => 0,
+            'referred_by' => $referrer ? $referrer->id : null,
         ]);
 
         $resturant = Restaurant::create([

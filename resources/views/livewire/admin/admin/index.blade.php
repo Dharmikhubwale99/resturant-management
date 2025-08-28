@@ -36,6 +36,7 @@
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Resturant no</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Role</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Created At</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Reffred By</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Plan Expiry Date</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Action</th>
@@ -57,6 +58,7 @@
                         <td class="px-6 whitespace-nowrap text-sm text-gray-900">
                             {{ $user->restaurant?->created_at ? $user->restaurant->created_at->format('d-m-Y') : '' }}
                         </td>
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->referredBy?->username ?? '---' }}</td>
                         <td class="px-6 whitespace-nowrap text-sm text-gray-900">
                             {{ $user->restaurant?->plan_expiry_at ? $user->restaurant->plan_expiry_at->format('d-m-Y') : '' }}
                         </td>
