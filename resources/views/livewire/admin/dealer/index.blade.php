@@ -34,6 +34,8 @@
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Mobile</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Email</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Role</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Commission Rate</th>
+                    <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Commission Amount</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                     <th class="px-6 whitespace-nowrap py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                 </tr>
@@ -49,6 +51,8 @@
                         <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->mobile }}</td>
                         <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->email }}</td>
                         <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->role }}</td>
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->commission_rate }}</td>
+                        <td class="px-6 whitespace-nowrap text-sm text-gray-900">{{ $user->dealer_commission }}</td>
                         <td class="px-6 whitespace-nowrap text-sm">
 
                             @if ($user->is_active)

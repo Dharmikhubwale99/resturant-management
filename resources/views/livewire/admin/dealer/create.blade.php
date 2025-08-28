@@ -16,6 +16,7 @@
                 <x-form.input name="password" label="Password" type="password" wireModel="password" required showToggle="true" />
                 <x-form.input name="password_confirmation" label="Confirm Password" type="password"
                     wireModel="password_confirmation" required showToggle="true" />
+                <x-form.input name="commission_rate" label="Commission Rate" type="text" wireModel="commission_rate" />
                 </div>
 
                 <div class="mb-4">

@@ -19,6 +19,7 @@
                     showToggle="true" />
                 <x-form.input name="password_confirmation" label="Confirm New Password" type="password"
                     wireModel="password_confirmation" showToggle="true" />
+                <x-form.input name="commission_rate" label="Commission Rate" type="text" wireModel="commission_rate" />
             </div>
 
             <div class="mb-4">
