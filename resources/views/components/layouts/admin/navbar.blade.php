@@ -8,6 +8,10 @@
             </div>
 
             <div class="hidden md:flex space-x-8 items-center">
+                <a href="{{ route('superadmin.dashboard') }}"
+                        class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                        Dashboard
+                    </a>
                 @can('dealer-index')
                     <a href="{{ route('superadmin.dealer.index') }}"
                         class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
@@ -69,6 +73,9 @@
                         </div>
 
                         <div class="block md:hidden ">
+
+                            <a href="{{ route('superadmin.dashboard') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
 
                             <a href="{{ route('superadmin.dealer.index') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dealers</a>
