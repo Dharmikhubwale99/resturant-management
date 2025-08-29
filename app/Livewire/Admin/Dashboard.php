@@ -55,16 +55,21 @@ class Dashboard extends Component
         $countBase = $this->baseRestaurantQuery()->clone();
         $base = $this->baseRestaurantQuery()->clone();
 
+        // Today Dealer Sale Amount (₹) — only paid plans
         $this->todayDealerSalesCount = Restaurant::query()
-            ->whereHas('user', fn($uq) => $uq->whereNotNull('referred_by'))
-            ->whereHas('plan', fn($q) => $q->where('price', '>', 0))
-            ->whereDate('created_at', \Carbon\Carbon::today())
-            ->count();
+        ->whereHas('user', fn($uq) => $uq->whereNotNull('referred_by'))
+        ->whereDate('restaurants.created_at', \Carbon\Carbon::today())
+        ->leftJoin('plans', 'restaurants.plan_id', '=', 'plans.id')
+        ->where('plans.price', '>', 0) // remove this if you want to include free trials
+        ->sum('plans.price');
 
+        // Total Dealer Sale Amount (₹) — only paid plans
         $this->totalDealerSalesCount = Restaurant::query()
-            ->whereHas('user', fn($uq) => $uq->whereNotNull('referred_by'))
-            ->whereHas('plan', fn($q) => $q->where('price', '>', 0))
-            ->count();
+        ->whereHas('user', fn($uq) => $uq->whereNotNull('referred_by'))
+        ->leftJoin('plans', 'restaurants.plan_id', '=', 'plans.id')
+        ->where('plans.price', '>', 0) // remove this if you want to include free trials
+        ->sum('plans.price');
+
 
         $freeBase = (clone $countBase)->whereHas('plan', fn($q) => $q->where('price', 0));
 
