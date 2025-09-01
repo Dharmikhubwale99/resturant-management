@@ -10,6 +10,7 @@ use App\Enums\{OrderType, PaymentMethod};
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Log;
 use App\Traits\TransactionTrait;
+use Illuminate\Support\Facades\Session;
 
 class Item extends Component
 {
@@ -790,6 +791,8 @@ class Item extends Component
                 'method' => $this->paymentMethod,
             ]);
             $this->totalSale($order->restaurant_id, $order->total_amount);
+            $this->attachStashedCustomerToOrder($order);
+            $this->maybeSendBillWhatsApp($order);
         }
 
         return redirect()->route('restaurant.waiter.dashboard')->with('success', 'Order Payment Complete!');
@@ -1083,7 +1086,13 @@ class Item extends Component
     {
         $this->resetValidation();
         $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->first();
-        if ($order->customer_id) {
+        if (!$order) {
+            $this->followupCustomer_name = '';
+            $this->followupCustomer_mobile = '';
+            $this->followupCustomer_email = '';
+            $this->customer_dob = '';
+            $this->customer_anniversary = '';
+        } else {
             $customer = Customer::find($order->customer_id);
             if ($customer) {
                 $this->followupCustomer_name = $customer->name ?? '';
@@ -1092,12 +1101,6 @@ class Item extends Component
                 $this->customer_dob = $customer->dob ? \Carbon\Carbon::parse($customer->dob)->format('Y-m-d') : '';
                 $this->customer_anniversary = $customer->anniversary ? \Carbon\Carbon::parse($customer->anniversary)->format('Y-m-d') : '';
             }
-        } else {
-            $this->followupCustomer_name = '';
-            $this->followupCustomer_mobile = '';
-            $this->followupCustomer_email = '';
-            $this->customer_dob = '';
-            $this->customer_anniversary = '';
         }
         $this->showCustomerModal = true;
     }
@@ -1105,45 +1108,53 @@ class Item extends Component
     public function saveCustomer()
     {
         $this->validate([
-            'followupCustomer_name' => 'required|string|max:100',
+            'followupCustomer_name'   => 'required|string|max:100',
             'followupCustomer_mobile' => 'required|string|max:20',
-            'followupCustomer_email' => 'nullable|email',
-            'customer_dob' => 'nullable|date',
-            'customer_anniversary' => 'nullable|date',
+            'followupCustomer_email'  => 'nullable|email',
+            'customer_dob'            => 'nullable|date',
+            'customer_anniversary'    => 'nullable|date',
         ]);
 
-        $order = Order::where('table_id', $this->table_id)->where('status', 'pending')->latest()->firstOrFail();
+        $order = Order::where('table_id', $this->table_id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first(); // <-- firstOrFail ન રાખો
 
-        if (auth()->user()->restaurant_id) {
-            $restaurantId = auth()->user()->restaurant_id;
-        } else {
-            $restaurantId = Restaurant::where('user_id', auth()->id())->value('id');
+        // restaurant_id resolve
+        $restaurantId = auth()->user()->restaurant_id
+            ?: Restaurant::where('user_id', auth()->id())->value('id');
+
+        // જો order ના હોય: values session માં સ્ટોર કરો અને પાછા ફરી જાઓ
+        if (!$order) {
+            $this->stashCustomerForLater($restaurantId);
+            $this->showCustomerModal = false;
+
+            session()->flash('success', 'Customer details saved. Order create થતાની સાથે auto-link થઈ જશે!');
+            return;
         }
 
+        // order હોય તો તરત link/update કરો
         $order->update([
             'customer_name' => $this->followupCustomer_name,
-            'mobile' => $this->followupCustomer_mobile,
+            'mobile'        => $this->followupCustomer_mobile,
         ]);
 
-        $coustomer = Customer::where('order_id', $order->id)->first();
-        if (!$coustomer) {
-           $newCustomer = Customer::create([
-                'order_id' => $order->id,
-                'name' => $this->followupCustomer_name,
-                'mobile' => $this->followupCustomer_mobile,
-                'email' => $this->followupCustomer_email,
-                'dob' => $this->customer_dob,
-                'anniversary' => $this->customer_anniversary,
+        $customer = Customer::where('order_id', $order->id)->first();
+        if (!$customer) {
+            $newCustomer = Customer::create([
+                'order_id'      => $order->id,
+                'name'          => $this->followupCustomer_name,
+                'mobile'        => $this->followupCustomer_mobile,
+                'email'         => $this->followupCustomer_email,
+                'dob'           => $this->customer_dob ? Carbon::parse($this->customer_dob)->toDateString() : null,
+                'anniversary'   => $this->customer_anniversary ? Carbon::parse($this->customer_anniversary)->toDateString() : null,
                 'restaurant_id' => $restaurantId,
             ]);
 
-            $order->update([
-                'customer_id' => $newCustomer->id,
-            ]);
+            $order->update(['customer_id' => $newCustomer->id]);
         }
 
         $this->showCustomerModal = false;
-
         session()->flash('success', 'Customer added and linked to order!');
     }
 
@@ -1271,4 +1282,69 @@ class Item extends Component
         $this->recalcRowTotals($this->modsKey);
         $this->modsAddons = array_values(array_filter($this->modsAddons, fn($a) => (int) $a['id'] !== (int) $addonId));
     }
+
+    private function maybeSendBillWhatsApp(\App\Models\Order $order): void
+    {
+        try {
+            \App\Jobs\SendOrderBillToCustomer::dispatch($order->id);
+            Log::info('maybeSendBillWhatsApp dispatched', ['order_id' => $order->id]);
+        } catch (\Throwable $e) {
+            Log::error('maybeSendBillWhatsApp dispatch failed', [
+                'order_id' => $order->id,
+                'error'    => $e->getMessage(),
+            ]);
+        }
+    }
+
+    protected function stashCustomerForLater($restaurantId): void
+    {
+        // table પ્રમાણે key રાખીએ જેથી બેહૂધા clash ન થાય
+        $key = "pending_customer.{$this->table_id}";
+
+        Session::put($key, [
+            'name'          => $this->followupCustomer_name,
+            'mobile'        => $this->followupCustomer_mobile,
+            'email'         => $this->followupCustomer_email,
+            'dob'           => $this->customer_dob,
+            'anniversary'   => $this->customer_anniversary,
+            'restaurant_id' => $restaurantId,
+            'saved_at'      => now()->toDateTimeString(),
+        ]);
+    }
+
+    public function attachStashedCustomerToOrder(Order $order): void
+    {
+        $key = "pending_customer.{$order->table_id}";
+        $data = Session::get($key);
+
+        if (!$data) {
+            return; // sessionમાં કઈ નથી
+        }
+
+        // orderમાં basic fields update
+        $order->update([
+            'customer_name' => $data['name'],
+            'mobile'        => $data['mobile'],
+        ]);
+
+        // પહેલેથી customer link છે કે નહિ?
+        $existing = Customer::where('order_id', $order->id)->first();
+        if (!$existing) {
+            $customer = Customer::create([
+                'order_id'      => $order->id,
+                'name'          => $data['name'],
+                'mobile'        => $data['mobile'],
+                'email'         => $data['email'] ?? null,
+                'dob'           => !empty($data['dob']) ? \Illuminate\Support\Carbon::parse($data['dob'])->toDateString() : null,
+                'anniversary'   => !empty($data['anniversary']) ? \Illuminate\Support\Carbon::parse($data['anniversary'])->toDateString() : null,
+                'restaurant_id' => $data['restaurant_id'],
+            ]);
+
+            $order->update(['customer_id' => $customer->id]);
+        }
+
+        // કામ પુરું - session cleanup
+        Session::forget($key);
+    }
+
 }

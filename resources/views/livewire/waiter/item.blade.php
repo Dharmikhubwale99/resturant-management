@@ -1,12 +1,16 @@
 @push('css')
-<style>
-    /* Android Chrome pull-to-refresh OFF */
-    html, body { overscroll-behavior-y: none; }
-    .overscroll-contain {
-      overscroll-behavior: contain;
-      overscroll-behavior-y: contain;
-    }
-  </style>
+    <style>
+        /* Android Chrome pull-to-refresh OFF */
+        html,
+        body {
+            overscroll-behavior-y: none;
+        }
+
+        .overscroll-contain {
+            overscroll-behavior: contain;
+            overscroll-behavior-y: contain;
+        }
+    </style>
 @endpush
 <div class="font-sans bg-gray-100 h-[100dvh] md:h-screen overflow-auto md:overflow-hidden overscroll-contain">
     <!-- Header - Responsive -->
@@ -90,14 +94,14 @@
 
                 <nav class="md:hidden mb-4">
                     <div class="flex justify-between items-center">
-                    <button wire:click="clearCategory"
-                        class="block w-full text-left px-3 py-2 text-sm {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
-                        <i class="fas fa-list mr-2"></i> All Items (Categories)
-                    </button>
-                    <button class="md:hidden text-gray-300 hover:text-white focus:outline-none"
-                        onclick="document.getElementById('mobileCats').classList.toggle('hidden')">
-                        <i class="fas fa-plus"></i>
-                    </button>
+                        <button wire:click="clearCategory"
+                            class="block w-full text-left px-3 py-2 text-sm {{ $selectedCategory === null ? 'bg-hub-primary text-white' : 'text-gray-300 hover:bg-gray-700' }}">
+                            <i class="fas fa-list mr-2"></i> All Items (Categories)
+                        </button>
+                        <button class="md:hidden text-gray-300 hover:text-white focus:outline-none"
+                            onclick="document.getElementById('mobileCats').classList.toggle('hidden')">
+                            <i class="fas fa-plus"></i>
+                        </button>
                     </div>
                     <!-- Extra categories (toggled by both the header + button and the Show More button) -->
                     <div id="mobileCats" class="mobile-categories hidden">
@@ -892,20 +896,20 @@
     </script>
 
     <script>
-        Livewire.on('printKot', (event) => {
-            const kotId = event.kotId;
-            const isWindows = /Windows/i.test(navigator.userAgent);
+        Livewire.on('printKot', ({
+            kotId
+        }) => {
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const url = isAndroid ?
+                `/bluetooth/launch/kot/${kotId}` :
+                `/windows/kot/launch/${kotId}`;
 
-            if (isWindows) {
-                window.open(`/windows/kot/launch/${kotId}`, '_blank'); // QZ Tray direct
-                qz.websocket.connect().then(() => console.log("Connected to QZ"));
-
-            } else {
-                // Android direct (તમે પહેલેથી Bluetooth Print વાપરી રહ્યાં છો)
-                window.open(`/bluetooth/launch/kot/${kotId}`, '_blank');
-            }
+            // 🔑 pop-up blocker ટાળવા માટે તરત open કરો (કોઈ await પહેલા)
+            const w = window.open(url, '_blank');
+            if (!w) alert('Please allow pop-ups to print.');
         });
     </script>
+
 
     <script>
         // Add this to handle the initial state and clicks

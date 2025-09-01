@@ -34,24 +34,55 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 p-6">
         @foreach ($plans as $plan)
             @php
-                $originalPrice = (float) $plan->price;
-                $finalPrice = $originalPrice;
-                $discount = 0;
-                $discountLabel = '';
+                // Base prices
+                $price = (float) ($plan->price ?? 0);
+                $machinePrice = (float) ($plan->machine_price ?? 0);
 
-                if ($plan->type === 'fixed' && $plan->amount) {
-                    $discount = (float) $plan->amount;
-                    $finalPrice -= $discount;
-                    $discountLabel = '₹' . number_format($discount, 2);
-                } elseif ($plan->type === 'percentage' && $plan->value) {
-                    $discount = ($originalPrice * (float) $plan->value) / 100;
-                    $finalPrice -= $discount;
-                    $discountLabel = $plan->value . '%';
+                // ---- Plan discount (on price) ----
+                $finalPrice = $price;
+                $planDiscountAmt = 0;
+                $planDiscountLabel = '';
+
+                if ($plan->type === 'fixed' && !is_null($plan->amount)) {
+                    $planDiscountAmt = max(0, min((float) $plan->amount, $price));
+                    $finalPrice = $price - $planDiscountAmt;
+                    $planDiscountLabel = '₹' . number_format($planDiscountAmt, 2);
+                } elseif ($plan->type === 'percentage' && !is_null($plan->value)) {
+                    $pct = max(0, min((float) $plan->value, 100));
+                    $planDiscountAmt = round($price * ($pct / 100), 2);
+                    $finalPrice = $price - $planDiscountAmt;
+                    $planDiscountLabel = rtrim(rtrim(number_format($pct, 2), '0'), '.') . '%';
                 }
 
-                $finalPrice = max(0, $finalPrice);
-                $youSave = $originalPrice - $finalPrice;
+                // ---- Machine discount (on machine_price) ----
+                $machineFinalPrice = $machinePrice;
+                $machineDiscountAmt = 0;
+                $machineDiscountLabel = '';
 
+                // NOTE: 'machine_discount_amount' = fixed amount column (if you created it)
+                if ($plan->machine_discount_type === 'fixed' && !is_null($plan->machine_final_amount ?? null)) {
+                    $machineDiscountAmt = max(0, min((float) $plan->machine_final_amount, $machinePrice));
+                    $machineFinalPrice = $machinePrice - $machineDiscountAmt;
+                    $machineDiscountLabel = '₹' . number_format($machineDiscountAmt, 2);
+                } elseif (
+                    $plan->machine_discount_type === 'percentage' &&
+                    !is_null($plan->machine_discount_value ?? null)
+                ) {
+                    $mpct = max(0, min((float) $plan->machine_discount_value, 100));
+                    $machineDiscountAmt = round($machinePrice * ($mpct / 100), 2);
+                    $machineFinalPrice = $machinePrice - $machineDiscountAmt;
+                    $machineDiscountLabel = rtrim(rtrim(number_format($mpct, 2), '0'), '.') . '%';
+                }
+
+                // Guards
+                $finalPrice = max(0, round($finalPrice, 2));
+                $machineFinalPrice = max(0, round($machineFinalPrice, 2));
+
+                // ---- Totals ----
+                $grandTotal = $finalPrice + $machineFinalPrice; // sum of plan + machine final
+                $youSave = $price - $finalPrice + ($machinePrice - $machineFinalPrice);
+
+                // Features (as you had)
                 $features = $planFeatures[$plan->id] ?? collect();
             @endphp
 
@@ -62,23 +93,14 @@
                 <p class="text-gray-500 text-sm">{{ $plan->description }}</p>
 
                 <div class="flex items-center justify-between mt-2">
-                    <div>
-                        @if ($finalPrice < $originalPrice)
-                            <div>
-                                <span class="text-3xl font-extrabold line-through text-red-400">
-                                    ₹{{ number_format($originalPrice, 2) }}
-                                </span>
-                                <span class="text-lg font-bold text-green-600 ml-2">
-                                    ₹{{ number_format($finalPrice, 2) }}
-                                    ({{ $discountLabel }} off)
-                                </span>
-                            </div>
-                        @else
-                            <span class="text-lg font-extrabold  ml-2">
-                                ₹{{ number_format($finalPrice, 2) }}
+                    <div class="flex items-center justify-between mt-2">
+                        <div>
+                            <span class="text-3xl font-extrabold">
+                                ₹{{ number_format($grandTotal, 2) }}
                             </span>
-                        @endif
+                        </div>
                     </div>
+
                     <span class="text-sm text-gray-500">{{ $plan->duration_days }} Days</span>
                 </div>
 

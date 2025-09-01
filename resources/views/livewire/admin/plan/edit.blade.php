@@ -29,6 +29,22 @@
                 <x-form.input name="amount" label="Amount" wireModel="amount" type="number" step="0.01" />
             @endif
 
+            <x-form.input name="machine_price" label="Machine Price" type="number" step="0.01"
+                wireModel="machine_price" placeholder="Enter Machine price" />
+
+            <x-form.select name="machine_type" label="Machine Discount Type" wireModelLive="machine_discount_type"
+                :options="['fixed' => 'Fixed', 'percentage' => 'Percentage']" />
+
+            @if ($machine_discount_type === 'percentage')
+                <x-form.input name="machine_discount_value" label="Discount Value (%)"
+                    wireModel="machine_discount_value" type="number" step="0.01" placeholder="e.g. 10" />
+            @endif
+
+            @if ($machine_discount_type === 'fixed')
+                <x-form.input name="machine_final_amount" label="Discount Amount" wireModel="machine_final_amount"
+                    type="number" step="0.01" placeholder="e.g. 500" />
+            @endif
+
             <div class="mb-2">
                 <label class="inline-flex items-center">
                     <input type="checkbox" wire:model.live="selectAllFeatures" class="form-checkbox">

@@ -14,9 +14,11 @@
             <x-form.input name="description" label="Description" type="textarea" wireModel="description"
                 placeholder="Enter description" />
 
-            <x-form.input name="storage_quota_mb" label="Storage Quota (MB)" type="number" wireModel="storage_quota_mb" placeholder="e.g. 10240 for 10 GB" />
+            <x-form.input name="storage_quota_mb" label="Storage Quota (MB)" type="number" wireModel="storage_quota_mb"
+                placeholder="e.g. 10240 for 10 GB" />
 
-            <x-form.input name="max_file_size_kb" label="Max File Size (KB)" type="number" wireModel="max_file_size_kb" placeholder="e.g. 2048 for 2 MB" />
+            <x-form.input name="max_file_size_kb" label="Max File Size (KB)" type="number" wireModel="max_file_size_kb"
+                placeholder="e.g. 2048 for 2 MB" />
 
             <x-form.select name="type" label="Discount Type" wireModelLive="type" :options="['fixed' => 'Fixed', 'percentage' => 'Percentage']" />
 
@@ -29,27 +31,44 @@
                 <x-form.input name="amount" label="Amount" wireModel="amount" type="number" step="0.01" />
             @endif
 
-                <div class="mb-2">
+            <x-form.input name="machine_price" label="Machine Price" type="number" step="0.01"
+                wireModel="machine_price" placeholder="Enter Machine price" />
+
+            <x-form.select name="machine_type" label="Machine Discount Type" wireModelLive="machine_discount_type"
+                :options="['fixed' => 'Fixed', 'percentage' => 'Percentage']" />
+
+            @if ($machine_discount_type === 'percentage')
+                <x-form.input name="machine_discount_value" label="Discount Value (%)"
+                    wireModel="machine_discount_value" type="number" step="0.01" placeholder="e.g. 10" />
+            @endif
+
+            @if ($machine_discount_type === 'fixed')
+                <x-form.input name="machine_discount_amount" label="Discount Amount" wireModel="machine_discount_amount"
+                    type="number" step="0.01" placeholder="e.g. 500" />
+            @endif
+
+            <div class="mb-2">
+                <label class="inline-flex items-center">
+                    <input type="checkbox" wire:model.live="selectAllFeatures" class="form-checkbox">
+                    <span class="ml-2 font-semibold">Select All Features</span>
+                </label>
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-2">
+                @foreach ($availableFeatures as $feature)
                     <label class="inline-flex items-center">
-                        <input type="checkbox" wire:model.live="selectAllFeatures" class="form-checkbox">
-                        <span class="ml-2 font-semibold">Select All Features</span>
+                        <input type="checkbox" wire:model="featureAccess" value="{{ $feature }}"
+                            class="form-checkbox">
+                        <span class="ml-2 capitalize">{{ str_replace('_', ' ', $feature) }}</span>
                     </label>
-                </div>
-
-
-                <div class="grid grid-cols-2 gap-2">
-                    @foreach ($availableFeatures as $feature)
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" wire:model="featureAccess" value="{{ $feature }}" class="form-checkbox">
-                            <span class="ml-2 capitalize">{{ str_replace('_', ' ', $feature) }}</span>
-                        </label>
-                    @endforeach
-                </div>
+                @endforeach
+            </div>
 
 
             <div class="flex flex-row text-center  space-x-3">
                 <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
-                route="superadmin.plans.index" />
+                    route="superadmin.plans.index" />
                 <x-form.button type="submit" title="Save" wireClick="submit" wireTarget="submit" />
             </div>
         </form>
