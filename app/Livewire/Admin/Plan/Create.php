@@ -19,6 +19,11 @@ class Create extends Component
     public $availableFeatures = [];
     public $selectAllFeatures = false;
     public $storage_quota_mb, $max_file_size_kb;
+    public $machine_price;
+    public $machine_discount_type;
+    public $machine_discount_value;
+    public $machine_discount_amount;
+    public $machine_final_amount;
 
     #[Layout('components.layouts.admin.app')]
     public function render()
@@ -34,7 +39,7 @@ class Create extends Component
     public function updatedSelectAllFeatures($value)
     {
         if ($value) {
-            $this->featureAccess = $this->availableFeatures; // બધું select
+            $this->featureAccess = $this->availableFeatures;
         } else {
             $this->featureAccess = [];
         }
@@ -51,12 +56,20 @@ class Create extends Component
             'type' => 'nullable',
             'storage_quota_mb' => 'nullable|integer|min:0',
             'max_file_size_kb' => 'nullable|integer|min:0',
+            'machine_price' => 'nullable|numeric|min:0',
+            'machine_discount_type' => 'nullable|in:fixed,percentage',
         ];
 
         if ($this->type === 'percentage') {
             $rules['value'] = 'nullable|numeric|min:0';
         } elseif ($this->type === 'fixed') {
             $rules['amount'] = 'nullable|numeric|min:0';
+        }
+
+        if ($this->machine_discount_type === 'percentage') {
+            $rules['machine_discount_value'] = 'required|numeric|min:0|max:100';
+        } elseif ($this->machine_discount_type === 'fixed') {
+            $rules['machine_discount_amount'] = 'required|numeric|min:0|lte:machine_price';
         }
 
         $validated = $this->validate($rules);
@@ -71,6 +84,10 @@ class Create extends Component
             'amount' => $this->amount,
             'storage_quota_mb' => $this->storage_quota_mb,
             'max_file_size_kb' => $this->max_file_size_kb,
+            'machine_price' => $this->machine_price,
+            'machine_discount_type' => $this->machine_discount_type,
+            'machine_discount_value' => $this->machine_discount_value,
+            'machine_final_amount' => $this->machine_discount_amount,
         ]);
 
         foreach ($this->featureAccess as $featureKey) {

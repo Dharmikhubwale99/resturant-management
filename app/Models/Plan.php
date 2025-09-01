@@ -28,7 +28,11 @@ class Plan extends Model implements HasMedia
         'value',
         'amount',
         'storage_quota_mb',
-        'max_file_size_kb'
+        'max_file_size_kb',
+        'machine_price',
+        'machine_discount_type',
+        'machine_discount_value',
+        'machine_final_amount',
     ];
 
     /**

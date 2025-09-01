@@ -74,10 +74,12 @@
                 {{ $restaurant->address }}<br>
                 Phone: {{ $restaurant->mobile }}<br>
                 Email: {{ $restaurant->email }}
-                @if ($restaurant->gstin)
-                    <br>FSSAI No.: {{ $restaurant->gstin }}
+                @if (!empty($restaurant->fssai_no))
+                    <br>FSSAI No.: {{ $restaurant->fssai_no }}
                 @endif
-                GST No: {{ $restaurant->gstin }}
+                @if (!empty($restaurant->gstin))
+                    <br>GST No.: {{ $restaurant->gstin }}
+                @endif
             </p>
         </div>
 
@@ -104,67 +106,59 @@
                 @php
                     $totalQty = 0;
                     $totalItems = 0;
-                    $totalTaxable = 0; // will equal $subTotal below
                     $totalCgst = 0;
                     $totalSgst = 0;
                     $subTotal = 0;
                 @endphp
 
-
                 @foreach ($order->orderItems as $item)
-                @php
-                $qty = $item->quantity;
-                $rate = $item->base_price;            // per-unit entered price
-                $variant = $item->variant;
-                $tax = optional($item->item->taxSetting);
-                $taxRate = $tax?->rate ?? 0;          // e.g., 5
-                $isInclusive = $item->item->is_tax_inclusive;
+                    @php
+                        $qty = (int) $item->quantity;
+                        $rate = (float) $item->base_price; // entered per-unit
+                        $variant = $item->variant;
+                        $tax = optional($item->item->taxSetting);
+                        $taxRate = $tax?->rate ?? 0;
+                        $isInclusive = (bool) $item->item->is_tax_inclusive;
 
-                // We will DISPLAY base (tax-exclusive) price in Rate column
-                if ($taxRate > 0) {
-                    if ($isInclusive) {
-                        // YOUR SPEC: inclusive=100 should SHOW 95 and tax 5
-                        $basePrice = $rate - ($rate * $taxRate / 100);  // 100 - 5 = 95
-                        $taxPerUnit = ($rate * $taxRate / 100);         // 5
-                    } else {
-                        // exclusive=100 should SHOW 100 and tax 5
-                        $basePrice = $rate;                              // 100
-                        $taxPerUnit = ($basePrice * $taxRate / 100);     // 5
-                    }
-                } else {
-                    $basePrice = $rate;
-                    $taxPerUnit = 0;
-                }
+                        if ($taxRate > 0) {
+                            if ($isInclusive) {
+                                // inclusive 100 => show 95 as base, 5 as tax
+                                $basePrice = $rate - ($rate * $taxRate) / 100;
+                                $taxPerUnit = ($rate * $taxRate) / 100;
+                            } else {
+                                // exclusive 100 => show 100 base, 5 tax
+                                $basePrice = $rate;
+                                $taxPerUnit = ($basePrice * $taxRate) / 100;
+                            }
+                        } else {
+                            $basePrice = $rate;
+                            $taxPerUnit = 0;
+                        }
 
-                $cgstPerUnit = $taxPerUnit / 2;
-                $sgstPerUnit = $taxPerUnit / 2;
+                        $cgstPerUnit = $taxPerUnit / 2;
+                        $sgstPerUnit = $taxPerUnit / 2;
+                        $lineBaseTotal = $basePrice * $qty;
 
-                // Totals (base subtotal + split taxes)
-                $lineBaseTotal = $basePrice * $qty;
-                $subTotal     += $lineBaseTotal;
-                $totalTaxable += $lineBaseTotal;     // same as subtotal for display
-                $totalCgst    += $cgstPerUnit * $qty;
-                $totalSgst    += $sgstPerUnit * $qty;
+                        $subTotal += $lineBaseTotal;
+                        $totalCgst += $cgstPerUnit * $qty;
+                        $totalSgst += $sgstPerUnit * $qty;
+                        $totalQty += $qty;
+                        $totalItems++;
 
-                $displayRate = $basePrice;           // show base in Rate column
-                $lineTotal   = $lineBaseTotal;       // show base in Total column
-
-                $totalQty += $qty;
-                $totalItems++;
-            @endphp
-            @php
-            $grandTotal = $subTotal + $totalCgst + $totalSgst;
-        @endphp
-
+                        $displayRate = $basePrice; // what we show in Rate
+                        $lineTotal = $lineBaseTotal; // show base in Total
+                    @endphp
 
                     <tr>
-                        <td>{{ $item->item->name }} @if ($variant)
+                        <td>
+                            {{ $item->item->name }}
+                            @if ($variant)
                                 ({{ $variant->name }})
                             @endif
                         </td>
                         <td class="text-right">{{ $qty }}</td>
-                        <td class="text-right">{{ number_format($rate, 0) }}</td>
-                        <td class="text-right">{{ number_format($lineTotal, 0) }}</td>
+                        <td class="text-right">{{ number_format($displayRate, 2) }}</td>
+                        <td class="text-right">{{ number_format($lineTotal, 2) }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -172,6 +166,9 @@
 
         <hr>
 
+            @php
+                $grandTotal = $subTotal + $totalCgst + $totalSgst;
+            @endphp
         <table>
             <tr>
                 <td>Total Items: {{ $totalItems }}</td>
@@ -203,11 +200,17 @@
                 <td class="text-right font-bold">{{ number_format($grandTotal, 2) }}</td>
             </tr>
 
+            @php
+                // જો payments() relation છે તો:
+                $paid = method_exists($order, 'payments') ? ($order->payments()->sum('amount') ?? 0) : 0;
+                $balance = max(0, ($order->total_amount ?? $grandTotal) - $paid);
+            @endphp
             <tr>
                 <td colspan="3" class="text-right">Balance:</td>
-                <td class="text-right">{{ number_format($grandTotal, 2) }}</td>
+                <td class="text-right">{{ number_format($balance, 2) }}</td>
             </tr>
         </table>
+
 
         <hr>
 
