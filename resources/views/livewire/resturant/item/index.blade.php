@@ -12,7 +12,7 @@
             <div class="flex gap-2 w-full sm:w-auto">
                 @can('item-import')
                     <x-form.button title="Import" class="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white"
-                        wire:click="$set('showImportModal', true)" />
+                        wireClick="openImport" />
                 @endcan
                 @can('item-create')
                     <x-form.button title="+ Add" route="restaurant.items.create"
@@ -155,85 +155,87 @@
     <div class="mt-4">
         {{ $items->links() }}
     </div>
-</div>
 
-@if ($showImportModal)
-    <div class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-            <button class="absolute top-2 right-2 text-gray-500" wire:click="$set('showImportModal', false)">✕</button>
-            <h3 class="text-lg font-bold mb-2">Import Items from Excel</h3>
-            @if (setting('category_module'))
-                <p class="mb-2 text-sm text-gray-600">Required columns: <b>category_name, name, item_type, price</b>
-                </p>
-                <a href="{{ asset('sample_items_import_with_category.xlsx') }}"
-                    class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
-            @else
-                <p class="mb-2 text-sm text-gray-600">Required columns: <b>name, item_type, price</b></p>
-                <a href="{{ asset('sample_items_import_without_category.xlsx') }}"
-                    class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
-            @endif
-            <form wire:submit.prevent="importItems" enctype="multipart/form-data" class="space-y-3">
-                <div class="relative">
-                    <input type="file" wire:model="importFile" accept=".xlsx,.xls"
-                        class="border rounded px-2 py-1 w-full" />
-                    <div wire:loading wire:target="importFile"
-                        class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 rounded">
-                        <svg class="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                        </svg>
-                        <span class="ml-2 text-green-700 text-xs">Uploading...</span>
-                    </div>
-                </div>
-                @error('importFile')
-                    <span class="text-red-500 text-xs">{{ $message }}</span>
-                @enderror
-                @if ($importErrors)
-                    <div class="bg-red-100 text-red-700 p-2 rounded text-xs">
-                        <ul>
-                            @foreach ($importErrors as $err)
-                                <li>Row {{ $err['row'] }}: {{ $err['error'] }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+
+    @if ($showImportModal)
+        <div class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+                <button class="absolute top-2 right-2 text-gray-500"
+                    wire:click="$set('showImportModal', false)">✕</button>
+                <h3 class="text-lg font-bold mb-2">Import Items from Excel</h3>
+                @if (setting('category_module'))
+                    <p class="mb-2 text-sm text-gray-600">Required columns: <b>category_name, name, item_type, price</b>
+                    </p>
+                    <a href="{{ asset('sample_items_import_with_category.xlsx') }}"
+                        class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
+                @else
+                    <p class="mb-2 text-sm text-gray-600">Required columns: <b>name, item_type, price</b></p>
+                    <a href="{{ asset('sample_items_import_without_category.xlsx') }}"
+                        class="text-blue-600 underline text-xs mt-2 inline-block">Download Sample Excel</a>
                 @endif
-                <div class="flex justify-end gap-2">
-                    {{-- <button type="button" wire:click="$set('showImportModal', false)" class="px-3 py-1 bg-gray-300 rounded">Cancel</button> --}}
-                    {{-- <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded">Import</button> --}}
-                    <x-form.button type="submit" title="Save" wireTarget="submit" />
-                    <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
-                        route="restaurant.items.index" />
-                </div>
-            </form>
-        </div>
-    </div>
-@endif
-@if ($confirmingBlock)
-    <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
-        <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
-            <h3 class="text-lg font-semibold mb-4 text-yellow-600">
-                {{ optional(\App\Models\Item::find($itemId))->is_active ? 'Confirm Unblock' : 'Confirm Block' }}
-            </h3>
-            <p class="text-gray-700 mb-6">
-                Are you sure you want to
-                {{ optional(\App\Models\Item::find($itemId))->is_active ? 'unblock' : 'block' }} this
-                Item?
-            </p>
-
-            <div class="flex justify-end space-x-3">
-                <button wire:click="cancelBlock"
-                    class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
-                <button wire:click="toggleBlock"
-                    class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
-                    {{ optional(\App\Models\Item::find($itemId))->is_active ? 'UnBlock' : 'Block' }}
-                </button>
+                <form wire:submit.prevent="importItems" enctype="multipart/form-data" class="space-y-3">
+                    <div class="relative">
+                        <input type="file" wire:model="importFile" accept=".xlsx,.xls"
+                            class="border rounded px-2 py-1 w-full" />
+                        <div wire:loading wire:target="importFile"
+                            class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 rounded">
+                            <svg class="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                            </svg>
+                            <span class="ml-2 text-green-700 text-xs">Uploading...</span>
+                        </div>
+                    </div>
+                    @error('importFile')
+                        <span class="text-red-500 text-xs">{{ $message }}</span>
+                    @enderror
+                    @if ($importErrors)
+                        <div class="bg-red-100 text-red-700 p-2 rounded text-xs">
+                            <ul>
+                                @foreach ($importErrors as $err)
+                                    <li>Row {{ $err['row'] }}: {{ $err['error'] }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    <div class="flex justify-end gap-2">
+                        {{-- <button type="button" wire:click="$set('showImportModal', false)" class="px-3 py-1 bg-gray-300 rounded">Cancel</button> --}}
+                        {{-- <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded">Import</button> --}}
+                        <x-form.button type="submit" title="Save" wireTarget="submit" />
+                        <x-form.button title="Back" class="bg-gray-500 hover:bg-gray-600 text-white"
+                            route="restaurant.items.index" />
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
-@endif
+    @endif
+    @if ($confirmingBlock)
+        <div class="fixed inset-0 bg-transparent bg-opacity-0 z-40 flex items-center justify-center">
+            <div class="bg-white rounded-lg p-6 shadow-xl z-50 w-full max-w-md">
+                <h3 class="text-lg font-semibold mb-4 text-yellow-600">
+                    {{ optional(\App\Models\Item::find($itemId))->is_active ? 'Confirm Unblock' : 'Confirm Block' }}
+                </h3>
+                <p class="text-gray-700 mb-6">
+                    Are you sure you want to
+                    {{ optional(\App\Models\Item::find($itemId))->is_active ? 'unblock' : 'block' }} this
+                    Item?
+                </p>
+
+                <div class="flex justify-end space-x-3">
+                    <button wire:click="cancelBlock"
+                        class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700">Cancel</button>
+                    <button wire:click="toggleBlock"
+                        class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                        {{ optional(\App\Models\Item::find($itemId))->is_active ? 'UnBlock' : 'Block' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
+
 {{-- @push('scripts')
     <script>
         function openLfmForItem(itemId) {

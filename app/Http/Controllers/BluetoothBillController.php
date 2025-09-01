@@ -9,6 +9,8 @@ use App\Models\Restaurant;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
+
 
 class BluetoothBillController extends Controller
 {
@@ -47,6 +49,7 @@ class BluetoothBillController extends Controller
 
         // ===== Header =====
         $logoSrc = $this->toPublicUrl($order->restaurant?->logo_url);
+
 
         if (!$logoSrc) {
             // fetch your global settings; rename model/field if different in your app
@@ -237,7 +240,37 @@ class BluetoothBillController extends Controller
         }
 
         // Return clean JSON ARRAY (not force-object)
-        return response()->json($lines, 200, [], JSON_UNESCAPED_UNICODE);
+        return response()->json(
+            $lines,                              // your lines array
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT
+        );
+
+
+    }
+
+    private function toPublicUrl(?string $path): ?string
+    {
+        if (!$path) return null;
+
+        // already absolute?
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
+        }
+
+        // starts with "/" → make absolute to app URL
+        if (str_starts_with($path, '/')) {
+            return url($path);
+        }
+
+        // typical Laravel "public" disk file (storage/app/public/...)
+        if (Storage::disk('public')->exists($path)) {
+            return asset('storage/' . ltrim($path, '/'));
+        }
+
+        // fallback: treat as public asset path (e.g. "images/logo.png")
+        return asset($path);
     }
 
     public function launchBill(Order $order)

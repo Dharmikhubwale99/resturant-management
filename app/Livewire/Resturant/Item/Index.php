@@ -112,6 +112,17 @@ class Index extends Component
         $this->cancelDelete();
     }
 
+    public function openImport(): void
+    {
+        $this->showImportModal = true;
+    }
+
+    public function closeImport(): void
+    {
+        $this->showImportModal = false;
+    }
+
+
     public function importItems()
     {
         $this->validate([
