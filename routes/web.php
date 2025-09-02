@@ -121,6 +121,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\BluetoothPrintController;
 use App\Http\Controllers\WindowsPrintController;
 use App\Http\Controllers\BluetoothBillController;
+use App\Http\Controllers\WindowsBillController;
 use App\Livewire\FileManager;
 
 Route::get('/file-manager', FileManager::class)
@@ -145,6 +146,13 @@ Route::get('/bluetooth/response/bill/{order}', [BluetoothBillController::class, 
 
 Route::get('/bluetooth/launch/bill/{order}', [BluetoothBillController::class, 'launchBill'])
     ->name('bt.bill.launch');
+
+Route::get('/windows/bill/launch/{order}', [WindowsBillController::class, 'launchBill'])
+    ->name('windows.bill.launch');
+
+// QZ view → fetches ESC/POS data from below endpoint
+Route::get('/windows/bill/escpos/{order}', [WindowsBillController::class, 'escposBill'])
+    ->name('windows.bill.escpos');
 
 Route::get('superadmin/login', Login::class)->name('superadmin.login');
 Route::get('/logout', [LogoutController::class, 'logout'])->name('logout');

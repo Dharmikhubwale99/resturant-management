@@ -910,7 +910,6 @@
         });
     </script>
 
-
     <script>
         // Add this to handle the initial state and clicks
         document.addEventListener('DOMContentLoaded', function() {
@@ -940,7 +939,13 @@
     <script>
         Livewire.on('btPrintBill', (event) => {
             const orderId = event.orderId;
-            window.open(`/bluetooth/launch/bill/${orderId}`, '_blank');
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const url = isAndroid
+                ? `/bluetooth/launch/bill/${orderId}`
+                : `/windows/bill/launch/${orderId}`;
+
+            const w = window.open(url, '_blank');
+            if (!w) alert('Please allow pop-ups to print.');
         });
     </script>
 

@@ -44,8 +44,7 @@
                 transition-transform transform hover:scale-105 hover:shadow-xl"
                     wire:click="openConfirm({{ $table->id }})">
                     <div class="absolute top-4 right-4 flex justify-end gap-2">
-                        <div
-                            class=" bg-white px-3 py-1 rounded-full text-xs font-medium text-gray-700">
+                        <div class=" bg-white px-3 py-1 rounded-full text-xs font-medium text-gray-700">
                             {{ $table->capacity }} Seats
                         </div>
                     </div>
@@ -137,12 +136,20 @@
 
 @push('scripts')
     <script>
-        Livewire.on('printBill', ({
-            billId
+        Livewire.on('btPrintBill', ({
+            orderId
         }) => {
-            const url = `{{ url('/restaurant/bill-print') }}/${billId}`;
-            const printWindow = window.open(url, '_blank');
-            printWindow.focus();
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const url = isAndroid ?
+                `/bluetooth/launch/bill/${orderId}` :
+                `/windows/bill/launch/${orderId}`;
+
+            const w = window.open(url, '_blank');
+            if (!w) {
+                alert('Please allow pop-ups to print.');
+            } else {
+                w.focus();
+            }
         });
     </script>
 @endpush
